@@ -1,0 +1,141 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { CATEGORIES } from '~/lib/categories';
+
+const all = await getCollection('works');
+
+const countByCat = CATEGORIES.reduce((acc, c) => {
+  acc[c.id] = all.filter(w => w.data.category === c.id).length;
+  return acc;
+}, {} as Record<string, number>);
+---
+
+<BaseLayout title="分类 · 鲁琦 Qi Lu" description="按服务设计 / UX·UI / AI 原型 / 视觉与 3D / 科研 浏览作品">
+  <section class="head">
+    <div class="container">
+      <p class="kicker">CATEGORIES — 5</p>
+      <h1>按类型浏览。</h1>
+      <p class="lede">不同观看者关心不同切片。挑你感兴趣的那条线进去。</p>
+    </div>
+  </section>
+
+  <section class="cats">
+    <div class="container">
+      <div class="cat-grid">
+        {CATEGORIES.map((c, i) => (
+          <a href={c.linkTo || `/categories/${c.id}`} class={`cat-card ${countByCat[c.id] === 0 ? 'is-empty' : ''}`}>
+            <span class="cat-num">{(i + 1).toString().padStart(2, '0')}</span>
+            <h2 class="cat-label">{c.label}</h2>
+            <p class="cat-desc">{c.description}</p>
+            <div class="cat-foot">
+              <span class="cat-count">
+                {countByCat[c.id] === 0 ? '暂无作品' : `${countByCat[c.id]} 件作品`}
+              </span>
+              <span class="cat-arrow">→</span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .head { padding: clamp(64px, 10vh, 120px) 0 48px; }
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.18em;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 7vw, 5rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+    line-height: 0.95;
+  }
+  .lede {
+    color: var(--fg-soft);
+    font-size: 1.125rem;
+    max-width: 640px;
+  }
+
+  .cats { padding: 24px 0 0; }
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-top: var(--border-w) solid var(--border);
+    border-left: var(--border-w) solid var(--border);
+  }
+  .cat-card {
+    border-right: var(--border-w) solid var(--border);
+    border-bottom: var(--border-w) solid var(--border);
+    padding: 32px 28px;
+    background: var(--bg);
+    color: var(--fg);
+    display: flex;
+    flex-direction: column;
+    min-height: 280px;
+    transition: background var(--transition), color var(--transition);
+    position: relative;
+  }
+  .cat-card:hover {
+    background: var(--accent);
+    color: var(--accent-text);
+  }
+  .cat-num {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--fg-muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+  }
+  .cat-card:hover .cat-num { color: var(--accent-text); opacity: 0.7; }
+  .cat-label {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+    line-height: 1.05;
+  }
+  .cat-desc {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--fg-soft);
+    flex: 1;
+    margin: 0 0 20px;
+  }
+  .cat-card:hover .cat-desc { color: var(--accent-text); }
+  .cat-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: var(--border-w) solid var(--border);
+    padding-top: 16px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .cat-card:hover .cat-foot { border-top-color: var(--accent-text); }
+  .cat-arrow {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+  }
+  .cat-card.is-empty .cat-count { opacity: 0.5; }
+
+  @media (max-width: 960px) {
+    .cat-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .cat-grid { grid-template-columns: 1fr; }
+    .cat-card { min-height: 200px; padding: 24px 20px; }
+  }
+</style>

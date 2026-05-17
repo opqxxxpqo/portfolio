@@ -1,0 +1,48 @@
+# Build output
+dist/
+.astro/
+
+# Dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables
+.env
+.env.production
+.env.local
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Netlify
+.netlify/
+
+# 原始素材文件夹（很大，不进仓库）
+Portfolio material/
+
+# Claude Code 本地配置 / 临时
+.claude/
+
+# 散落的截图
+ScreenShot_*.png
+ScreenShot_*.jpg
+
+# 内部规划文档（不公开）
+说明.md
+
+

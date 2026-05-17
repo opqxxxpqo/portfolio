@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <rect width="1200" height="630" fill="#0d0d0d"/>
+  <text x="80" y="200" font-family="Inter, sans-serif" font-size="40" fill="#6f6f6f" letter-spacing="6">PORTFOLIO</text>
+  <text x="80" y="340" font-family="Inter, sans-serif" font-size="120" font-weight="700" fill="#ededed">YourName</text>
+  <text x="80" y="430" font-family="PingFang SC, sans-serif" font-size="32" fill="#a3a3a3">研究生作品集 · 科研 / AI / 设计</text>
+  <line x1="80" y1="540" x2="200" y2="540" stroke="#4ea27a" stroke-width="3"/>
+  <text x="80" y="580" font-family="Inter, sans-serif" font-size="22" fill="#6f6f6f">2026</text>
+</svg>

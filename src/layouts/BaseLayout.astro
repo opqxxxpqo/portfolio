@@ -1,0 +1,84 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import Header from '~/components/Header.astro';
+import Footer from '~/components/Footer.astro';
+import SEO from '~/components/SEO.astro';
+import '~/styles/global.css';
+
+export interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  noindex?: boolean;
+}
+
+const { title, description, ogImage, noindex } = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- 字体：Inter (body) + Archivo Black (display) 来自 jsdelivr，国内访问稳定 -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.16/index.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fontsource/archivo-black@5.0.20/400.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.16/index.css" />
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/archivo-black@5.0.20/400.css" />
+    </noscript>
+
+    <SEO title={title} description={description} ogImage={ogImage} noindex={noindex} />
+
+    <!-- 先于渲染恢复主题，避免闪烁。默认 dark；用户切换过会被 localStorage 覆盖 -->
+    <!-- ClientRouter 跨页跳转时会把新页面的 <html data-theme="light"> 同步过来，
+         所以也要在 astro:before-swap 时把保存的主题写到 newDocument，避免视觉闪回浅色 -->
+    <script is:inline>
+      (function () {
+        const readTheme = () => {
+          try {
+            const saved = localStorage.getItem('theme');
+            return saved === 'dark' || saved === 'light' ? saved : null;
+          } catch (e) { return null; }
+        };
+        const applied = readTheme();
+        if (applied) document.documentElement.setAttribute('data-theme', applied);
+
+        document.addEventListener('astro:before-swap', (ev) => {
+          const cur = readTheme();
+          if (cur) ev.newDocument.documentElement.setAttribute('data-theme', cur);
+        });
+
+        // 跟踪导航历史给"返回上一级"用：ClientRouter 用 pushState，
+        // document.referrer 不会随之更新，所以走 sessionStorage 自己记。
+        // 每次 ClientRouter swap 完之后，把刚才那个页面的 URL 存起来。
+        let lastPath = location.pathname + location.search;
+        document.addEventListener('astro:after-swap', () => {
+          try { sessionStorage.setItem('prevPath', lastPath); } catch (_) {}
+          lastPath = location.pathname + location.search;
+        });
+      })();
+    </script>
+
+    <ClientRouter />
+  </head>
+  <body>
+    <Header />
+    <main id="main"><slot /></main>
+    <Footer />
+  </body>
+</html>

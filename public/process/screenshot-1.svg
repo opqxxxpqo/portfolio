@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+  <rect width="1600" height="900" fill="#161616"/>
+  <rect x="40" y="40" width="1520" height="60" fill="#262626"/>
+  <circle cx="80" cy="70" r="8" fill="#ff5f57"/>
+  <circle cx="110" cy="70" r="8" fill="#febc2e"/>
+  <circle cx="140" cy="70" r="8" fill="#28c840"/>
+  <text x="800" y="76" font-family="ui-monospace, monospace" font-size="14" fill="#6f6f6f" text-anchor="middle">claude-code · portfolio</text>
+  <text x="80" y="180" font-family="ui-monospace, monospace" font-size="18" fill="#4ea27a">$ 帮我用 Astro 搭建一个个人作品集...</text>
+  <text x="80" y="240" font-family="ui-monospace, monospace" font-size="14" fill="#a3a3a3">● 正在搭建项目骨架</text>
+  <text x="80" y="270" font-family="ui-monospace, monospace" font-size="14" fill="#a3a3a3">  ✓ package.json</text>
+  <text x="80" y="295" font-family="ui-monospace, monospace" font-size="14" fill="#a3a3a3">  ✓ astro.config.mjs</text>
+  <text x="80" y="320" font-family="ui-monospace, monospace" font-size="14" fill="#a3a3a3">  ✓ Content schema</text>
+  <text x="80" y="345" font-family="ui-monospace, monospace" font-size="14" fill="#a3a3a3">  ✓ Layouts and components</text>
+  <text x="80" y="370" font-family="ui-monospace, monospace" font-size="14" fill="#a3a3a3">  ✓ 4 个示例作品</text>
+  <text x="80" y="800" font-family="PingFang SC, sans-serif" font-size="16" fill="#6f6f6f">（请把此 SVG 替换为真实对话截图 PNG）</text>
+</svg>

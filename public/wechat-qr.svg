@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#fafafa"/>
+  <rect x="40" y="40" width="320" height="320" fill="none" stroke="#0d0d0d" stroke-width="2" stroke-dasharray="6 6"/>
+  <text x="200" y="200" font-family="PingFang SC, sans-serif" font-size="22" fill="#6f6f6f" text-anchor="middle">微信二维码占位</text>
+  <text x="200" y="240" font-family="PingFang SC, sans-serif" font-size="14" fill="#a3a3a3" text-anchor="middle">请替换为 public/wechat-qr.png</text>
+</svg>

@@ -1,0 +1,52 @@
+---
+export interface Props {
+  links: { label: string; url: string }[];
+}
+const { links } = Astro.props;
+---
+
+<ul class="link-list">
+  {links.map(l => (
+    <li>
+      <a href={l.url} target="_blank" rel="noopener" class="link-row">
+        <span class="label">{l.label}</span>
+        <span class="arrow">↗</span>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .link-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: var(--border-w) solid var(--border);
+  }
+  .link-list li {
+    border-bottom: var(--border-w) solid var(--border);
+  }
+  .link-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 8px;
+    color: var(--fg);
+    transition: all var(--transition);
+  }
+  .link-row:hover {
+    background: var(--accent);
+    color: var(--accent-text);
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  .label {
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    font-weight: 900;
+  }
+  .arrow {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+  }
+</style>

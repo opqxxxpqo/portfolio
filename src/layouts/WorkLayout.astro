@@ -1,0 +1,569 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { CATEGORY_MAP } from '~/lib/categories';
+import Gallery from '~/components/Gallery.astro';
+import Bilibili from '~/components/Bilibili.astro';
+import VideoPlayer from '~/components/VideoPlayer.astro';
+import PDFViewer from '~/components/PDFViewer.astro';
+import ModelViewer from '~/components/ModelViewer.astro';
+import EmbedFrame from '~/components/EmbedFrame.astro';
+import LinkList from '~/components/LinkList.astro';
+
+export interface Props {
+  work: any;
+  Content: any;
+}
+
+const { work, Content } = Astro.props;
+const data = work.data;
+const cat = CATEGORY_MAP[data.category as keyof typeof CATEGORY_MAP];
+
+const dateFmt = new Intl.DateTimeFormat('zh-CN', {
+  year: 'numeric',
+  month: 'long'
+}).format(data.date);
+
+const proseClass = data.longform ? 'prose prose-longform' : 'prose';
+const containerClass = data.longform ? 'container-narrow' : 'container';
+---
+
+<BaseLayout
+  title={`${data.title} · 鲁琦 Qi Lu`}
+  description={data.summary}
+  ogImage={data.cover}
+>
+  <article>
+    <!-- 作品头部 -->
+    <header class={containerClass} style="padding-top: 64px; padding-bottom: 48px;">
+      <a href="/" class="back-link" id="work-back-link" data-default-href="/">← 返回首页</a>
+      <div class="meta-row">
+        <span class="chip">{cat.label}</span>
+        <span class="meta-time">{dateFmt}</span>
+        {data.duration && <span class="meta-dim">{data.duration}</span>}
+      </div>
+      <h1 class="work-title">{data.title}</h1>
+      <p class="work-summary">{data.summary}</p>
+
+      {(data.role || data.tools) && (
+        <dl class="meta-grid">
+          {data.role && (
+            <div class="meta-row-grid">
+              <dt>角色</dt>
+              <dd>{data.role}</dd>
+            </div>
+          )}
+          {data.tools && data.tools.length > 0 && (
+            <div class="meta-row-grid">
+              <dt>工具</dt>
+              <dd>
+                <ul class="tools-list">
+                  {data.tools.map((t: string) => <li>{t}</li>)}
+                </ul>
+              </dd>
+            </div>
+          )}
+          {data.tags && data.tags.length > 0 && (
+            <div class="meta-row-grid">
+              <dt>标签</dt>
+              <dd class="tags-line">{data.tags.join(' · ')}</dd>
+            </div>
+          )}
+        </dl>
+      )}
+    </header>
+
+    <!-- 正文 -->
+    <div class={containerClass}>
+      <div class={proseClass}>
+        <Content />
+      </div>
+    </div>
+
+    <!-- items: grid 网格（点击卡片用 dialog 弹出实际媒体） -->
+    {data.items && data.items.length > 0 && (
+      <div class={containerClass} style="margin-top: 64px;">
+        <section class="items-grid" aria-label={`${data.title} 作品集`}>
+          {data.items.map((it: any, idx: number) => {
+            const thumb = it.poster || (it.type === 'image' ? it.src : null);
+            const icon = it.type === 'bilibili' || it.type === 'video'
+              ? '▶'
+              : it.type === 'model'
+                ? '⌖'
+                : it.type === 'link'
+                  ? '↗'
+                  : '⤢';
+            const inner = (
+              <>
+                {thumb ? (
+                  <img src={thumb} alt={it.title} loading="lazy" decoding="async" class="item-thumb" />
+                ) : (
+                  <span class="item-placeholder" data-type={it.type}>
+                    <span class="placeholder-type">{it.type.toUpperCase()}</span>
+                    <span class="placeholder-title">{it.title}</span>
+                  </span>
+                )}
+                <span class="item-overlay" aria-hidden="true">
+                  <span class="item-overlay-icon">{icon}</span>
+                </span>
+              </>
+            );
+            if (it.type === 'link') {
+              const external = !!it.external;
+              return (
+                <a
+                  class="item-card item-card--link"
+                  href={it.src}
+                  data-astro-prefetch={external ? undefined : true}
+                  target={external ? '_blank' : undefined}
+                  rel={external ? 'noopener' : undefined}
+                  aria-label={`跳转 ${it.title}`}
+                >
+                  {inner}
+                </a>
+              );
+            }
+            return (
+              <button class="item-card" type="button" data-idx={idx} aria-label={`打开 ${it.title}`}>
+                {inner}
+              </button>
+            );
+          })}
+        </section>
+
+        <dialog class="item-modal" id="items-modal">
+          <div class="modal-bar">
+            <span class="modal-title" id="modal-title"></span>
+            <button class="modal-close" type="button" aria-label="关闭">×</button>
+          </div>
+          <div class="modal-stage" id="modal-stage"></div>
+        </dialog>
+
+        <!-- 注册 model-viewer 自定义元素，否则 items modal 里 innerHTML 的 <model-viewer> 是未知元素，渲染成 0×0 -->
+        <script>
+          import { ModelViewerElement } from '@google/model-viewer';
+          ModelViewerElement.dracoDecoderLocation =
+            'https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/libs/draco/gltf/';
+        </script>
+
+        <script is:inline type="application/json" id="items-data" set:html={JSON.stringify(data.items)} />
+        <script is:inline data-astro-rerun>
+          // data-astro-rerun: ClientRouter 跨页跳转后会重新执行
+          (() => {
+            const dataEl = document.getElementById('items-data');
+            const dialog = document.getElementById('items-modal');
+            const stage = document.getElementById('modal-stage');
+            const titleEl = document.getElementById('modal-title');
+            const closeBtn = dialog && dialog.querySelector('.modal-close');
+            if (!dataEl || !dialog || !stage || !titleEl || !closeBtn) return;
+            const items = JSON.parse(dataEl.textContent || '[]');
+
+            const escapeAttr = (s) => String(s).replace(/"/g, '&quot;');
+
+            function render(it) {
+              if (it.type === 'bilibili') {
+                return '<iframe src="//player.bilibili.com/player.html?bvid=' + encodeURIComponent(it.src) + '&high_quality=1&danmaku=0&autoplay=0" referrerpolicy="no-referrer" allowfullscreen loading="lazy" class="modal-iframe"></iframe>';
+              }
+              if (it.type === 'video') {
+                const poster = it.poster ? ' poster="' + escapeAttr(it.poster) + '"' : '';
+                return '<video src="' + escapeAttr(it.src) + '"' + poster + ' controls muted playsinline preload="metadata" class="modal-video"></video>';
+              }
+              if (it.type === 'model') {
+                return '<model-viewer src="' + escapeAttr(it.src) + '" camera-controls auto-rotate auto-rotate-delay="1500" rotation-per-second="20deg" environment-image="neutral" shadow-intensity="1" exposure="1" loading="eager" class="modal-model"></model-viewer>';
+              }
+              if (it.type === 'image') {
+                return '<img src="' + escapeAttr(it.src) + '" alt="' + escapeAttr(it.alt || it.title) + '" class="modal-image" />';
+              }
+              return '';
+            }
+
+            function openItem(idx) {
+              const it = items[idx];
+              if (!it) return;
+              titleEl.textContent = it.title + (it.note ? '  ·  ' + it.note : '');
+              stage.innerHTML = render(it);
+              if (typeof dialog.showModal === 'function') dialog.showModal();
+              else dialog.setAttribute('open', '');
+            }
+
+            function closeItem() {
+              if (typeof dialog.close === 'function') dialog.close();
+              else dialog.removeAttribute('open');
+              stage.innerHTML = '';
+            }
+
+            // 事件委托：直接挂在 grid container 上，绑定一次就够
+            // （比给每个 card 单独 addEventListener 更稳，避免 ClientRouter swap 后 listener 丢失）
+            const grid = document.querySelector('.items-grid');
+            if (grid) {
+              grid.addEventListener('click', (e) => {
+                const card = e.target.closest('.item-card');
+                if (!card) return;
+                const idx = Number(card.getAttribute('data-idx'));
+                openItem(idx);
+              });
+            }
+            closeBtn.addEventListener('click', closeItem);
+            dialog.addEventListener('click', (e) => { if (e.target === dialog) closeItem(); });
+            dialog.addEventListener('close', () => { stage.innerHTML = ''; });
+          })();
+        </script>
+      </div>
+    )}
+
+    <!-- 媒体块（分组字段，向后兼容） -->
+    <div class={containerClass} style="margin-top: 64px;">
+      {data.gallery && data.gallery.length > 0 && (
+        <section class="media-section">
+          <h2 class="media-title">画廊</h2>
+          <Gallery images={data.gallery} title={data.title} />
+        </section>
+      )}
+
+      {data.bilibili && data.bilibili.length > 0 && (
+        <section class="media-section">
+          <h2 class="media-title">视频 · B 站</h2>
+          {data.bilibili.map((bv: string) => <Bilibili bvid={bv} title={data.title} />)}
+        </section>
+      )}
+
+      {data.videos && data.videos.length > 0 && (
+        <section class="media-section">
+          <h2 class="media-title">视频</h2>
+          {data.videos.map((v: string) => <VideoPlayer src={v} poster={data.cover} title={data.title} />)}
+        </section>
+      )}
+
+      {data.pdfs && data.pdfs.length > 0 && (
+        <section class="media-section">
+          <h2 class="media-title">文档</h2>
+          {data.pdfs.map((p: string) => <PDFViewer src={p} />)}
+        </section>
+      )}
+
+      {data.models && data.models.length > 0 && (
+        <section class="media-section">
+          <h2 class="media-title">3D 模型</h2>
+          {data.models.map((m: string) => <ModelViewer src={m} />)}
+        </section>
+      )}
+
+      {data.embeds && data.embeds.length > 0 && (
+        <section class="media-section">
+          <h2 class="media-title">互动 Demo</h2>
+          {data.embeds.map((e: any) => (
+            <EmbedFrame url={e.url} height={e.height} title={e.title} />
+          ))}
+        </section>
+      )}
+
+      {data.links && data.links.length > 0 && (
+        <section class="media-section">
+          <h2 class="media-title">相关链接</h2>
+          <LinkList links={data.links} />
+        </section>
+      )}
+    </div>
+  </article>
+
+  <!-- 返回上级：
+       优先用 sessionStorage.prevPath (BaseLayout 在 astro:after-swap 时写入)
+       fallback 到 document.referrer (用户直接外部链接进来时) -->
+  <script is:inline data-astro-rerun>
+    (() => {
+      const link = document.getElementById('work-back-link');
+      if (!link) return;
+      const here = location.pathname + location.search;
+
+      // 优先：sessionStorage
+      try {
+        const prev = sessionStorage.getItem('prevPath');
+        if (prev && prev !== here) {
+          link.setAttribute('href', prev);
+          link.textContent = '← 返回上级';
+          return;
+        }
+      } catch (_) {}
+
+      // fallback：document.referrer（仅适用于硬跳转或刚打开页面）
+      try {
+        const ref = document.referrer;
+        if (ref) {
+          const refUrl = new URL(ref);
+          if (refUrl.origin === location.origin && refUrl.pathname !== location.pathname) {
+            link.setAttribute('href', refUrl.pathname + refUrl.search);
+            link.textContent = '← 返回上级';
+            return;
+          }
+        }
+      } catch (_) {}
+
+      link.setAttribute('href', '/');
+      link.textContent = '← 返回首页';
+    })();
+  </script>
+</BaseLayout>
+
+<style>
+  .back-link {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 32px;
+    padding: 4px 10px;
+    border: var(--border-w) solid transparent;
+    transition: all var(--transition);
+  }
+  .back-link:hover {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .meta-time {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .meta-dim {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--fg-muted);
+  }
+
+  .work-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.25rem, 6vw, 4.5rem);
+    font-weight: 900;
+    letter-spacing: -0.025em;
+    line-height: 0.95;
+    margin-bottom: 24px;
+  }
+  .work-summary {
+    color: var(--fg-soft);
+    font-size: clamp(1.0625rem, 1.6vw, 1.25rem);
+    max-width: 720px;
+    margin-bottom: 40px;
+    line-height: 1.55;
+  }
+
+  .meta-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 0;
+    border-top: var(--border-w) solid var(--border);
+    border-bottom: var(--border-w) solid var(--border);
+  }
+  .meta-row-grid {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 24px;
+    padding: 14px 0;
+    border-bottom: var(--border-w) solid var(--border);
+  }
+  .meta-row-grid:last-child { border-bottom: none; }
+  .meta-row-grid dt {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    margin: 0;
+  }
+  .meta-row-grid dd {
+    margin: 0;
+    color: var(--fg);
+    font-size: 0.9375rem;
+  }
+  .tools-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tools-list li {
+    padding: 2px 10px;
+    border: var(--border-w) solid var(--border);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .tags-line { color: var(--fg-soft); font-size: 0.9375rem; }
+
+  /* ---------- ITEMS GRID + MODAL（items 字段渲染） ---------- */
+  .items-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  .item-card {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    padding: 0;
+    background: var(--bg-soft);
+    border: var(--border-w) solid var(--border);
+    color: var(--fg);
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform var(--transition);
+  }
+  .item-card:hover { transform: translateY(-2px); }
+  .item-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .item-card:hover .item-thumb { transform: scale(1.04); }
+  .item-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+    text-align: left;
+    background: var(--bg-strong);
+  }
+  .placeholder-type {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+  }
+  .placeholder-title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: var(--fg);
+    line-height: 1.1;
+  }
+  .item-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 10, 10, 0.0);
+    color: var(--accent-text);
+    font-size: 2.5rem;
+    transition: background var(--transition), opacity var(--transition);
+    opacity: 0;
+  }
+  .item-card:hover .item-overlay,
+  .item-card:focus-visible .item-overlay {
+    background: rgba(10, 10, 10, 0.45);
+    opacity: 1;
+  }
+  .item-card--link { text-decoration: none; }
+
+  /* ---------- MODAL ---------- */
+  .item-modal {
+    width: min(1100px, 92vw);
+    max-height: 88vh;
+    padding: 0;
+    background: var(--bg);
+    border: var(--border-w-thick) solid var(--border);
+    color: var(--fg);
+  }
+  .item-modal::backdrop {
+    background: rgba(10, 10, 10, 0.82);
+    backdrop-filter: blur(2px);
+  }
+  .modal-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 18px;
+    border-bottom: var(--border-w) solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--fg-muted);
+  }
+  .modal-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
+  .modal-close {
+    background: transparent;
+    border: var(--border-w) solid var(--border);
+    color: var(--fg);
+    width: 32px;
+    height: 32px;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+  }
+  .modal-close:hover { background: var(--fg); color: var(--bg); }
+  .modal-stage {
+    background: #000;
+    display: block;
+    width: 100%;
+  }
+  .modal-stage :is(.modal-iframe, .modal-video, .modal-model) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 0;
+    background: #000;
+  }
+  .modal-stage .modal-image {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+  }
+
+  @media (max-width: 960px) {
+    .items-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  }
+  @media (max-width: 640px) {
+    .items-grid { grid-template-columns: 1fr; gap: 16px; }
+  }
+
+  .media-section {
+    margin-bottom: 80px;
+  }
+  .media-title {
+    font-family: var(--font-display);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--fg);
+    margin-bottom: 20px;
+    font-weight: 900;
+    padding-bottom: 8px;
+    border-bottom: var(--border-w-thick) solid var(--border);
+  }
+
+  @media (max-width: 640px) {
+    .meta-row-grid {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+  }
+</style>

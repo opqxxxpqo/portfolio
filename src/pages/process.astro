@@ -1,0 +1,250 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="此站如何搭建 · 鲁琦 Qi Lu"
+  description="本站使用 Astro + Claude Code 搭建，本身就是 AI 协作能力的演示"
+>
+  <section class="head">
+    <div class="container-narrow">
+      <p class="kicker">PROCESS</p>
+      <h1>这个网站<br/>怎么做的。</h1>
+      <p class="intro">
+        坦白说，<strong>这个作品集本身就是一份作品</strong>。
+        我使用 <a href="https://claude.com/claude-code" class="inline-link">Claude Code</a> 在
+        本地通过对话式协作搭起来——不到一晚上，从零到可部署。
+      </p>
+      <p class="intro">
+        放在这里不是为了显得"会写代码"——而是想直接展示：在 2026 年，
+        当一位非纯前端背景的研究生需要一份个人站点时，<strong>怎样的协作流程是高效的</strong>。
+      </p>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="container-narrow">
+      <h2 class="block-title">技术选型</h2>
+      <ul class="tech-list">
+        <li><strong>Astro 5</strong>静态优先，开启 View Transitions，包体积极小</li>
+        <li><strong>Content Collections + zod</strong>作品 frontmatter 严格校验</li>
+        <li><strong>原生 CSS + CSS 变量</strong>不引 Tailwind，深浅色模式只用变量切换</li>
+        <li><strong>Netlify</strong>国内访问稳定，GitHub Actions 也配好了双通道</li>
+        <li><strong>无重型 JS</strong>主题切换 + 列表展开 + 视图切换，加起来不到 3KB</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="container-narrow">
+      <h2 class="block-title">协作流程</h2>
+      <ol class="flow">
+        <li>
+          <span class="flow-num">01</span>
+          <div>
+            <h3>把需求写清楚</h3>
+            <p>
+              我先列了一份很详细的需求文档：信息架构、字段、视觉风格、性能指标、目标受众。
+              清晰的输入是 AI 协作的前提。
+            </p>
+          </div>
+        </li>
+        <li>
+          <span class="flow-num">02</span>
+          <div>
+            <h3>让 Claude Code 全量生成骨架</h3>
+            <p>
+              所有页面、组件、内容 schema、部署配置一次性产出。我做的事是<strong>读、检查、追问</strong>，
+              而不是逐行写。
+            </p>
+          </div>
+        </li>
+        <li>
+          <span class="flow-num">03</span>
+          <div>
+            <h3>本地跑起来 + 视觉微调</h3>
+            <p>
+              <code>npm run dev</code>，对着浏览器一点点抠间距和动效。
+              这一步的判断必须我来做，AI 给不了。
+            </p>
+          </div>
+        </li>
+        <li>
+          <span class="flow-num">04</span>
+          <div>
+            <h3>持续更新</h3>
+            <p>
+              之后每加一个新作品，只需要在 <code>src/content/works/</code> 写一个 markdown 文件，
+              重新 build 即可。
+            </p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block highlight">
+    <div class="container-narrow">
+      <h2 class="block-title">对话截图（占位）</h2>
+      <p class="block-lede">
+        这里准备放 1—2 张和 Claude Code 协作的截图，让流程更具象。
+        正式上线前请把下面的 SVG 换成真实截图（推荐 PNG，宽度 ≥ 1600px）。
+      </p>
+      <div class="screenshots">
+        <img src="/process/screenshot-1.svg" alt="Claude Code 协作截图 1" loading="lazy" />
+        <img src="/process/screenshot-2.svg" alt="Claude Code 协作截图 2" loading="lazy" />
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="container-narrow">
+      <h2 class="block-title">我的判断</h2>
+      <p class="intro">
+        AI 在 2026 年已经是基础工具。<strong>真正区分人的是品味、判断、对问题的定义能力</strong>——
+        这些不会被 AI 取代，反而被它放大。
+      </p>
+      <p class="intro">
+        如果你看到这里，欢迎 <a href="mailto:you@example.com" class="inline-link">写信给我</a>，
+        我也很想知道你如何看待 AI 协作的边界。
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .head { padding: clamp(64px, 10vh, 120px) 0 32px; }
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.18em;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 7vw, 4.5rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    margin-bottom: 40px;
+    line-height: 0.95;
+  }
+  .intro {
+    font-size: 1.0625rem;
+    color: var(--fg-soft);
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+  .intro strong { color: var(--fg); }
+  .inline-link {
+    color: var(--fg);
+    border-bottom: var(--border-w) solid var(--accent);
+    transition: all var(--transition);
+  }
+  .inline-link:hover {
+    background: var(--accent);
+    color: var(--accent-text);
+  }
+
+  .block {
+    padding: 80px 0;
+    border-top: var(--border-w-thick) solid var(--border);
+  }
+  .block.highlight { background: var(--bg-strong); }
+  .block-title {
+    font-family: var(--font-display);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--fg);
+    margin-bottom: 32px;
+    font-weight: 900;
+    padding-bottom: 8px;
+    border-bottom: var(--border-w-thick) solid var(--border);
+  }
+  .block-lede {
+    color: var(--fg-soft);
+    margin-bottom: 24px;
+    max-width: 600px;
+  }
+
+  .tech-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .tech-list li {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 24px;
+    padding: 16px 0;
+    border-bottom: var(--border-w) solid var(--border);
+    color: var(--fg-soft);
+    font-size: 1rem;
+  }
+  .tech-list strong {
+    font-family: var(--font-display);
+    color: var(--fg);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .flow {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .flow li {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: 24px;
+    padding: 28px 0;
+    border-bottom: var(--border-w) solid var(--border);
+  }
+  .flow li:last-child { border-bottom: none; }
+  .flow-num {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--fg);
+    font-weight: 900;
+  }
+  .flow h3 {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+    color: var(--fg);
+    font-weight: 900;
+  }
+  .flow p {
+    color: var(--fg-soft);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    margin: 0;
+  }
+  .flow code, .tech-list code {
+    font-family: var(--font-mono);
+    background: var(--bg-strong);
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    font-size: 0.875em;
+    color: var(--fg);
+  }
+
+  .screenshots {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .screenshots img {
+    width: 100%;
+    border: var(--border-w-thick) solid var(--border);
+    background: var(--bg);
+  }
+
+  @media (max-width: 640px) {
+    .screenshots { grid-template-columns: 1fr; }
+    .flow li, .tech-list li { grid-template-columns: 1fr; gap: 8px; }
+  }
+</style>

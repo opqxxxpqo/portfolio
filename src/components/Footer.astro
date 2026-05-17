@@ -1,0 +1,91 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-col brand-col">
+      <div class="footer-brand">QI LU · 鲁琦</div>
+      <p class="footer-tag">拉夫堡大学服务设计创新硕士 · 持续更新</p>
+    </div>
+    <div class="footer-col">
+      <h4>联系</h4>
+      <ul>
+        <li><a href="mailto:luqiapp2007@163.com" class="link-underline">luqiapp2007@163.com</a></li>
+        <li><a href="https://github.com/opqxxxpqo" class="link-underline" rel="noopener" target="_blank">GitHub · opqxxxpqo</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>站点</h4>
+      <ul>
+        <li><a href="/" class="link-underline">首页</a></li>
+        <li><a href="/categories" class="link-underline">分类</a></li>
+        <li><a href="/about" class="link-underline">关于我</a></li>
+        <li><a href="/process" class="link-underline">此站如何搭建</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© {year} QI LU — ALL RIGHTS RESERVED.</span>
+    <span class="muted">BUILT WITH ASTRO · CLAUDE CODE</span>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: var(--border-w-thick) solid var(--border);
+    margin-top: 120px;
+    padding: 64px 0 24px;
+    background: var(--bg);
+  }
+  .footer-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 32px;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 48px;
+  }
+  .footer-brand {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+  .footer-tag { color: var(--fg-muted); font-size: 0.875rem; margin-top: 6px; }
+  .footer-col h4 {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--fg-muted);
+    margin-bottom: 14px;
+    font-weight: 900;
+  }
+  .footer-col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .footer-col li { margin-bottom: 8px; font-size: 0.9375rem; }
+  .footer-col a { color: var(--fg); }
+
+  .footer-bottom {
+    max-width: var(--max-width);
+    margin: 48px auto 0;
+    padding: 20px 32px 0;
+    border-top: var(--border-w) solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 640px) {
+    .footer-inner { grid-template-columns: 1fr; gap: 32px; padding: 0 20px; }
+    .footer-bottom { flex-direction: column; gap: 8px; padding: 20px 20px 0; }
+  }
+</style>

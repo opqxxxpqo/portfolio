@@ -1,0 +1,41 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="404 · 页面未找到" noindex={true}>
+  <section class="notfound">
+    <div class="container-narrow">
+      <p class="big">404</p>
+      <h1>这里没有内容。</h1>
+      <p class="dim">你访问的页面不存在或已被移动。</p>
+      <div class="links">
+        <a href="/" class="chunky-btn primary">← 返回首页</a>
+        <a href="/categories" class="chunky-btn">浏览分类</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .notfound {
+    padding: 120px 0 160px;
+    min-height: 60vh;
+  }
+  .big {
+    font-family: var(--font-display);
+    font-size: clamp(6rem, 22vw, 16rem);
+    font-weight: 900;
+    letter-spacing: -0.06em;
+    line-height: 1;
+    color: var(--accent);
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 5vw, 3rem);
+    margin-bottom: 16px;
+    font-weight: 900;
+  }
+  .dim { color: var(--fg-soft); margin-bottom: 40px; font-size: 1.0625rem; }
+  .links { display: flex; gap: 12px; flex-wrap: wrap; }
+</style>

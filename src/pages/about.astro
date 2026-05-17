@@ -1,0 +1,302 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+
+// 教育背景 —— 如果本科学校 / 年份要补，改这里
+const education = [
+  {
+    period: '2025 — 至今',
+    school: 'Loughborough University · 拉夫堡大学',
+    detail: 'MSc Service Design Innovation · 服务设计创新（Postgrad）'
+  },
+  {
+    period: '2021 — 2025',
+    school: '视觉传达设计 · Visual Communication Design',
+    detail: 'BA · 学士'
+  }
+];
+
+// 主攻软件（重点展示，给 HR 一眼看到的部分）
+const primaryTools = [
+  { name: 'Figma',        usage: '服务蓝图 · 界面 · 协作原型' },
+  { name: 'Blender',      usage: '3D 建模 · 动画 · 渲染' },
+  { name: 'Photoshop',    usage: '视觉设计 · 合成 · 后期' },
+  { name: 'Claude Code',  usage: '日常开发 · 原型搭建（含本站）' },
+  { name: 'Codex',        usage: '代码生成 · 重构 · 调试' }
+];
+
+// 熟练使用（按方向分组，避免一长串平铺）
+const proficient = [
+  {
+    group: '视觉 · 排版 · 动效',
+    items: ['After Effects', 'Premiere Pro', 'Premiere Rush', 'Procreate', 'Lightroom', 'InDesign', 'Illustrator', 'Adobe Animate']
+  },
+  {
+    group: '3D · 建模 · 仿真',
+    items: ['Cinema 4D', 'Rhino 7', 'SketchUp', 'Marvelous Designer', 'Substance 3D Painter / Designer', 'EmberGen']
+  },
+  {
+    group: '引擎 · 交互硬件',
+    items: ['Unity', 'Godot', 'Arduino']
+  }
+];
+---
+
+<BaseLayout title="关于 · 鲁琦 Qi Lu" description="拉夫堡大学服务设计创新硕士 · 视觉传达背景 · 软件栈 / 联系方式">
+  <section class="head">
+    <div class="container-narrow">
+      <p class="kicker">ABOUT</p>
+      <h1>你好，<br/>我是鲁琦。</h1>
+      <p class="intro">
+        本科<strong>视觉传达设计</strong>出身，现在在英国拉夫堡大学读
+        <strong>Service Design Innovation</strong> 硕士。
+        从静态视觉到服务系统设计，我习惯把人当成方法的起点，把工具当成放大器。
+      </p>
+      <p class="intro">
+        日常里我把 <strong>Claude Code / Codex</strong> 这类 AI 编程工具当成自己的"第二只手"——
+        它不替我做判断，但能把节省下来的时间投回到调研、视觉打磨、和真正需要人的环节里。
+      </p>
+      <div class="cta">
+        <a href="/resume.pdf" class="chunky-btn primary">下载简历 PDF</a>
+        <a href="mailto:luqiapp2007@163.com" class="chunky-btn">邮件联系</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="container-narrow">
+      <h2 class="block-title">教育背景</h2>
+      <ul class="edu-list">
+        {education.map(e => (
+          <li>
+            <span class="edu-period">{e.period}</span>
+            <div>
+              <div class="edu-school">{e.school}</div>
+              <div class="edu-detail">{e.detail}</div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="block highlight">
+    <div class="container-narrow">
+      <h2 class="block-title">软件栈 · 主攻</h2>
+      <p class="block-lede">
+        下面五件是我<strong>最常用、最熟练</strong>的工具，几乎每个项目都会出现。
+        排序大致按使用频率，不分先后。
+      </p>
+      <ul class="ai-list">
+        {primaryTools.map(t => (
+          <li>
+            <div class="ai-name">{t.name}</div>
+            <div class="ai-usage">{t.usage}</div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="container-narrow">
+      <h2 class="block-title">软件栈 · 熟练使用</h2>
+      <p class="block-lede">
+        这些是按需调用的工具——根据项目类型选择，都有过实际产出。
+      </p>
+      <div class="skills">
+        {proficient.map(g => (
+          <div class="skill-group">
+            <h3 class="skill-group-title">{g.group}</h3>
+            <ul class="skill-items">
+              {g.items.map(i => <li>{i}</li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="container-narrow">
+      <h2 class="block-title">联系方式</h2>
+      <ul class="contact-list">
+        <li><span>邮箱</span><a href="mailto:luqiapp2007@163.com">luqiapp2007@163.com</a></li>
+        <li><span>GitHub</span><a href="https://github.com/opqxxxpqo" target="_blank" rel="noopener">github.com/opqxxxpqo</a></li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .head { padding: clamp(64px, 10vh, 120px) 0 64px; }
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.18em;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 7vw, 4.5rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+    margin-bottom: 40px;
+  }
+  .intro {
+    font-size: 1.0625rem;
+    color: var(--fg-soft);
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+  .intro strong { color: var(--fg); }
+  .cta {
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .block {
+    padding: 80px 0;
+    border-top: var(--border-w-thick) solid var(--border);
+  }
+  .block.highlight {
+    background: var(--bg-strong);
+  }
+  .block-title {
+    font-family: var(--font-display);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--fg);
+    margin-bottom: 32px;
+    font-weight: 900;
+    padding-bottom: 8px;
+    border-bottom: var(--border-w-thick) solid var(--border);
+  }
+  .block-lede {
+    color: var(--fg-soft);
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 32px;
+    max-width: 640px;
+  }
+  .block-lede strong { color: var(--fg); }
+
+  .edu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .edu-list li {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+    padding: 20px 0;
+    border-bottom: var(--border-w) solid var(--border);
+  }
+  .edu-list li:last-child { border-bottom: none; }
+  .edu-period {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .edu-school {
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    color: var(--fg);
+    margin-bottom: 4px;
+  }
+  .edu-detail { color: var(--fg-soft); font-size: 0.9375rem; }
+
+  .ai-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    border-top: var(--border-w) solid var(--border);
+    border-left: var(--border-w) solid var(--border);
+  }
+  .ai-list li {
+    background: var(--bg);
+    padding: 20px;
+    border-right: var(--border-w) solid var(--border);
+    border-bottom: var(--border-w) solid var(--border);
+  }
+  .ai-name {
+    font-family: var(--font-display);
+    color: var(--accent);
+    font-weight: 900;
+    margin-bottom: 8px;
+    font-size: 1.0625rem;
+  }
+  .ai-usage { color: var(--fg-soft); font-size: 0.9375rem; line-height: 1.55; }
+
+  .skills {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+  }
+  .skill-group-title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--fg);
+    margin-bottom: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding-bottom: 8px;
+    border-bottom: var(--border-w) solid var(--border);
+  }
+  .skill-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .skill-items li {
+    color: var(--fg-soft);
+    padding: 4px 0;
+    font-size: 0.9375rem;
+  }
+
+  .contact-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .contact-list li {
+    display: grid;
+    grid-template-columns: 88px 1fr;
+    gap: 24px;
+    padding: 16px 0;
+    border-bottom: var(--border-w) solid var(--border);
+    font-size: 0.9375rem;
+  }
+  .contact-list span {
+    font-family: var(--font-mono);
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.8125rem;
+  }
+  .contact-list a {
+    color: var(--fg);
+    border-bottom: var(--border-w) solid var(--accent);
+    display: inline-block;
+    padding-bottom: 1px;
+  }
+  .contact-list a:hover { background: var(--accent); color: var(--accent-text); }
+
+  @media (max-width: 640px) {
+    .ai-list, .skills { grid-template-columns: 1fr; }
+    .edu-list li, .contact-list li { grid-template-columns: 1fr; gap: 4px; }
+  }
+</style>

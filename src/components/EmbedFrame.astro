@@ -1,0 +1,54 @@
+---
+export interface Props {
+  url: string;
+  height: number;
+  title: string;
+}
+const { url, height, title } = Astro.props;
+---
+
+<div class="embed-block">
+  <div class="embed-bar">
+    <span class="embed-title">{title}</span>
+    <a href={url} target="_blank" rel="noopener" class="embed-link">新窗口打开 ↗</a>
+  </div>
+  <iframe
+    src={url}
+    title={title}
+    style={`width: 100%; height: ${height}px;`}
+    referrerpolicy="no-referrer"
+    loading="lazy"
+    allow="fullscreen"
+  ></iframe>
+</div>
+
+<style>
+  .embed-block {
+    border: var(--border-w-thick) solid var(--border);
+    margin-bottom: 16px;
+    background: var(--bg-soft);
+  }
+  .embed-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: var(--border-w) solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .embed-title { color: var(--fg-muted); }
+  .embed-link {
+    color: var(--fg);
+    padding: 4px 10px;
+    border: var(--border-w) solid var(--border);
+    transition: all var(--transition);
+  }
+  .embed-link:hover {
+    background: var(--fg);
+    color: var(--bg);
+  }
+  iframe { display: block; border: 0; }
+</style>

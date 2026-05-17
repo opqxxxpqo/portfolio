@@ -1,0 +1,42 @@
+---
+export interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = '研究生作品集 · 科研项目 / AI 应用 / 设计作品',
+  ogImage = '/og-image.svg',
+  noindex = false
+} = Astro.props;
+
+const siteName = '作品集';
+const canonical = new URL(Astro.url.pathname, Astro.site || 'https://your-portfolio.netlify.app');
+const ogUrl = new URL(ogImage, Astro.site || 'https://your-portfolio.netlify.app');
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical.href} />
+{noindex && <meta name="robots" content="noindex,nofollow" />}
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={siteName} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical.href} />
+<meta property="og:image" content={ogUrl.href} />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogUrl.href} />
+
+<!-- Theme color (浏览器地址栏配色) -->
+<meta name="theme-color" content="#eae3d2" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#1a1612" media="(prefers-color-scheme: dark)" />

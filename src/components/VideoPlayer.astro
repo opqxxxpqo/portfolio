@@ -1,0 +1,39 @@
+---
+// 自托管 mp4 播放器。默认静音 + 显示控件 + lazy metadata。
+// 不开 autoplay：避免移动端流量浪费 / 让用户自己点。
+export interface Props {
+  src: string;
+  poster?: string;
+  title?: string;
+}
+const { src, poster, title } = Astro.props;
+---
+
+<div class="video-block">
+  <video
+    src={src}
+    poster={poster}
+    controls
+    muted
+    playsinline
+    preload="metadata"
+    title={title}
+  >
+    你的浏览器不支持 video 标签。<a href={src} download>点此下载视频 ↓</a>
+  </video>
+</div>
+
+<style>
+  .video-block {
+    width: 100%;
+    background: var(--bg-soft);
+    border: var(--border-w-thick) solid var(--border);
+    margin-bottom: 16px;
+  }
+  .video-block video {
+    display: block;
+    width: 100%;
+    max-height: 70vh;
+    background: #000;
+  }
+</style>

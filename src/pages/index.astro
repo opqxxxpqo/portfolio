@@ -1,0 +1,506 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { CATEGORY_MAP } from '~/lib/categories';
+
+const all = await getCollection('works');
+
+// 隐藏 hidden:true 的作品（合集子项），按时间倒序
+const works = all
+  .filter(w => !w.data.hidden)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const yearFmt = (d: Date) => d.getFullYear().toString();
+---
+
+<BaseLayout
+  title="鲁琦 Qi Lu · 作品集"
+  description="拉夫堡大学服务设计创新硕士 · 视觉传达背景 · 服务设计 / UX·UI / AI 原型 / 视觉与 3D · 持续更新"
+>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <p class="hero-kicker">PORTFOLIO · 2026 — 持续更新中</p>
+      <h1 class="hero-name">QI<br/>LU.</h1>
+      <p class="hero-line">
+        <span class="hero-line-zh">拉夫堡大学 · <span class="hero-accent">服务设计创新硕士</span></span>
+        <span class="hero-line-en">Loughborough University · MSc Service Design Innovation</span>
+        <span class="hero-line-sub">视觉传达本科 · 把 AI 编程当成日常工具</span>
+      </p>
+      <div class="hero-contact">
+        <a href="mailto:luqiapp2007@163.com" class="chunky-btn primary email-wave-btn" aria-label="发邮件 luqiapp2007@163.com">
+          <span class="email-wave-decor" aria-hidden="true">
+            <svg class="email-wave-svg" viewBox="0 0 400 100" preserveAspectRatio="none">
+              <path class="wave-main" d="M0,32 Q50,4 100,32 T200,32 T300,32 T400,32 L400,100 L0,100 Z"/>
+            </svg>
+          </span>
+          <span class="email-wave-label">邮件 ↗</span>
+        </a>
+        <a href="/resume.pdf" class="chunky-btn">简历 PDF</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- INDEX BAR + 切换按钮 -->
+  <section class="index-bar">
+    <div class="container">
+      <div class="bar-inner">
+        <div class="bar-meta">
+          <span class="bar-num">{works.length.toString().padStart(2, '0')}</span>
+          <span class="bar-label">件作品 · 时间倒序</span>
+        </div>
+        <div class="view-toggle" role="tablist" aria-label="切换显示方式">
+          <button id="view-list" class="chunky-btn is-active" type="button">List</button>
+          <button id="view-grid" class="chunky-btn" type="button">Grid</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 列表视图（默认） -->
+  <!-- 原生 <details name="works"> 手风琴：只能开一个，无 JS 也能用 -->
+  <section id="list-view" class="works-list">
+    <div class="container">
+      <ol class="work-rows">
+        {works.map((w, i) => {
+          const cat = CATEGORY_MAP[w.data.category as keyof typeof CATEGORY_MAP];
+          return (
+            <li class="work-row" data-cat={w.data.category}>
+              <details name="works" class="work-details">
+                <summary class="row-head">
+                  <span class="row-num">{(i + 1).toString().padStart(2, '0')}</span>
+                  <span class="row-year">{yearFmt(w.data.date)}</span>
+                  <span class="row-title">{w.data.title}</span>
+                  <span class="row-cat">{cat?.label || w.data.category}</span>
+                  <svg class="row-chevron" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M13.17 12L8.22 7.05l1.41-1.41L16 12l-6.37 6.37-1.41-1.42L13.17 12z"/>
+                  </svg>
+                </summary>
+                <div class={w.data.hideListCover ? 'row-body row-body--collection' : 'row-body'}>
+                  <div class="row-text">
+                    <p class="row-summary">{w.data.summary}</p>
+                    <a href={`/works/${w.id}`} class="row-link" data-astro-prefetch>查看作品 →</a>
+                  </div>
+                  {!w.data.hideListCover && (
+                    <a href={`/works/${w.id}`} class="row-cover" data-astro-prefetch aria-label={`${w.data.title} 详情`}>
+                      <img src={w.data.cover} alt={`${w.data.title} 封面`} loading="lazy" decoding="async" />
+                    </a>
+                  )}
+                </div>
+              </details>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  </section>
+
+  <!-- 网格视图（默认隐藏） -->
+  <section id="grid-view" class="works-grid" hidden>
+    <div class="container">
+      <div class="grid">
+        {works.map(w => {
+          const cat = CATEGORY_MAP[w.data.category as keyof typeof CATEGORY_MAP];
+          return (
+            <a href={`/works/${w.id}`} class="grid-card" data-cat={w.data.category} data-astro-prefetch>
+              <div class="card-cover">
+                <img src={w.data.cover} alt={`${w.data.title} 封面`} loading="lazy" decoding="async" />
+              </div>
+              <div class="card-body">
+                <div class="card-meta">
+                  <span class="card-year">{yearFmt(w.data.date)}</span>
+                  <span class="card-cat">{cat?.label || w.data.category}</span>
+                </div>
+                <h3 class="card-title">{w.data.title}</h3>
+                <p class="card-summary">{w.data.summary}</p>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* ---------- HERO ---------- */
+  .hero {
+    padding: clamp(64px, 12vh, 140px) 0 clamp(48px, 8vh, 96px);
+    border-bottom: var(--border-w-thick) solid var(--border);
+  }
+  .hero-kicker {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.18em;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+  .hero-name {
+    font-family: var(--font-display);
+    font-size: clamp(4rem, 14vw, 11rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 0.88;
+    margin-bottom: 40px;
+    color: var(--fg);
+    text-transform: uppercase;
+  }
+  .hero-line {
+    font-size: clamp(1.0625rem, 1.8vw, 1.375rem);
+    color: var(--fg-soft);
+    line-height: 1.55;
+    margin-bottom: 40px;
+    max-width: 640px;
+    font-weight: 500;
+  }
+  /* 中文主行 / 英文小字副行 / 第三行附加 */
+  .hero-line-zh { display: block; }
+  .hero-line-en {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: clamp(0.75rem, 1.1vw, 0.9375rem);
+    letter-spacing: 0.04em;
+    color: var(--fg-muted);
+    margin-top: 6px;
+    font-weight: 500;
+  }
+  .hero-line-sub {
+    display: block;
+    margin-top: 14px;
+  }
+  .hero-accent {
+    background: var(--accent);
+    color: var(--accent-text);
+    padding: 0 6px;
+  }
+  .hero-contact {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  /* ---------- HERO 邮件按钮：手机端波浪溢出 ---------- */
+  /* 桌面端 decor 隐藏；手机端 SVG 从按钮顶部鼓起，crests 高出 ~32px */
+  .email-wave-btn { position: relative; }
+  .email-wave-decor { display: none; }
+  .email-wave-label { position: relative; z-index: 1; }
+
+  /* ---------- INDEX BAR ---------- */
+  .index-bar {
+    border-bottom: var(--border-w) solid var(--border);
+    background: var(--bg);
+  }
+  .bar-inner {
+    padding: 16px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+  .bar-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .bar-num {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: var(--fg);
+  }
+  .bar-label {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .view-toggle {
+    display: flex;
+    gap: 0;
+  }
+  .view-toggle .chunky-btn {
+    border-right-width: 0;
+  }
+  .view-toggle .chunky-btn:last-child {
+    border-right-width: var(--border-w);
+  }
+
+  /* ---------- LIST VIEW（学 ky.fyi 的 details 手风琴） ---------- */
+  .works-list { padding: 0; }
+  .work-rows {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .work-row {
+    border-bottom: var(--border-w) solid var(--border);
+  }
+  .work-row.hidden { display: none; }
+
+  /* 隐藏原生 disclosure 三角，自己画 chevron */
+  .work-details > summary {
+    list-style: none;
+    cursor: pointer;
+  }
+  .work-details > summary::-webkit-details-marker { display: none; }
+  .work-details > summary::marker { display: none; }
+
+  .row-head {
+    padding: 20px 0;
+    display: grid;
+    grid-template-columns: 48px 80px 1fr auto 28px;
+    align-items: center;
+    gap: 24px;
+    color: var(--fg);
+    transition: background var(--transition), padding var(--transition);
+  }
+  .row-head:hover {
+    background: var(--accent);
+    color: var(--accent-text);
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .row-num {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--fg-muted);
+  }
+  .row-head:hover .row-num { color: var(--accent-text); }
+
+  .row-year {
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  .row-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2.5vw, 1.875rem);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+
+  .row-cat {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    white-space: nowrap;
+  }
+  .row-head:hover .row-cat { color: var(--accent-text); }
+
+  .row-chevron {
+    width: 22px;
+    height: 22px;
+    transition: transform var(--transition);
+  }
+  .work-details[open] > .row-head .row-chevron {
+    transform: rotate(90deg);
+  }
+
+  /* 展开后的主体：左边描述+链接，右边封面图 */
+  .row-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+    gap: 32px;
+    padding: 8px 0 40px;
+    align-items: start;
+  }
+  /* 合集型作品：没有 cover，单列展示，描述更宽 */
+  .row-body--collection {
+    grid-template-columns: minmax(0, 720px);
+  }
+  .row-text {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .row-summary {
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--fg-soft);
+    margin: 0;
+  }
+  .row-link {
+    align-self: flex-start;
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    color: var(--fg);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: var(--border-w) solid var(--accent);
+    padding-bottom: 2px;
+    transition: background var(--transition), color var(--transition);
+  }
+  .row-link:hover {
+    background: var(--accent);
+    color: var(--accent-text);
+  }
+  .row-cover {
+    display: block;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border: var(--border-w) solid var(--border);
+    background: var(--bg-soft);
+  }
+  .row-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .row-cover:hover img { transform: scale(1.02); }
+
+  /* ---------- GRID VIEW ---------- */
+  .works-grid { padding: 48px 0 0; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  .grid-card {
+    border: var(--border-w) solid var(--border);
+    background: var(--bg);
+    color: var(--fg);
+    display: block;
+    transition: background var(--transition), color var(--transition);
+  }
+  .grid-card:hover {
+    background: var(--invert-bg);
+    color: var(--invert-fg);
+  }
+  .card-cover {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-bottom: var(--border-w) solid var(--border);
+  }
+  .card-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .grid-card:hover .card-cover img { transform: scale(1.03); }
+  .card-body { padding: 20px; }
+  .card-meta {
+    display: flex;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    color: var(--fg-muted);
+  }
+  .grid-card:hover .card-meta { color: var(--invert-fg); opacity: 0.7; }
+  .card-title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .card-summary {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (max-width: 960px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: 1fr; }
+    .row-head {
+      grid-template-columns: 32px 1fr 22px;
+      gap: 12px;
+      padding: 16px 0;
+    }
+    .row-year, .row-cat { display: none; }
+    .row-body {
+      grid-template-columns: 1fr;
+      gap: 16px;
+      padding: 4px 0 32px;
+    }
+    .row-text { order: 2; }   /* 手机上图片置顶，描述/链接在下 */
+    .row-cover { order: 1; }
+    .hero-contact { flex-direction: column; align-items: flex-start; }
+    .hero-contact .chunky-btn { width: 100%; justify-content: center; }
+
+    /* 邮件按钮波浪溢出 —— 仅手机 */
+    /* 移除按钮自身的矩形边框与底色，让波浪 SVG 成为唯一的视觉块 */
+    .email-wave-btn {
+      overflow: visible;
+      margin-top: 34px;            /* 给溢出的 crest 让出空间 */
+      background: transparent;
+      border-color: transparent;   /* 保持 2px 空间，避免与其他按钮排版偏移 */
+    }
+    .email-wave-decor {
+      display: block;
+      position: absolute;
+      left: 0; right: 0;
+      bottom: 0;
+      height: calc(100% + 32px);  /* 按钮高度 + 32px 顶部溢出 */
+      pointer-events: none;
+      overflow: hidden;            /* 限制水平方向，避免动画时左右出血 */
+      z-index: 0;
+    }
+    .email-wave-svg {
+      position: absolute;
+      inset: 0;
+      width: 200%;                 /* 2× 让 translateX -50% 无缝循环 */
+      height: 100%;
+      animation: email-wave-flow 7s linear infinite;
+    }
+    .wave-main { fill: var(--accent); }
+  }
+
+  @keyframes email-wave-flow {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .email-wave-svg { animation: none; }
+  }
+</style>
+
+<script>
+  function setupHome() {
+    // 列表展开 / 折叠 —— 由原生 <details name="works"> 处理，无 JS 需要
+
+    // 视图切换
+    const listBtn = document.getElementById('view-list');
+    const gridBtn = document.getElementById('view-grid');
+    const listView = document.getElementById('list-view');
+    const gridView = document.getElementById('grid-view');
+    if (!listBtn || !gridBtn || !listView || !gridView) return;
+
+    const setView = (mode: 'list' | 'grid') => {
+      const isList = mode === 'list';
+      listView.hidden = !isList;
+      gridView.hidden = isList;
+      listBtn.classList.toggle('is-active', isList);
+      gridBtn.classList.toggle('is-active', !isList);
+      try { localStorage.setItem('home-view', mode); } catch (e) {}
+    };
+
+    listBtn.addEventListener('click', () => setView('list'));
+    gridBtn.addEventListener('click', () => setView('grid'));
+
+    // 恢复上次选择
+    try {
+      const saved = localStorage.getItem('home-view');
+      if (saved === 'grid') setView('grid');
+    } catch (e) {}
+  }
+  setupHome();
+  document.addEventListener('astro:after-swap', setupHome);
+</script>

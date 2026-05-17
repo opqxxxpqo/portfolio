@@ -1,0 +1,200 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { CATEGORIES, CATEGORY_MAP, type Category } from '~/lib/categories';
+
+export async function getStaticPaths() {
+  return CATEGORIES.map(c => ({ params: { id: c.id } }));
+}
+
+const { id } = Astro.params as { id: Category };
+const cat = CATEGORY_MAP[id];
+
+const all = await getCollection('works');
+const works = all
+  .filter(w => w.data.category === id && !w.data.hidden)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const yearFmt = (d: Date) => d.getFullYear().toString();
+---
+
+<BaseLayout
+  title={`${cat.label} · 鲁琦 Qi Lu`}
+  description={cat.description}
+>
+  <section class="head">
+    <div class="container">
+      <a href="/categories" class="back-link">← 全部分类</a>
+      <p class="kicker">CATEGORY</p>
+      <h1>{cat.label}</h1>
+      <p class="lede">{cat.description}</p>
+      <p class="count">{works.length === 0 ? '此分类暂无作品' : `${works.length} 件作品`}</p>
+    </div>
+  </section>
+
+  {works.length > 0 ? (
+    <section class="works">
+      <div class="container">
+        <ol class="work-rows">
+          {works.map((w, i) => (
+            <li class="work-row">
+              <a href={`/works/${w.id}`} class="row-link" data-astro-prefetch>
+                <span class="row-num">{(i + 1).toString().padStart(2, '0')}</span>
+                <span class="row-year">{yearFmt(w.data.date)}</span>
+                <span class="row-title">{w.data.title}</span>
+                <span class="row-arrow">→</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  ) : (
+    <section class="empty">
+      <div class="container">
+        <div class="empty-box">
+          <p class="empty-tag">EMPTY</p>
+          <h2>这个分类还没有作品。</h2>
+          <p>新作品上线后会出现在这里。</p>
+          <a href="/categories" class="chunky-btn">← 看看别的分类</a>
+        </div>
+      </div>
+    </section>
+  )}
+</BaseLayout>
+
+<style>
+  .head {
+    padding: clamp(48px, 8vh, 96px) 0 64px;
+    border-bottom: var(--border-w-thick) solid var(--border);
+  }
+  .back-link {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 32px;
+    padding: 4px 10px;
+    border: var(--border-w) solid transparent;
+    transition: all var(--transition);
+  }
+  .back-link:hover {
+    background: var(--fg);
+    color: var(--bg);
+  }
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.18em;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 9vw, 7rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    margin-bottom: 24px;
+    line-height: 0.9;
+    text-transform: uppercase;
+  }
+  .lede {
+    color: var(--fg-soft);
+    font-size: 1.125rem;
+    max-width: 640px;
+    margin-bottom: 24px;
+  }
+  .count {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+  }
+
+  .works { padding: 0; }
+  .work-rows {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .work-row {
+    border-bottom: var(--border-w) solid var(--border);
+  }
+  .row-link {
+    display: grid;
+    grid-template-columns: 48px 80px 1fr 40px;
+    align-items: baseline;
+    gap: 24px;
+    padding: 24px 0;
+    color: var(--fg);
+    transition: all var(--transition);
+  }
+  .row-link:hover {
+    background: var(--accent);
+    color: var(--accent-text);
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .row-num {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--fg-muted);
+  }
+  .row-link:hover .row-num { color: var(--accent-text); opacity: 0.7; }
+  .row-year {
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+  .row-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2.5vw, 1.875rem);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .row-arrow {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    text-align: right;
+  }
+
+  .empty { padding: 80px 0 120px; }
+  .empty-box {
+    border: var(--border-w-thick) solid var(--border);
+    padding: 48px 40px;
+    background: var(--bg-soft);
+    text-align: center;
+  }
+  .empty-tag {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--fg-muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .empty-box h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    margin-bottom: 12px;
+  }
+  .empty-box p {
+    color: var(--fg-soft);
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 640px) {
+    .row-link {
+      grid-template-columns: 32px 1fr 28px;
+      gap: 12px;
+      padding: 18px 0;
+    }
+    .row-year { display: none; }
+  }
+</style>
