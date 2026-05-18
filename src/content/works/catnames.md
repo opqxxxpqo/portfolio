@@ -2,12 +2,12 @@
 title: "Catnames · 猫猫派对"
 category: ai-prototype
 date: 2026-05-15
-cover: /works/catnames/cover.svg
+cover: /works/catnames/cover.jpg
 summary: "2—8 人的派对小游戏：用单词线索引导队友在猫卡上找到目标猫。三种模式，合作 / 竞争 / 角色隐身玩法切换。"
 role: "独立开发"
 tools:
   - Claude Code
-  - JavaScript / HTML / CSS
+  - Codex
 tags:
   - AI 编程
   - 派对游戏

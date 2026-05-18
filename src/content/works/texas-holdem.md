@@ -7,7 +7,8 @@ summary: "把德州扑克和 UNO 抽卡机制糅在一起的肉鸽小游戏 —�
 role: "独立开发"
 tools:
   - Claude Code
-  - JavaScript / HTML / CSS
+  - ChatGPT
+  - Figma
 tags:
   - AI 编程
   - 游戏 Prototype
