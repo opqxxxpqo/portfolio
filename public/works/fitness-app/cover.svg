@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <rect width="1600" height="1000" fill="#0a0a0a"/>
+  <rect x="60" y="60" width="1480" height="880" fill="none" stroke="#eae3d2" stroke-width="6"/>
+  <text x="120" y="380" font-family="ui-monospace, Consolas, monospace" font-size="32" fill="#8a7e6a" letter-spacing="6">$ AI · UI PROTOTYPE</text>
+  <text x="120" y="560" font-family="Archivo Black, Inter, sans-serif" font-size="200" font-weight="900" fill="#eae3d2" letter-spacing="-6">FITNESS</text>
+  <text x="120" y="720" font-family="Archivo Black, Inter, sans-serif" font-size="160" font-weight="900" fill="#4d6bff" letter-spacing="-4">健身 APP.</text>
+  <rect x="120" y="790" width="640" height="50" fill="none" stroke="#eae3d2" stroke-width="3"/>
+  <text x="140" y="827" font-family="ui-monospace, Consolas, monospace" font-size="22" font-weight="700" fill="#eae3d2" letter-spacing="2">封面待定 · 下载链接待补</text>
+</svg>
