@@ -82,7 +82,7 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
     <!-- items: grid 网格（点击卡片用 dialog 弹出实际媒体） -->
     {data.items && data.items.length > 0 && (
       <div class={containerClass} style="margin-top: 64px;">
-        <section class="items-grid" aria-label={`${data.title} 作品集`}>
+        <section class={`items-grid items-grid--${data.itemsLayout || 'grid'}`} aria-label={`${data.title} 作品集`}>
           {data.items.map((it: any, idx: number) => {
             const thumb = it.poster || (it.type === 'image' ? it.src : null);
             const icon = it.type === 'bilibili' || it.type === 'video'
@@ -539,10 +539,38 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
   }
 
   @media (max-width: 960px) {
-    .items-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .items-grid--grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
   }
   @media (max-width: 640px) {
-    .items-grid { grid-template-columns: 1fr; gap: 16px; }
+    .items-grid--grid { grid-template-columns: 1fr; gap: 16px; }
+  }
+
+  /* ---------- ITEMS GRID · PORTRAIT 变体（手机原型截图等竖比例素材） ---------- */
+  /* 自适应多列，按图片原比例显示，不裁剪 */
+  .items-grid--portrait {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 18px;
+    align-items: start;
+  }
+  .items-grid--portrait .item-card {
+    aspect-ratio: auto;
+    background: transparent;
+    border: none;
+    overflow: visible;
+  }
+  .items-grid--portrait .item-thumb {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    display: block;
+  }
+  @media (max-width: 640px) {
+    .items-grid--portrait {
+      grid-template-columns: 1fr;
+      gap: 16px;
+      max-width: 360px;            /* 手机上单列，限制宽度避免大图过宽 */
+      margin: 0 auto;
+    }
   }
 
   .media-section {

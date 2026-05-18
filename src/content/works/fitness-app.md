@@ -13,6 +13,8 @@ tags:
   - UI 原型
   - 健身
   - 移动端
+itemsLayout: portrait
+coverFit: contain
 items:
   - type: image
     src: /works/fitness-app/acn-1.jpg

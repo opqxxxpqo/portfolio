@@ -33,6 +33,16 @@ const works = defineCollection({
     // 适合本身就是"目录/入口"型的页面（cover 没有信息量）
     hideListCover: z.boolean().optional().default(false),
 
+    // itemsLayout: items 网格的布局
+    //   'grid' (默认) = 3 列 4:3 卡片，cover 裁剪填充
+    //   'portrait' = 自适应多列窄卡片，按图片原比例显示，适合手机截图
+    itemsLayout: z.enum(['grid', 'portrait']).optional(),
+
+    // coverFit: 首页 list 里 cover 的显示方式
+    //   'cover' (默认) = 裁剪填充 16:10 框
+    //   'contain' = 按图片原比例完整显示（适合竖比例的封面）
+    coverFit: z.enum(['cover', 'contain']).optional(),
+
     // 多媒体字段，按需启用
     gallery: z.array(z.string()).optional(),
     bilibili: z.array(z.string()).optional(),     // BV 号数组

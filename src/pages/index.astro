@@ -81,7 +81,7 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
                     <a href={`/works/${w.id}`} class="row-link" data-astro-prefetch>查看作品 →</a>
                   </div>
                   {!w.data.hideListCover && (
-                    <a href={`/works/${w.id}`} class="row-cover" data-astro-prefetch aria-label={`${w.data.title} 详情`}>
+                    <a href={`/works/${w.id}`} class={`row-cover row-cover--${w.data.coverFit || 'cover'}`} data-astro-prefetch aria-label={`${w.data.title} 详情`}>
                       <img src={w.data.cover} alt={`${w.data.title} 封面`} loading="lazy" decoding="async" />
                     </a>
                   )}
@@ -335,18 +335,37 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
   }
   .row-cover {
     display: block;
-    aspect-ratio: 16 / 10;
-    overflow: hidden;
     border: var(--border-w) solid var(--border);
     background: var(--bg-soft);
+    overflow: hidden;
   }
-  .row-cover img {
+  /* 默认：16:10 框，裁剪填充 */
+  .row-cover--cover {
+    aspect-ratio: 16 / 10;
+  }
+  .row-cover--cover img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .row-cover:hover img { transform: scale(1.02); }
+  .row-cover--cover:hover img { transform: scale(1.02); }
+  /* 变体：按原比例 contain，最大 380px 高，避免竖图把布局拉太长 */
+  .row-cover--contain {
+    background: transparent;
+    border: none;
+  }
+  .row-cover--contain img {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 380px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+    transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .row-cover--contain:hover img { transform: scale(1.02); }
 
   /* ---------- GRID VIEW ---------- */
   .works-grid { padding: 48px 0 0; }
