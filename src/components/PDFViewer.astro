@@ -2,24 +2,31 @@
 export interface Props {
   src: string;
   height?: number;
+  noDownload?: boolean;  // true 时不显示下载按钮，只在线浏览
 }
-const { src, height = 720 } = Astro.props;
+const { src, height = 720, noDownload = false } = Astro.props;
 const fileName = src.split('/').pop() || 'document.pdf';
+// PDF.js / 浏览器内置 PDF 查看器的工具栏参数：禁用下载/打印按钮
+const embedSrc = noDownload ? `${src}#toolbar=1&navpanes=0&scrollbar=1&statusbar=0` : src;
 ---
 
 <div class="pdf-block">
   <div class="pdf-bar">
     <span class="pdf-name">{fileName}</span>
-    <a href={src} download class="pdf-download">下载 PDF ↓</a>
+    {!noDownload && (
+      <a href={src} download class="pdf-download">下载 PDF ↓</a>
+    )}
   </div>
   <object
-    data={src}
+    data={embedSrc}
     type="application/pdf"
     style={`width: 100%; height: ${height}px;`}
   >
     <div class="pdf-fallback">
       你的浏览器不支持内嵌 PDF。
-      <a href={src} class="link-underline">点击下载</a>
+      {!noDownload && (
+        <a href={src} class="link-underline">点击下载</a>
+      )}
     </div>
   </object>
 </div>

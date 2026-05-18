@@ -236,7 +236,7 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
       {data.pdfs && data.pdfs.length > 0 && (
         <section class="media-section">
           <h2 class="media-title">文档</h2>
-          {data.pdfs.map((p: string) => <PDFViewer src={p} />)}
+          {data.pdfs.map((p: string) => <PDFViewer src={p} noDownload={true} />)}
         </section>
       )}
 
