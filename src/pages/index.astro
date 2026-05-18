@@ -68,10 +68,9 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
             <li class="work-row" data-cat={w.data.category}>
               <details name="works" class="work-details">
                 <summary class="row-head">
-                  <span class="row-num">{(i + 1).toString().padStart(2, '0')}</span>
                   <span class="row-year">{yearFmt(w.data.date)}</span>
                   <span class="row-title">{w.data.title}</span>
-                  <span class="row-cat">{cat?.label || w.data.category}</span>
+                  <span class="row-cat">{cat?.labelZh || cat?.label || w.data.category}</span>
                   <svg class="row-chevron" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="M13.17 12L8.22 7.05l1.41-1.41L16 12l-6.37 6.37-1.41-1.42L13.17 12z"/>
                   </svg>
@@ -250,7 +249,7 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
   .row-head {
     padding: 20px 0;
     display: grid;
-    grid-template-columns: 48px 80px 1fr auto 28px;
+    grid-template-columns: 80px 1fr auto 28px;  /* year · title · cat · chevron */
     align-items: center;
     gap: 24px;
     color: var(--fg);
@@ -262,12 +261,6 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
     padding-left: 16px;
     padding-right: 16px;
   }
-  .row-num {
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
-    color: var(--fg-muted);
-  }
-  .row-head:hover .row-num { color: var(--accent-text); }
 
   .row-year {
     font-family: var(--font-mono);
@@ -284,12 +277,12 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
   }
 
   .row-cat {
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);   /* 中文用 sans 字体，mono 没有中文回落会丑 */
     font-size: 0.8125rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    letter-spacing: 0.04em;
     color: var(--fg-muted);
     white-space: nowrap;
+    font-weight: 500;
   }
   .row-head:hover .row-cat { color: var(--accent-text); }
 
@@ -420,11 +413,15 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
   @media (max-width: 640px) {
     .grid { grid-template-columns: 1fr; }
     .row-head {
-      grid-template-columns: 32px 1fr 22px;
-      gap: 12px;
+      grid-template-columns: 1fr auto 22px;   /* title · cat · chevron */
+      gap: 10px;
       padding: 16px 0;
     }
-    .row-year, .row-cat { display: none; }
+    .row-year { display: none; }              /* 年份手机端省掉 */
+    .row-cat {
+      font-size: 0.6875rem;                   /* 手机端中文小字 */
+      letter-spacing: 0.04em;
+    }
     .row-body {
       grid-template-columns: 1fr;
       gap: 16px;
@@ -437,7 +434,8 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
 
     /* 邮件按钮波浪溢出 —— 仅手机 */
     /* 移除按钮自身的矩形边框与底色，让波浪 SVG 成为唯一的视觉块 */
-    .email-wave-btn {
+    /* 用 .chunky-btn.primary.email-wave-btn 三类选择器，特异性才能压过 .chunky-btn.primary 的 IKB 底色 */
+    .chunky-btn.primary.email-wave-btn {
       overflow: visible;
       margin-top: 34px;            /* 给溢出的 crest 让出空间 */
       background: transparent;
