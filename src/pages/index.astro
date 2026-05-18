@@ -363,6 +363,7 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
     object-fit: contain;
     display: block;
     margin: 0 auto;
+    border-radius: 28px;           /* 手机原型图加圆角，盖住白底毛边 */
     transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
   }
   .row-cover--contain:hover img { transform: scale(1.02); }
