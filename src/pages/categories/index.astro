@@ -69,13 +69,10 @@ const countByCat = CATEGORIES.reduce((acc, c) => {
   .cat-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0;
-    border-top: var(--border-w) solid var(--border);
-    border-left: var(--border-w) solid var(--border);
+    gap: 32px;
   }
   .cat-card {
-    border-right: var(--border-w) solid var(--border);
-    border-bottom: var(--border-w) solid var(--border);
+    border: var(--border-w) solid var(--border);
     padding: 32px 28px;
     background: var(--bg);
     color: var(--fg);
