@@ -1,9 +1,9 @@
 ---
-title: "乐团指挥 · Behavior Translation Terminal"
+title: "Digital Conductor"
 category: ai-prototype
 date: 2026-05-18
-cover: /works/behavior-translation/cover.svg
-summary: "把全局键鼠操作翻译成音乐和 ASCII / CRT 终端可视化。桌面录制 + 网页回放双模式，全程不记录字符内容。"
+cover: /works/behavior-translation/cover.jpg
+summary: "把数字行为转译为交响乐的实验性交互系统。键盘、鼠标、停顿与操作密度被静默记录，实时映射为音乐结构、动态 orchestration 与可视化数据流。"
 role: "独立开发"
 tools:
   - Claude Code
@@ -12,9 +12,9 @@ tools:
   - HTML / JavaScript
 tags:
   - AI 编程
+  - 生成式音乐
   - 行为可视化
-  - CRT 美学
-  - 桌面工具
+  - 实验交互
 links:
   - label: "在新窗口打开 Web Demo"
     url: https://opqxxxpqo.github.io/behavior-translation-terminal/renderer.html
@@ -28,24 +28,23 @@ embeds:
     title: "Web Demo · 回放可视化 · 电脑端体验更佳"
 ---
 
-## 是什么
+## 项目概念
 
-桌面端实时记录键鼠事件（按键类别 / 鼠标坐标 / 滚轮 / 点击），把行为流"翻译"成两种东西：
+《Digital Conductor》是一套将数字行为转译为交响乐的实验性交互系统。
 
-- **音乐**：不同事件类别映射成乐器与音高
-- **CRT 终端可视化**：模拟老式 CRT / ASCII 显示器的回放界面
+项目通过静默记录用户在电脑前的无意识行为，将键盘输入、鼠标轨迹、停顿与操作密度实时映射为音乐结构、动态 orchestration 与视觉化数据流。
 
-## 隐私
+在传统计算系统中，人类行为通常被压缩为日志、点击率与效率指标。
+而在本项目中，这些被忽略的行为痕迹被重新理解为一种"潜意识表演"。
 
-不记录任何**字符内容**，只记录"事件类别"。不抓剪贴板，不录屏。本地 `.jsonl` 存储。
+用户并不主动创作音乐，
+而是在日常工作、浏览、思考与停顿的过程中，无意识地完成一场持续发生的数字交响乐。
 
-## 两种用法
+## 项目关注
 
-- **桌面 app**（Windows）：后台运行，托盘控制；录制行为后即时生成音乐 + 回放
-- **网页 Demo**：上传已经录好的 `.jsonl` 文件，或者用模拟数据直接看 CRT 可视化效果
+- 行为与情绪的关系
+- 数据的感性表达
+- 人与系统之间的潜意识互动
+- 数字生活中的节奏感与情绪密度
 
-## AI 在哪一段
-
-- Python 桌面端 / 全局事件钩子 / 数据格式 —— Claude Code 给方案我选
-- CRT 渲染器（HTML / JS / 字符画）—— Codex 写大块，我做交互调整
-- 音乐映射规则、UI 文案、CRT 风格 —— 我决定
+它既是一套生成式音乐系统，也是一种关于数字行为的观察装置。
