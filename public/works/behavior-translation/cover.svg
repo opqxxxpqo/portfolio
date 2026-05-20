@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <rect width="1600" height="1000" fill="#050505"/>
+  <rect x="60" y="60" width="1480" height="880" fill="none" stroke="#eae3d2" stroke-width="6"/>
+  <g font-family="ui-monospace, 'JetBrains Mono', Consolas, monospace">
+    <text x="120" y="180" font-size="22" fill="#8a7e6a" letter-spacing="6">$ AI · DESKTOP + WEB</text>
+    <text x="120" y="240" font-size="22" fill="#4d6bff" letter-spacing="4">▌ ANALYSIS BAY · RESPONSE PLAYBACK</text>
+  </g>
+  <text x="120" y="500" font-family="Archivo Black, Inter, sans-serif" font-size="180" font-weight="900" fill="#eae3d2" letter-spacing="-6">乐团指挥.</text>
+  <text x="120" y="640" font-family="Archivo Black, Inter, sans-serif" font-size="80" font-weight="900" fill="#4d6bff" letter-spacing="-2">BEHAVIOR TRANSLATION</text>
+  <g font-family="ui-monospace, 'JetBrains Mono', Consolas, monospace" font-size="18" fill="#8a7e6a" letter-spacing="3">
+    <text x="120" y="720">▸ KEYBOARD · MOUSE → MUSIC + ASCII / CRT VISUALIZATION</text>
+    <text x="120" y="755">▸ DESKTOP RECORDER · WEB DEMO REPLAY · JSONL EXPORT</text>
+  </g>
+  <g font-family="ui-monospace, 'JetBrains Mono', Consolas, monospace" font-size="14" fill="#3a3a3a" letter-spacing="2">
+    <text x="120" y="860">█▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█</text>
+    <text x="120" y="880">█ NO CHARACTER LOG · NO CLIPBOARD · NO SCREEN RECORD       █</text>
+    <text x="120" y="900">█▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█</text>
+  </g>
+</svg>
