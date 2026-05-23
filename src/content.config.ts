@@ -15,14 +15,18 @@ const works = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/works' }),
   schema: z.object({
     title: z.string(),
+    titleEn: z.string().optional(),
     category: z.enum(CATEGORIES),
     date: z.coerce.date(),
     cover: z.string(), // public/ 下的相对路径，例 /works/research-sample/cover.svg
     summary: z.string(),
+    summaryEn: z.string().optional(),
 
     role: z.string().optional(),
+    roleEn: z.string().optional(),
     tools: z.array(z.string()).optional(),
     duration: z.string().optional(),
+    durationEn: z.string().optional(),
     tags: z.array(z.string()).optional(),
     featured: z.boolean().optional().default(false),
     longform: z.boolean().optional().default(false),
@@ -86,4 +90,19 @@ const works = defineCollection({
   })
 });
 
-export const collections = { works };
+// 英文版作品正文：在 src/content/works-en/ 里按 xxx.en.md 命名。
+// 与主 works 集合分目录，避免 glob 双重匹配的问题。
+// id 是 "xxx.en"，在 [slug].astro 里通过 strip 后缀和主作品匹配。
+const worksEn = defineCollection({
+  loader: glob({ pattern: '*.md', base: './src/content/works-en' }),
+  schema: z
+    .object({
+      title: z.string().optional(),
+      summary: z.string().optional(),
+      role: z.string().optional(),
+      duration: z.string().optional()
+    })
+    .partial()
+});
+
+export const collections = { works, worksEn };

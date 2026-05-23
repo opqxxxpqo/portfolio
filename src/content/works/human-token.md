@@ -1,10 +1,13 @@
 ---
 title: "Human Token"
+titleEn: "Human Token"
 category: ai-prototype
 date: 2026-05-15
 cover: /works/human-token/cover.jpg
 summary: '把键盘、鼠标、移动量化成"人类输出代币"的悬浮窗小工具。当前为浏览器仿真版，桌面 app 抓取的是 OS 级全局事件。'
+summaryEn: 'A floating widget that quantifies keystrokes, clicks and mouse motion into a "human output token". This is a browser-simulated build; the desktop app captures OS-level global events.'
 role: "独立开发"
+roleEn: "Solo dev"
 tools:
   - Claude Code
   - Codex

@@ -2,6 +2,8 @@
 import { getCollection, render } from 'astro:content';
 import WorkLayout from '~/layouts/WorkLayout.astro';
 
+const enEntries = await getCollection('worksEn');
+
 export async function getStaticPaths() {
   const works = await getCollection('works');
   return works.map(work => ({
@@ -12,6 +14,16 @@ export async function getStaticPaths() {
 
 const { work } = Astro.props;
 const { Content } = await render(work);
+
+// 英文版正文：src/content/works-en/<slug>.md → 在 worksEn 集合里的 id 就是 <slug>
+const workEnEntry = enEntries.find(e => e.id === work.id);
+const ContentEn = workEnEntry ? (await render(workEnEntry)).Content : null;
+const enFrontmatter = workEnEntry?.data ?? null;
 ---
 
-<WorkLayout work={work} Content={Content} />
+<WorkLayout
+  work={work}
+  Content={Content}
+  ContentEn={ContentEn}
+  enFrontmatter={enFrontmatter}
+/>

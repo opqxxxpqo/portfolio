@@ -24,11 +24,29 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
 >
   <section class="head">
     <div class="container">
-      <a href="/categories" class="back-link">← 全部分类</a>
+      <a href="/categories" class="back-link">
+        <span class="lang-zh">← 全部分类</span>
+        <span class="lang-en">← All categories</span>
+      </a>
       <p class="kicker">CATEGORY</p>
       <h1>{cat.label}</h1>
-      <p class="lede">{cat.description}</p>
-      <p class="count">{works.length === 0 ? '此分类暂无作品' : `${works.length} 件作品`}</p>
+      <p class="lede">
+        <span class="lang-zh">{cat.description}</span>
+        <span class="lang-en">{cat.descriptionEn}</span>
+      </p>
+      <p class="count">
+        {works.length === 0 ? (
+          <>
+            <span class="lang-zh">此分类暂无作品</span>
+            <span class="lang-en">No works in this category yet</span>
+          </>
+        ) : (
+          <>
+            <span class="lang-zh">{works.length} 件作品</span>
+            <span class="lang-en">{works.length} works</span>
+          </>
+        )}
+      </p>
     </div>
   </section>
 
@@ -41,7 +59,10 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
               <a href={`/works/${w.id}`} class="row-link" data-astro-prefetch>
                 <span class="row-num">{(i + 1).toString().padStart(2, '0')}</span>
                 <span class="row-year">{yearFmt(w.data.date)}</span>
-                <span class="row-title">{w.data.title}</span>
+                <span class="row-title">
+                  <span class="lang-zh">{w.data.title}</span>
+                  <span class="lang-en">{(w.data as any).titleEn || w.data.title}</span>
+                </span>
                 <span class="row-arrow">→</span>
               </a>
             </li>
@@ -54,9 +75,18 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
       <div class="container">
         <div class="empty-box">
           <p class="empty-tag">EMPTY</p>
-          <h2>这个分类还没有作品。</h2>
-          <p>新作品上线后会出现在这里。</p>
-          <a href="/categories" class="chunky-btn">← 看看别的分类</a>
+          <h2>
+            <span class="lang-zh">这个分类还没有作品。</span>
+            <span class="lang-en">Nothing here yet.</span>
+          </h2>
+          <p>
+            <span class="lang-zh">新作品上线后会出现在这里。</span>
+            <span class="lang-en">New works will appear here as they go live.</span>
+          </p>
+          <a href="/categories" class="chunky-btn">
+            <span class="lang-zh">← 看看别的分类</span>
+            <span class="lang-en">← Try another category</span>
+          </a>
         </div>
       </div>
     </section>

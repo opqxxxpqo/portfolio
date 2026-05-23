@@ -18,6 +18,24 @@ const { title, description, ogImage, noindex } = Astro.props;
 <!doctype html>
 <html lang="zh-CN" data-theme="dark">
   <head>
+    <!-- 语言初始化：早于渲染读 localStorage / navigator.language 决定中英。
+         设置 <html lang> 后所有 .lang-zh / .lang-en CSS 规则会立刻生效，避免闪烁。 -->
+    <script is:inline>
+      (function () {
+        const readLang = () => {
+          try {
+            const saved = localStorage.getItem('lang');
+            if (saved === 'zh' || saved === 'en') return saved;
+          } catch (e) {}
+          // 没保存过 -> 跟浏览器
+          const nav = (navigator.language || 'zh').toLowerCase();
+          return nav.startsWith('en') ? 'en' : 'zh';
+        };
+        const cur = readLang();
+        document.documentElement.setAttribute('lang', cur === 'en' ? 'en' : 'zh-CN');
+      })();
+    </script>
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
@@ -61,6 +79,13 @@ const { title, description, ogImage, noindex } = Astro.props;
         document.addEventListener('astro:before-swap', (ev) => {
           const cur = readTheme();
           if (cur) ev.newDocument.documentElement.setAttribute('data-theme', cur);
+          // 跨页跳转时也要把当前 lang 同步到新文档，否则 ClientRouter 把 newDocument 里的默认 zh-CN 套回来
+          try {
+            const lang = localStorage.getItem('lang');
+            if (lang === 'zh' || lang === 'en') {
+              ev.newDocument.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'zh-CN');
+            }
+          } catch (e) {}
         });
 
         // 跟踪导航历史给"返回上一级"用：ClientRouter 用 pushState，

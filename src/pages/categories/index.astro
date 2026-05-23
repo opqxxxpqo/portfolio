@@ -15,8 +15,14 @@ const countByCat = CATEGORIES.reduce((acc, c) => {
   <section class="head">
     <div class="container">
       <p class="kicker">CATEGORIES — 5</p>
-      <h1>按类型浏览。</h1>
-      <p class="lede">不同观看者关心不同切片。挑你感兴趣的那条线进去。</p>
+      <h1>
+        <span class="lang-zh">按类型浏览。</span>
+        <span class="lang-en">Browse by type.</span>
+      </h1>
+      <p class="lede">
+        <span class="lang-zh">不同观看者关心不同切片。挑你感兴趣的那条线进去。</span>
+        <span class="lang-en">Different viewers care about different slices. Pick the one that interests you.</span>
+      </p>
     </div>
   </section>
 
@@ -27,10 +33,23 @@ const countByCat = CATEGORIES.reduce((acc, c) => {
           <a href={c.linkTo || `/categories/${c.id}`} class={`cat-card ${countByCat[c.id] === 0 ? 'is-empty' : ''}`}>
             <span class="cat-num">{(i + 1).toString().padStart(2, '0')}</span>
             <h2 class="cat-label">{c.label}</h2>
-            <p class="cat-desc">{c.description}</p>
+            <p class="cat-desc">
+              <span class="lang-zh">{c.description}</span>
+              <span class="lang-en">{c.descriptionEn}</span>
+            </p>
             <div class="cat-foot">
               <span class="cat-count">
-                {countByCat[c.id] === 0 ? '暂无作品' : `${countByCat[c.id]} 件作品`}
+                {countByCat[c.id] === 0 ? (
+                  <>
+                    <span class="lang-zh">暂无作品</span>
+                    <span class="lang-en">No works yet</span>
+                  </>
+                ) : (
+                  <>
+                    <span class="lang-zh">{countByCat[c.id]} 件作品</span>
+                    <span class="lang-en">{countByCat[c.id]} works</span>
+                  </>
+                )}
               </span>
               <span class="cat-arrow">→</span>
             </div>

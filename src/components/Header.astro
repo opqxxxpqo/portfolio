@@ -1,5 +1,6 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
+import LangToggle from './LangToggle.astro';
 
 const pathname = Astro.url.pathname;
 const isActive = (href: string) => {
@@ -8,9 +9,9 @@ const isActive = (href: string) => {
 };
 
 const navItems = [
-  { href: '/', label: '首页' },
-  { href: '/categories', label: '分类' },
-  { href: '/about', label: '关于我' }
+  { href: '/', zh: '首页', en: 'Home' },
+  { href: '/categories', zh: '分类', en: 'Categories' },
+  { href: '/about', zh: '关于我', en: 'About' }
 ];
 ---
 
@@ -25,13 +26,17 @@ const navItems = [
               href={item.href}
               class={isActive(item.href) ? 'nav-link is-active' : 'nav-link'}
             >
-              {item.label}
+              <span class="lang-zh">{item.zh}</span>
+              <span class="lang-en">{item.en}</span>
             </a>
           </li>
         ))}
       </ul>
     </nav>
-    <ThemeToggle />
+    <div class="header-tools">
+      <LangToggle />
+      <ThemeToggle />
+    </div>
   </div>
 </header>
 
@@ -87,11 +92,13 @@ const navItems = [
     background: var(--fg);
     color: var(--bg);
   }
+  .header-tools { display: flex; gap: 8px; align-items: center; }
 
   @media (max-width: 640px) {
     .header-inner { gap: 12px; padding: 14px 20px; }
     nav ul { gap: 2px; }
     .nav-link { padding: 4px 8px; font-size: 0.875rem; }
     .brand { font-size: 1rem; }
+    .header-tools { gap: 4px; }
   }
 </style>

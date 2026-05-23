@@ -1,10 +1,13 @@
 ---
 title: "健身 App · 原型"
+titleEn: "Fitness App · Prototype"
 category: ai-prototype
 date: 2026-05-18
 cover: /works/fitness-app/cover.jpg
 summary: "健身 App 的四屏 UI 原型。Figma 设计 + Claude Code / Codex 实现。完整 app 下载链接待补。"
+summaryEn: "Four-screen UI prototype of a fitness app. Designed in Figma, implemented with Claude Code / Codex. A full app download link will follow."
 role: "独立完成"
+roleEn: "Solo"
 tools:
   - Claude Code
   - Codex

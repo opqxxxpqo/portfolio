@@ -1,10 +1,13 @@
 ---
 title: "Texas Hold'em · 肉鸽变体"
+titleEn: "Texas Hold'em · Roguelike Variant"
 category: ai-prototype
 date: 2026-05-01
 cover: /works/texas-holdem/cover.jpg
 summary: "把德州扑克和 UNO 抽卡机制糅在一起的肉鸽小游戏 —— 每轮抽卡组手牌，再上桌跟 AI 玩 no-limit Texas Hold'em。"
+summaryEn: "A roguelike that crosses Texas Hold'em with UNO-style draft: build your hand from cards drawn each round, then sit down for no-limit Texas Hold'em against the AI."
 role: "独立开发"
+roleEn: "Solo dev"
 tools:
   - Claude Code
   - ChatGPT

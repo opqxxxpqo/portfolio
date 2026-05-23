@@ -12,13 +12,25 @@ import LinkList from '~/components/LinkList.astro';
 export interface Props {
   work: any;
   Content: any;
+  ContentEn?: any;
+  enFrontmatter?: { title?: string; summary?: string; role?: string; duration?: string } | null;
 }
 
-const { work, Content } = Astro.props;
+const { work, Content, ContentEn, enFrontmatter } = Astro.props;
 const data = work.data;
 const cat = CATEGORY_MAP[data.category as keyof typeof CATEGORY_MAP];
 
-const dateFmt = new Intl.DateTimeFormat('zh-CN', {
+// 英文字段优先级：.en.md frontmatter > 主 frontmatter 的 *En 字段 > 中文回落
+const titleEn = enFrontmatter?.title || data.titleEn || data.title;
+const summaryEn = enFrontmatter?.summary || data.summaryEn || data.summary;
+const roleEn = enFrontmatter?.role || data.roleEn || data.role;
+const durationEn = enFrontmatter?.duration || data.durationEn || data.duration;
+
+const dateFmtZh = new Intl.DateTimeFormat('zh-CN', {
+  year: 'numeric',
+  month: 'long'
+}).format(data.date);
+const dateFmtEn = new Intl.DateTimeFormat('en-GB', {
   year: 'numeric',
   month: 'long'
 }).format(data.date);
@@ -35,26 +47,52 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
   <article>
     <!-- 作品头部 -->
     <header class={containerClass} style="padding-top: 64px; padding-bottom: 48px;">
-      <a href="/" class="back-link" id="work-back-link" data-default-href="/">← 返回首页</a>
+      <a href="/" class="back-link" id="work-back-link" data-default-href="/">
+        <span class="lang-zh">← 返回首页</span>
+        <span class="lang-en">← Back to home</span>
+      </a>
       <div class="meta-row">
         <span class="chip">{cat.label}</span>
-        <span class="meta-time">{dateFmt}</span>
-        {data.duration && <span class="meta-dim">{data.duration}</span>}
+        <span class="meta-time">
+          <span class="lang-zh">{dateFmtZh}</span>
+          <span class="lang-en">{dateFmtEn}</span>
+        </span>
+        {data.duration && (
+          <span class="meta-dim">
+            <span class="lang-zh">{data.duration}</span>
+            <span class="lang-en">{durationEn}</span>
+          </span>
+        )}
       </div>
-      <h1 class="work-title">{data.title}</h1>
-      <p class="work-summary">{data.summary}</p>
+      <h1 class="work-title">
+        <span class="lang-zh">{data.title}</span>
+        <span class="lang-en">{titleEn}</span>
+      </h1>
+      <p class="work-summary">
+        <span class="lang-zh">{data.summary}</span>
+        <span class="lang-en">{summaryEn}</span>
+      </p>
 
       {(data.role || data.tools) && (
         <dl class="meta-grid">
           {data.role && (
             <div class="meta-row-grid">
-              <dt>角色</dt>
-              <dd>{data.role}</dd>
+              <dt>
+                <span class="lang-zh">角色</span>
+                <span class="lang-en">Role</span>
+              </dt>
+              <dd>
+                <span class="lang-zh">{data.role}</span>
+                <span class="lang-en">{roleEn}</span>
+              </dd>
             </div>
           )}
           {data.tools && data.tools.length > 0 && (
             <div class="meta-row-grid">
-              <dt>工具</dt>
+              <dt>
+                <span class="lang-zh">工具</span>
+                <span class="lang-en">Tools</span>
+              </dt>
               <dd>
                 <ul class="tools-list">
                   {data.tools.map((t: string) => <li>{t}</li>)}
@@ -64,7 +102,10 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
           )}
           {data.tags && data.tags.length > 0 && (
             <div class="meta-row-grid">
-              <dt>标签</dt>
+              <dt>
+                <span class="lang-zh">标签</span>
+                <span class="lang-en">Tags</span>
+              </dt>
               <dd class="tags-line">{data.tags.join(' · ')}</dd>
             </div>
           )}
@@ -72,10 +113,20 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
       )}
     </header>
 
-    <!-- 正文 -->
+    <!-- 正文：中英两份 markdown，由 <html lang> 控制显隐 -->
     <div class={containerClass}>
       <div class={proseClass}>
-        <Content />
+        <div class="lang-zh"><Content /></div>
+        <div class="lang-en">
+          {ContentEn ? (
+            <ContentEn />
+          ) : (
+            <>
+              <p class="en-fallback-note">English version of this case study is on the way. Showing original Chinese text below.</p>
+              <Content />
+            </>
+          )}
+        </div>
       </div>
     </div>
 
@@ -214,42 +265,60 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
     <div class={containerClass} style="margin-top: 64px;">
       {data.gallery && data.gallery.length > 0 && (
         <section class="media-section">
-          <h2 class="media-title">画廊</h2>
+          <h2 class="media-title">
+            <span class="lang-zh">画廊</span>
+            <span class="lang-en">Gallery</span>
+          </h2>
           <Gallery images={data.gallery} title={data.title} />
         </section>
       )}
 
       {data.bilibili && data.bilibili.length > 0 && (
         <section class="media-section">
-          <h2 class="media-title">视频 · B 站</h2>
+          <h2 class="media-title">
+            <span class="lang-zh">视频 · B 站</span>
+            <span class="lang-en">Video · Bilibili</span>
+          </h2>
           {data.bilibili.map((bv: string) => <Bilibili bvid={bv} title={data.title} />)}
         </section>
       )}
 
       {data.videos && data.videos.length > 0 && (
         <section class="media-section">
-          <h2 class="media-title">视频</h2>
+          <h2 class="media-title">
+            <span class="lang-zh">视频</span>
+            <span class="lang-en">Video</span>
+          </h2>
           {data.videos.map((v: string) => <VideoPlayer src={v} poster={data.cover} title={data.title} />)}
         </section>
       )}
 
       {data.pdfs && data.pdfs.length > 0 && (
         <section class="media-section">
-          <h2 class="media-title">文档</h2>
+          <h2 class="media-title">
+            <span class="lang-zh">文档</span>
+            <span class="lang-en">Documents</span>
+          </h2>
           {data.pdfs.map((p: string) => <PDFViewer src={p} noDownload={true} />)}
         </section>
       )}
 
       {data.models && data.models.length > 0 && (
         <section class="media-section">
-          <h2 class="media-title">3D 模型</h2>
+          <h2 class="media-title">
+            <span class="lang-zh">3D 模型</span>
+            <span class="lang-en">3D Model</span>
+          </h2>
           {data.models.map((m: string) => <ModelViewer src={m} />)}
         </section>
       )}
 
       {data.embeds && data.embeds.length > 0 && (
         <section class="media-section">
-          <h2 class="media-title">互动 Demo</h2>
+          <h2 class="media-title">
+            <span class="lang-zh">互动 Demo</span>
+            <span class="lang-en">Interactive Demo</span>
+          </h2>
           {data.embeds.map((e: any) => (
             <EmbedFrame url={e.url} height={e.height} title={e.title} />
           ))}
@@ -258,7 +327,10 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
 
       {data.links && data.links.length > 0 && (
         <section class="media-section">
-          <h2 class="media-title">相关链接</h2>
+          <h2 class="media-title">
+            <span class="lang-zh">相关链接</span>
+            <span class="lang-en">Related links</span>
+          </h2>
           <LinkList links={data.links} />
         </section>
       )}
@@ -274,12 +346,18 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
       if (!link) return;
       const here = location.pathname + location.search;
 
+      // 用 lang-zh / lang-en 两个 span 撑住文案，CSS 决定哪个显示
+      const setText = (zh, en) => {
+        link.innerHTML =
+          '<span class="lang-zh">' + zh + '</span><span class="lang-en">' + en + '</span>';
+      };
+
       // 优先：sessionStorage
       try {
         const prev = sessionStorage.getItem('prevPath');
         if (prev && prev !== here) {
           link.setAttribute('href', prev);
-          link.textContent = '← 返回上级';
+          setText('← 返回上级', '← Back');
           return;
         }
       } catch (_) {}
@@ -291,14 +369,14 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
           const refUrl = new URL(ref);
           if (refUrl.origin === location.origin && refUrl.pathname !== location.pathname) {
             link.setAttribute('href', refUrl.pathname + refUrl.search);
-            link.textContent = '← 返回上级';
+            setText('← 返回上级', '← Back');
             return;
           }
         }
       } catch (_) {}
 
       link.setAttribute('href', '/');
-      link.textContent = '← 返回首页';
+      setText('← 返回首页', '← Back to home');
     })();
   </script>
 </BaseLayout>
@@ -572,6 +650,17 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
       max-width: 360px;            /* 手机上单列，限制宽度避免大图过宽 */
       margin: 0 auto;
     }
+  }
+
+  .en-fallback-note {
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    border-left: 3px solid var(--accent);
+    background: var(--bg-soft);
+    font-size: 0.875rem;
+    color: var(--fg-muted);
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
   }
 
   .media-section {

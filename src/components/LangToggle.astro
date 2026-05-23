@@ -1,0 +1,62 @@
+---
+// 中英切换按钮。挂在 Header 里 ThemeToggle 旁边。
+// 行为：点一下切 <html lang>，写 localStorage('lang')，无刷新。
+// 视觉：用纯文字标签 ZH / EN，当前语言加粗，另一种灰色。
+---
+<button
+  id="lang-toggle"
+  type="button"
+  aria-label="切换语言 / Switch language"
+  title="切换语言"
+>
+  <span class="seg seg-zh">ZH</span>
+  <span class="seg-sep" aria-hidden="true">/</span>
+  <span class="seg seg-en">EN</span>
+</button>
+
+<style>
+  #lang-toggle {
+    height: 36px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--bg);
+    border: var(--border-w) solid var(--border);
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    transition: all var(--transition);
+  }
+  #lang-toggle:hover {
+    background: var(--fg);
+    color: var(--bg);
+  }
+  .seg { opacity: 0.4; transition: opacity var(--transition); }
+  .seg-sep { opacity: 0.4; }
+  html[lang^="zh"] #lang-toggle .seg-zh { opacity: 1; }
+  html[lang^="en"] #lang-toggle .seg-en { opacity: 1; }
+
+  @media (max-width: 640px) {
+    #lang-toggle { padding: 0 8px; font-size: 0.6875rem; }
+  }
+</style>
+
+<script>
+  function setupLangToggle() {
+    const btn = document.getElementById('lang-toggle');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      const cur = (document.documentElement.getAttribute('lang') || 'zh').toLowerCase();
+      const next = cur.startsWith('en') ? 'zh' : 'en';
+      document.documentElement.setAttribute('lang', next === 'en' ? 'en' : 'zh-CN');
+      try { localStorage.setItem('lang', next); } catch (e) {}
+      // 通知监听者（比如 document.title 的同步脚本）
+      document.dispatchEvent(new CustomEvent('langchange', { detail: { lang: next } }));
+    });
+  }
+  setupLangToggle();
+  document.addEventListener('astro:after-swap', setupLangToggle);
+</script>

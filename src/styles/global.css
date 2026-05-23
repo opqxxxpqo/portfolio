@@ -93,6 +93,17 @@ body::before {
 
 img, video, iframe { max-width: 100%; height: auto; display: block; }
 
+/* ============================================================
+   中英双语显隐
+   服务端同时输出两份文本，靠 <html lang> 选一份显示
+   ============================================================ */
+html[lang^="zh"] .lang-en,
+html[lang^="zh"] [data-lang="en"] { display: none !important; }
+html[lang^="en"] .lang-zh,
+html[lang^="en"] [data-lang="zh"] { display: none !important; }
+/* .i18n-pair 不参与排版，本身不引入额外的盒子语义 */
+.i18n-pair { display: contents; }
+
 a {
   color: inherit;
   text-decoration: none;

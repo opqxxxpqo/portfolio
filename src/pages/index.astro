@@ -20,23 +20,39 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
   <!-- HERO -->
   <section class="hero">
     <div class="container">
-      <p class="hero-kicker">PORTFOLIO · 2026 — 持续更新中</p>
+      <p class="hero-kicker">
+        <span class="lang-zh">PORTFOLIO · 2026 — 持续更新中</span>
+        <span class="lang-en">PORTFOLIO · 2026 — Work in progress</span>
+      </p>
       <h1 class="hero-name">QI<br/>LU.</h1>
       <p class="hero-line">
-        <span class="hero-line-zh">拉夫堡大学 · <span class="hero-accent">服务设计创新硕士</span></span>
-        <span class="hero-line-en">Loughborough University · MSc Service Design Innovation</span>
-        <span class="hero-line-sub">视觉传达本科 · 把 AI 编程当成日常工具</span>
+        <span class="lang-zh">
+          <span class="hero-line-zh">拉夫堡大学 · <span class="hero-accent">服务设计创新硕士</span></span>
+          <span class="hero-line-en">Loughborough University · MSc Service Design Innovation</span>
+          <span class="hero-line-sub">视觉传达本科 · 把 AI 编程当成日常工具</span>
+        </span>
+        <span class="lang-en">
+          <span class="hero-line-zh">Loughborough University · <span class="hero-accent">MSc Service Design Innovation</span></span>
+          <span class="hero-line-en">BA in Visual Communication · graduate study in Service Design</span>
+          <span class="hero-line-sub">AI coding tools as everyday extensions of my hand</span>
+        </span>
       </p>
       <div class="hero-contact">
-        <a href="mailto:luqiapp2007@163.com" class="chunky-btn primary email-wave-btn" aria-label="发邮件 luqiapp2007@163.com">
+        <a href="mailto:luqiapp2007@163.com" class="chunky-btn primary email-wave-btn" aria-label="luqiapp2007@163.com">
           <span class="email-wave-decor" aria-hidden="true">
             <svg class="email-wave-svg" viewBox="0 0 400 100" preserveAspectRatio="none">
               <path class="wave-main" d="M0,32 Q50,4 100,32 T200,32 T300,32 T400,32 L400,100 L0,100 Z"/>
             </svg>
           </span>
-          <span class="email-wave-label">邮件 ↗</span>
+          <span class="email-wave-label">
+            <span class="lang-zh">邮件 ↗</span>
+            <span class="lang-en">Email ↗</span>
+          </span>
         </a>
-        <a href="/resume.pdf" class="chunky-btn">简历 PDF</a>
+        <a href="/resume.pdf" class="chunky-btn">
+          <span class="lang-zh">简历 PDF</span>
+          <span class="lang-en">Resume PDF</span>
+        </a>
       </div>
     </div>
   </section>
@@ -47,9 +63,12 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
       <div class="bar-inner">
         <div class="bar-meta">
           <span class="bar-num">{works.length.toString().padStart(2, '0')}</span>
-          <span class="bar-label">件作品 · 时间倒序</span>
+          <span class="bar-label">
+            <span class="lang-zh">件作品 · 时间倒序</span>
+            <span class="lang-en">works · reverse chronological</span>
+          </span>
         </div>
-        <div class="view-toggle" role="tablist" aria-label="切换显示方式">
+        <div class="view-toggle" role="tablist" aria-label="View toggle">
           <button id="view-list" class="chunky-btn is-active" type="button">List</button>
           <button id="view-grid" class="chunky-btn" type="button">Grid</button>
         </div>
@@ -69,16 +88,28 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
               <details name="works" class="work-details">
                 <summary class="row-head">
                   <span class="row-year">{yearFmt(w.data.date)}</span>
-                  <span class="row-title">{w.data.title}</span>
-                  <span class="row-cat">{cat?.labelZh || cat?.label || w.data.category}</span>
+                  <span class="row-title">
+                    <span class="lang-zh">{w.data.title}</span>
+                    <span class="lang-en">{(w.data as any).titleEn || w.data.title}</span>
+                  </span>
+                  <span class="row-cat">
+                    <span class="lang-zh">{cat?.labelZh || cat?.label || w.data.category}</span>
+                    <span class="lang-en">{cat?.label || w.data.category}</span>
+                  </span>
                   <svg class="row-chevron" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="M13.17 12L8.22 7.05l1.41-1.41L16 12l-6.37 6.37-1.41-1.42L13.17 12z"/>
                   </svg>
                 </summary>
                 <div class={w.data.hideListCover ? 'row-body row-body--collection' : 'row-body'}>
                   <div class="row-text">
-                    <p class="row-summary">{w.data.summary}</p>
-                    <a href={`/works/${w.id}`} class="row-link" data-astro-prefetch>查看作品 →</a>
+                    <p class="row-summary">
+                      <span class="lang-zh">{w.data.summary}</span>
+                      <span class="lang-en">{(w.data as any).summaryEn || w.data.summary}</span>
+                    </p>
+                    <a href={`/works/${w.id}`} class="row-link" data-astro-prefetch>
+                      <span class="lang-zh">查看作品 →</span>
+                      <span class="lang-en">View work →</span>
+                    </a>
                   </div>
                   {!w.data.hideListCover && (
                     <a href={`/works/${w.id}`} class={`row-cover row-cover--${w.data.coverFit || 'cover'}`} data-astro-prefetch aria-label={`${w.data.title} 详情`}>
@@ -110,8 +141,14 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
                   <span class="card-year">{yearFmt(w.data.date)}</span>
                   <span class="card-cat">{cat?.label || w.data.category}</span>
                 </div>
-                <h3 class="card-title">{w.data.title}</h3>
-                <p class="card-summary">{w.data.summary}</p>
+                <h3 class="card-title">
+                  <span class="lang-zh">{w.data.title}</span>
+                  <span class="lang-en">{(w.data as any).titleEn || w.data.title}</span>
+                </h3>
+                <p class="card-summary">
+                  <span class="lang-zh">{w.data.summary}</span>
+                  <span class="lang-en">{(w.data as any).summaryEn || w.data.summary}</span>
+                </p>
               </div>
             </a>
           );

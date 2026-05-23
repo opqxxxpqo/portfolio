@@ -1,10 +1,13 @@
 ---
 title: "Rescuing the River Lea"
+titleEn: "Rescuing the River Lea"
 category: visual-design
 date: 2026-04-29
 cover: /works/river-lea/cover.jpg
 summary: "一份关于伦敦 River Lea 河岸再生提案的单页交互演示。鼠标拖动 / 移动会触发镜头追踪与图像揭示。"
+summaryEn: "A single-page interactive presentation for a riverside-regeneration proposal on London's River Lea. Mouse drag and movement drive camera tracking and image reveals."
 role: "独立完成"
+roleEn: "Solo"
 tools:
   - HTML / CSS / JavaScript
   - ChatGPT (concept imagery)

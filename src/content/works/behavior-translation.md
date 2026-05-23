@@ -1,10 +1,13 @@
 ---
 title: "Digital Conductor"
+titleEn: "Digital Conductor"
 category: ai-prototype
 date: 2026-05-18
 cover: /works/behavior-translation/cover.jpg
 summary: "把数字行为转译为交响乐的实验性交互系统。键盘、鼠标、停顿与操作密度被静默记录，实时映射为音乐结构、动态 orchestration 与可视化数据流。"
+summaryEn: "An experimental interactive system that transcribes digital behavior into orchestral music. Keystrokes, mouse paths, pauses, and operational density are silently logged and mapped in real time into musical structure, dynamic orchestration, and a visual data stream."
 role: "独立开发"
+roleEn: "Solo dev"
 tools:
   - Claude Code
   - Codex

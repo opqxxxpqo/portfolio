@@ -1,9 +1,11 @@
 ---
 title: "建模"
+titleEn: "3D Modeling"
 category: visual-3d
 date: 2026-05-17
 cover: /works/modeling/car.jpg
 summary: "Blender 建模与渲染作品合集：世界渲染大赛参赛作 / 短片练习 / 可交互 3D 模型。"
+summaryEn: "A Blender modeling-and-rendering collection: World Rendering Competition entries, short-film studies, and interactive 3D models."
 tools:
   - Blender
 tags:

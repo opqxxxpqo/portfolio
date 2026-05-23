@@ -9,73 +9,150 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
   <section class="head">
     <div class="container-narrow">
       <p class="kicker">PROCESS</p>
-      <h1>这个网站<br/>怎么做的。</h1>
+      <h1>
+        <span class="lang-zh">这个网站<br/>怎么做的。</span>
+        <span class="lang-en">How this site<br/>was built.</span>
+      </h1>
       <p class="intro">
-        坦白说，<strong>这个作品集本身就是一份作品</strong>。
-        我使用 <a href="https://claude.com/claude-code" class="inline-link">Claude Code</a> 在
-        本地通过对话式协作搭起来——不到一晚上，从零到可部署。
+        <span class="lang-zh">
+          坦白说，<strong>这个作品集本身就是一份作品</strong>。
+          我使用 <a href="https://claude.com/claude-code" class="inline-link">Claude Code</a> 在
+          本地通过对话式协作搭起来——不到一晚上，从零到可部署。
+        </span>
+        <span class="lang-en">
+          Honestly — <strong>this portfolio is itself a piece of work</strong>.
+          I built it locally with <a href="https://claude.com/claude-code" class="inline-link">Claude Code</a>
+          through conversational pairing — under one evening, from zero to deployable.
+        </span>
       </p>
       <p class="intro">
-        放在这里不是为了显得"会写代码"——而是想直接展示：在 2026 年，
-        当一位非纯前端背景的研究生需要一份个人站点时，<strong>怎样的协作流程是高效的</strong>。
+        <span class="lang-zh">
+          放在这里不是为了显得"会写代码"——而是想直接展示：在 2026 年，
+          当一位非纯前端背景的研究生需要一份个人站点时，<strong>怎样的协作流程是高效的</strong>。
+        </span>
+        <span class="lang-en">
+          It's not here to prove I "can code" — it's here to show, plainly, what
+          <strong>an efficient AI-paired workflow looks like</strong> in 2026 for a graduate student who isn't a pure frontend engineer.
+        </span>
       </p>
     </div>
   </section>
 
   <section class="block">
     <div class="container-narrow">
-      <h2 class="block-title">技术选型</h2>
+      <h2 class="block-title">
+        <span class="lang-zh">技术选型</span>
+        <span class="lang-en">Stack</span>
+      </h2>
       <ul class="tech-list">
-        <li><strong>Astro 5</strong>静态优先，开启 View Transitions，包体积极小</li>
-        <li><strong>Content Collections + zod</strong>作品 frontmatter 严格校验</li>
-        <li><strong>原生 CSS + CSS 变量</strong>不引 Tailwind，深浅色模式只用变量切换</li>
-        <li><strong>Netlify</strong>国内访问稳定，GitHub Actions 也配好了双通道</li>
-        <li><strong>无重型 JS</strong>主题切换 + 列表展开 + 视图切换，加起来不到 3KB</li>
+        <li>
+          <strong>Astro 5</strong>
+          <span class="lang-zh">静态优先，开启 View Transitions，包体积极小</span>
+          <span class="lang-en">Static-first, View Transitions enabled, tiny bundle</span>
+        </li>
+        <li>
+          <strong>Content Collections + zod</strong>
+          <span class="lang-zh">作品 frontmatter 严格校验</span>
+          <span class="lang-en">Strict frontmatter validation for every work</span>
+        </li>
+        <li>
+          <strong><span class="lang-zh">原生 CSS + CSS 变量</span><span class="lang-en">Vanilla CSS + custom properties</span></strong>
+          <span class="lang-zh">不引 Tailwind，深浅色模式只用变量切换</span>
+          <span class="lang-en">No Tailwind; light/dark just toggles variables</span>
+        </li>
+        <li>
+          <strong>Netlify</strong>
+          <span class="lang-zh">国内访问稳定，GitHub Actions 也配好了双通道</span>
+          <span class="lang-en">Stable from China, with a GitHub Actions backup pipeline</span>
+        </li>
+        <li>
+          <strong><span class="lang-zh">无重型 JS</span><span class="lang-en">No heavy JS</span></strong>
+          <span class="lang-zh">主题切换 + 列表展开 + 视图切换，加起来不到 3KB</span>
+          <span class="lang-en">Theme toggle + list accordion + view switch — under 3KB total</span>
+        </li>
       </ul>
     </div>
   </section>
 
   <section class="block">
     <div class="container-narrow">
-      <h2 class="block-title">协作流程</h2>
+      <h2 class="block-title">
+        <span class="lang-zh">协作流程</span>
+        <span class="lang-en">Workflow</span>
+      </h2>
       <ol class="flow">
         <li>
           <span class="flow-num">01</span>
           <div>
-            <h3>把需求写清楚</h3>
+            <h3>
+              <span class="lang-zh">把需求写清楚</span>
+              <span class="lang-en">Write the brief clearly</span>
+            </h3>
             <p>
-              我先列了一份很详细的需求文档：信息架构、字段、视觉风格、性能指标、目标受众。
-              清晰的输入是 AI 协作的前提。
+              <span class="lang-zh">
+                我先列了一份很详细的需求文档：信息架构、字段、视觉风格、性能指标、目标受众。
+                清晰的输入是 AI 协作的前提。
+              </span>
+              <span class="lang-en">
+                I started with a detailed spec: information architecture, fields, visual tone, performance targets, audience.
+                A sharp brief is the entry condition for working with AI.
+              </span>
             </p>
           </div>
         </li>
         <li>
           <span class="flow-num">02</span>
           <div>
-            <h3>让 Claude Code 全量生成骨架</h3>
+            <h3>
+              <span class="lang-zh">让 Claude Code 全量生成骨架</span>
+              <span class="lang-en">Let Claude Code scaffold everything</span>
+            </h3>
             <p>
-              所有页面、组件、内容 schema、部署配置一次性产出。我做的事是<strong>读、检查、追问</strong>，
-              而不是逐行写。
+              <span class="lang-zh">
+                所有页面、组件、内容 schema、部署配置一次性产出。我做的事是<strong>读、检查、追问</strong>，
+                而不是逐行写。
+              </span>
+              <span class="lang-en">
+                Pages, components, content schema, deploy config — all generated in one pass. My job was to <strong>read, audit, ask follow-ups</strong>,
+                not to write line by line.
+              </span>
             </p>
           </div>
         </li>
         <li>
           <span class="flow-num">03</span>
           <div>
-            <h3>本地跑起来 + 视觉微调</h3>
+            <h3>
+              <span class="lang-zh">本地跑起来 + 视觉微调</span>
+              <span class="lang-en">Run locally and tune the visuals</span>
+            </h3>
             <p>
-              <code>npm run dev</code>，对着浏览器一点点抠间距和动效。
-              这一步的判断必须我来做，AI 给不了。
+              <span class="lang-zh">
+                <code>npm run dev</code>，对着浏览器一点点抠间距和动效。
+                这一步的判断必须我来做，AI 给不了。
+              </span>
+              <span class="lang-en">
+                <code>npm run dev</code>, then dial in spacing and motion against the browser.
+                This step is a judgment call — AI can't replace it.
+              </span>
             </p>
           </div>
         </li>
         <li>
           <span class="flow-num">04</span>
           <div>
-            <h3>持续更新</h3>
+            <h3>
+              <span class="lang-zh">持续更新</span>
+              <span class="lang-en">Keep adding</span>
+            </h3>
             <p>
-              之后每加一个新作品，只需要在 <code>src/content/works/</code> 写一个 markdown 文件，
-              重新 build 即可。
+              <span class="lang-zh">
+                之后每加一个新作品，只需要在 <code>src/content/works/</code> 写一个 markdown 文件，
+                重新 build 即可。
+              </span>
+              <span class="lang-en">
+                Each new work is just one markdown file in <code>src/content/works/</code>, then rebuild.
+              </span>
             </p>
           </div>
         </li>
@@ -85,28 +162,52 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
 
   <section class="block highlight">
     <div class="container-narrow">
-      <h2 class="block-title">对话截图（占位）</h2>
+      <h2 class="block-title">
+        <span class="lang-zh">对话截图（占位）</span>
+        <span class="lang-en">Conversation screenshots (placeholder)</span>
+      </h2>
       <p class="block-lede">
-        这里准备放 1—2 张和 Claude Code 协作的截图，让流程更具象。
-        正式上线前请把下面的 SVG 换成真实截图（推荐 PNG，宽度 ≥ 1600px）。
+        <span class="lang-zh">
+          这里准备放 1—2 张和 Claude Code 协作的截图，让流程更具象。
+          正式上线前请把下面的 SVG 换成真实截图（推荐 PNG，宽度 ≥ 1600px）。
+        </span>
+        <span class="lang-en">
+          Reserved for one or two real screenshots of working with Claude Code, to make the workflow concrete.
+          Swap the SVG placeholders below for actual screenshots before launch (PNG, ≥ 1600px wide).
+        </span>
       </p>
       <div class="screenshots">
-        <img src="/process/screenshot-1.svg" alt="Claude Code 协作截图 1" loading="lazy" />
-        <img src="/process/screenshot-2.svg" alt="Claude Code 协作截图 2" loading="lazy" />
+        <img src="/process/screenshot-1.svg" alt="Claude Code session 1" loading="lazy" />
+        <img src="/process/screenshot-2.svg" alt="Claude Code session 2" loading="lazy" />
       </div>
     </div>
   </section>
 
   <section class="block">
     <div class="container-narrow">
-      <h2 class="block-title">我的判断</h2>
+      <h2 class="block-title">
+        <span class="lang-zh">我的判断</span>
+        <span class="lang-en">My take</span>
+      </h2>
       <p class="intro">
-        AI 在 2026 年已经是基础工具。<strong>真正区分人的是品味、判断、对问题的定义能力</strong>——
-        这些不会被 AI 取代，反而被它放大。
+        <span class="lang-zh">
+          AI 在 2026 年已经是基础工具。<strong>真正区分人的是品味、判断、对问题的定义能力</strong>——
+          这些不会被 AI 取代，反而被它放大。
+        </span>
+        <span class="lang-en">
+          By 2026 AI is a baseline tool. <strong>What actually differentiates people is taste, judgment, and the ability to frame a problem</strong> —
+          AI doesn't replace those, it amplifies them.
+        </span>
       </p>
       <p class="intro">
-        如果你看到这里，欢迎 <a href="mailto:you@example.com" class="inline-link">写信给我</a>，
-        我也很想知道你如何看待 AI 协作的边界。
+        <span class="lang-zh">
+          如果你看到这里，欢迎 <a href="mailto:you@example.com" class="inline-link">写信给我</a>，
+          我也很想知道你如何看待 AI 协作的边界。
+        </span>
+        <span class="lang-en">
+          If you've read this far, feel free to <a href="mailto:you@example.com" class="inline-link">drop me a line</a> —
+          I'd love to hear where you draw the line on AI collaboration.
+        </span>
       </p>
     </div>
   </section>
