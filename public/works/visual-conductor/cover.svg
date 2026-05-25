@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d0f1a"/>
+      <stop offset="1" stop-color="#05060b"/>
+    </linearGradient>
+    <pattern id="scan" width="1600" height="6" patternUnits="userSpaceOnUse">
+      <rect width="1600" height="6" fill="none"/>
+      <rect width="1600" height="2" fill="#ffffff" opacity="0.04"/>
+    </pattern>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+
+  <!-- conducting waveform -->
+  <g stroke="#4d6bff" fill="none" stroke-width="4" opacity="0.85">
+    <path d="M0,560 Q160,360 320,560 T640,560 T960,560 T1280,560 T1600,560"/>
+    <path d="M0,620 Q200,460 400,620 T800,620 T1200,620 T1600,620" opacity="0.5"/>
+  </g>
+
+  <!-- hand keypoints (MediaPipe motif) -->
+  <g fill="#4d6bff">
+    <circle cx="1140" cy="400" r="10"/>
+    <circle cx="1210" cy="330" r="9"/>
+    <circle cx="1280" cy="300" r="9"/>
+    <circle cx="1180" cy="470" r="9"/>
+    <circle cx="1255" cy="430" r="9"/>
+    <circle cx="1320" cy="410" r="8"/>
+  </g>
+  <g stroke="#4d6bff" stroke-width="3" opacity="0.7">
+    <line x1="1140" y1="400" x2="1210" y2="330"/>
+    <line x1="1210" y1="330" x2="1280" y2="300"/>
+    <line x1="1140" y1="400" x2="1180" y2="470"/>
+    <line x1="1180" y1="470" x2="1255" y2="430"/>
+    <line x1="1255" y1="430" x2="1320" y2="410"/>
+  </g>
+
+  <text x="100" y="180" font-family="Archivo Black, sans-serif" font-size="120" font-weight="900" fill="#eae3d2" letter-spacing="-4">VISUAL</text>
+  <text x="100" y="300" font-family="Archivo Black, sans-serif" font-size="120" font-weight="900" fill="#4d6bff" letter-spacing="-4">CONDUCTOR</text>
+  <text x="104" y="360" font-family="ui-monospace, monospace" font-size="26" fill="#8a7e6a" letter-spacing="6">WEBCAM · HAND GESTURE · MUSIC</text>
+
+  <rect width="1600" height="1000" fill="url(#scan)"/>
+</svg>

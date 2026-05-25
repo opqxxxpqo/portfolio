@@ -2,6 +2,7 @@
 title: "Human Token"
 titleEn: "Human Token"
 category: ai-prototype
+ai: true
 date: 2026-05-15
 cover: /works/human-token/cover.jpg
 summary: '把键盘、鼠标、移动量化成"人类输出代币"的悬浮窗小工具。当前为浏览器仿真版，桌面 app 抓取的是 OS 级全局事件。'
@@ -11,8 +12,9 @@ roleEn: "Solo dev"
 tools:
   - Claude Code
   - Codex
-  - HTML / CSS / JS (vanilla)
-  - rdev (Rust，桌面端)
+  - Tauri
+  - Rust
+  - vanilla JS
 tags:
   - AI 编程
   - 桌面工具
@@ -24,20 +26,28 @@ embeds:
     title: 浏览器仿真版 · 点进去开始打字
 ---
 
-## 这是什么
+## 项目定位
 
-把人类一段时间内的"输出量"（敲键 / 点击 / 移动鼠标）按一个固定公式量化成一个数字 token，
-配一个可拖动、可折叠到屏幕边的悬浮窗实时显示。
-桌面端用 Rust 的 rdev 抓 OS 级全局键鼠事件；本地 JSON 持久化。
+一个悬浮桌面组件，把键盘输入、点击和鼠标移动距离换算成一个不断增长的数字，让「人的输出」第一次变得能被看见。
 
-## 浏览器仿真版的限制
+## 关键决策
 
-- iframe 出于浏览器安全只能监听到 iframe 内部触发的事件 —— **必须先点进上方框里**
-- 没有 5 小时滚动窗口，只有一个硬 cap（200k）
-- 折叠用 CSS transition 模拟，没有桌面 app 的 OS 窗口操作丝滑
+1. 用一个固定公式定义输出，而不是追求「更聪明」的 AI 评分——我要的是不同 session 之间能直接比较。
+2. 用 Rust + rdev 抓系统级全局事件，同时接受浏览器版本只能监听页面内事件的限制。
+3. 把大量 Rust 底层交给 AI 生成，我自己守住整合测试、交互逻辑和衰减参数调校。
 
-## AI 在哪一段
+## 迭代过程
 
-- 整体架构、token 公式、衰减机制 —— Claude / Codex 出方案，我选
-- Rust 部分（rdev 接入、托盘、跨平台权限）几乎是 AI 写的，我做集成测试和调参
-- 视觉风格、文案、交互细节 —— 我决定
+V1 浏览器计数器 → V2 桌面悬浮组件 → V3 本地持久化与跨 session 累积。
+
+## 使用工具
+
+Claude Code、Codex、Tauri、Rust、vanilla JS · 约 0.5 天
+
+## 如果重做一次
+
+把硬性上限换成滚动衰减，让数值更像一种长期代谢，而不是一个会撞顶的计数器。
+
+---
+
+> 上方内嵌的是浏览器仿真版：iframe 出于安全只能监听框内事件，**先点进框里再开始打字**；它没有 5 小时滚动窗口、只有一个硬 cap（200k），折叠也只是 CSS 过渡，不如桌面 app 的 OS 窗口丝滑。

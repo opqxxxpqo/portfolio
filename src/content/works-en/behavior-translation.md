@@ -4,23 +4,24 @@ summary: "An experimental interactive system that transcribes digital behavior i
 role: "Solo dev"
 ---
 
-## Concept
+## Positioning
 
-*Digital Conductor* is an experimental interactive system that translates digital behavior into orchestral music.
+A system that quietly logs your unconscious behavior at the computer — keystrokes, mouse paths, pauses — and scores it into a live symphony, turning overlooked data into a subconscious performance.
 
-It silently records the unconscious actions you perform at a computer — keystrokes, mouse trajectories, pauses, operational density — and maps them, in real time, onto musical structure, dynamic orchestration, and a visualized data stream.
+## Key Decisions
 
-Conventional computing tends to compress human behavior into logs, click-through rates, and efficiency metrics.
-Here, those overlooked traces are re-read as a kind of "subconscious performance."
+1. Scored behavior as *music* rather than a dashboard — logs and click-rates flatten the person out; music keeps the emotion in.
+2. Mapped operational density onto orchestration depth, so intensity reads as feeling rather than a number.
+3. Split desktop capture from the browser demo — the browser can only hear in-page events for security reasons, so global behavior needs the desktop path.
 
-You don't actively compose music.
-Instead, through ordinary work, browsing, thinking, and pausing, you unconsciously sustain an ongoing digital symphony.
+## Iteration
 
-## What the project pays attention to
+V1 in-browser keyboard/mouse simulation → V2 OS-level global capture → V3 different behaviors mapped to different instrument layers.
 
-- The relationship between behavior and emotion
-- The affective expressiveness of data
-- Subconscious interactions between humans and systems
-- Rhythm and emotional density in digital life
+## Built with
 
-It is both a generative music system and an observational instrument on digital behavior.
+Claude Code, Codex, Python, HTML / JavaScript · ~1–2 days
+
+## If I rebuilt this
+
+Add long-term behavioral memory so the music keeps evolving across days instead of resetting each session, and make timbre richer by reading emotion from behavior density. Or fold it straight into Human Token.

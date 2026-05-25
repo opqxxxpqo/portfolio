@@ -2,6 +2,7 @@
 title: "Rescuing the River Lea"
 titleEn: "Rescuing the River Lea"
 category: visual-design
+ai: true
 date: 2026-04-29
 cover: /works/river-lea/cover.jpg
 summary: "一份关于伦敦 River Lea 河岸再生提案的单页交互演示。鼠标拖动 / 移动会触发镜头追踪与图像揭示。"

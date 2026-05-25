@@ -27,14 +27,12 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
       <h1 class="hero-name">QI<br/>LU.</h1>
       <p class="hero-line">
         <span class="lang-zh">
-          <span class="hero-line-zh">拉夫堡大学 · <span class="hero-accent">服务设计创新硕士</span></span>
-          <span class="hero-line-en">Loughborough University · MSc Service Design Innovation</span>
-          <span class="hero-line-sub">视觉传达本科 · 把 AI 编程当成日常工具</span>
+          <span class="hero-line-zh">设计工程师 · 交付<span class="hero-accent">能落地的 AI 原型</span></span>
+          <span class="hero-line-sub">拉夫堡大学 服务设计创新硕士 · 视觉传达背景</span>
         </span>
         <span class="lang-en">
-          <span class="hero-line-zh">Loughborough University · <span class="hero-accent">MSc Service Design Innovation</span></span>
-          <span class="hero-line-en">BA in Visual Communication · graduate study in Service Design</span>
-          <span class="hero-line-sub">AI coding tools as everyday extensions of my hand</span>
+          <span class="hero-line-zh">Design Engineer who ships <span class="hero-accent">AI-powered prototypes</span>.</span>
+          <span class="hero-line-sub">MSc Service Design Innovation, Loughborough · Visual communication background.</span>
         </span>
       </p>
       <div class="hero-contact">
@@ -62,15 +60,25 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
     <div class="container">
       <div class="bar-inner">
         <div class="bar-meta">
-          <span class="bar-num">{works.length.toString().padStart(2, '0')}</span>
+          <span class="bar-num" id="bar-count">{works.length.toString().padStart(2, '0')}</span>
           <span class="bar-label">
             <span class="lang-zh">件作品 · 时间倒序</span>
             <span class="lang-en">works · reverse chronological</span>
           </span>
         </div>
-        <div class="view-toggle" role="tablist" aria-label="View toggle">
-          <button id="view-list" class="chunky-btn is-active" type="button">List</button>
-          <button id="view-grid" class="chunky-btn" type="button">Grid</button>
+        <div class="bar-controls">
+          <label class="ai-filter" for="ai-only">
+            <input type="checkbox" id="ai-only" />
+            <span class="ai-filter-box" aria-hidden="true"></span>
+            <span class="ai-filter-label">
+              <span class="lang-zh">只看 AI 辅助</span>
+              <span class="lang-en">AI-assisted only</span>
+            </span>
+          </label>
+          <div class="view-toggle" role="tablist" aria-label="View toggle">
+            <button id="view-list" class="chunky-btn is-active" type="button">List</button>
+            <button id="view-grid" class="chunky-btn" type="button">Grid</button>
+          </div>
         </div>
       </div>
     </div>
@@ -84,7 +92,7 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
         {works.map((w, i) => {
           const cat = CATEGORY_MAP[w.data.category as keyof typeof CATEGORY_MAP];
           return (
-            <li class="work-row" data-cat={w.data.category}>
+            <li class="work-row" data-cat={w.data.category} data-ai={w.data.ai ? '1' : '0'}>
               <details name="works" class="work-details">
                 <summary class="row-head">
                   <span class="row-year">{yearFmt(w.data.date)}</span>
@@ -92,10 +100,14 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
                     <span class="lang-zh">{w.data.title}</span>
                     <span class="lang-en">{(w.data as any).titleEn || w.data.title}</span>
                   </span>
-                  <span class="row-cat">
-                    <span class="lang-zh">{cat?.labelZh || cat?.label || w.data.category}</span>
-                    <span class="lang-en">{cat?.label || w.data.category}</span>
-                  </span>
+                  {w.data.category !== 'ai-prototype' ? (
+                    <span class="row-cat">
+                      <span class="lang-zh">{cat?.labelZh || cat?.label || w.data.category}</span>
+                      <span class="lang-en">{cat?.label || w.data.category}</span>
+                    </span>
+                  ) : (
+                    <span class="row-cat" aria-hidden="true"></span>
+                  )}
                   <svg class="row-chevron" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="M13.17 12L8.22 7.05l1.41-1.41L16 12l-6.37 6.37-1.41-1.42L13.17 12z"/>
                   </svg>
@@ -132,14 +144,16 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
         {works.map(w => {
           const cat = CATEGORY_MAP[w.data.category as keyof typeof CATEGORY_MAP];
           return (
-            <a href={`/works/${w.id}`} class="grid-card" data-cat={w.data.category} data-astro-prefetch>
+            <a href={`/works/${w.id}`} class="grid-card" data-cat={w.data.category} data-ai={w.data.ai ? '1' : '0'} data-astro-prefetch>
               <div class="card-cover">
                 <img src={w.data.cover} alt={`${w.data.title} 封面`} loading="lazy" decoding="async" />
               </div>
               <div class="card-body">
                 <div class="card-meta">
                   <span class="card-year">{yearFmt(w.data.date)}</span>
-                  <span class="card-cat">{cat?.label || w.data.category}</span>
+                  {w.data.category !== 'ai-prototype' && (
+                    <span class="card-cat">{cat?.label || w.data.category}</span>
+                  )}
                 </div>
                 <h3 class="card-title">
                   <span class="lang-zh">{w.data.title}</span>
@@ -252,6 +266,11 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
+  .bar-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
   .view-toggle {
     display: flex;
     gap: 0;
@@ -262,6 +281,52 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
   .view-toggle .chunky-btn:last-child {
     border-right-width: var(--border-w);
   }
+
+  /* ---------- AI 筛选勾选框 ---------- */
+  .ai-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    transition: color var(--transition);
+  }
+  .ai-filter:hover { color: var(--fg); }
+  /* 真正的 checkbox 藏起来，自己画方块 */
+  .ai-filter input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .ai-filter-box {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    border: var(--border-w) solid var(--border);
+    background: var(--bg);
+    position: relative;
+    transition: background var(--transition);
+  }
+  .ai-filter input:checked + .ai-filter-box {
+    background: var(--accent);
+  }
+  .ai-filter input:checked + .ai-filter-box::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 0px;
+    width: 6px;
+    height: 11px;
+    border: solid var(--accent-text);
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(45deg);
+  }
+  .ai-filter input:focus-visible + .ai-filter-box {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .ai-filter-label { white-space: nowrap; }
 
   /* ---------- LIST VIEW（学 ky.fyi 的 details 手风琴） ---------- */
   .works-list { padding: 0; }
@@ -486,6 +551,12 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
     }
     .row-text { order: 2; }   /* 手机上图片置顶，描述/链接在下 */
     .row-cover { order: 1; }
+
+    /* index bar 手机端：让 AI 勾选 + List/Grid 换行不挤 */
+    .bar-inner { flex-wrap: wrap; }
+    .bar-controls { gap: 12px; }
+    .ai-filter { font-size: 0.6875rem; }
+
     .hero-contact { flex-direction: column; align-items: flex-start; }
     .hero-contact .chunky-btn { width: 100%; justify-content: center; }
 
@@ -555,6 +626,38 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
       const saved = localStorage.getItem('home-view');
       if (saved === 'grid') setView('grid');
     } catch (e) {}
+
+    // 「只看 AI 辅助」筛选：勾选时隐藏 data-ai="0" 的 list 行与 grid 卡
+    const aiOnly = document.getElementById('ai-only') as HTMLInputElement | null;
+    const countEl = document.getElementById('bar-count');
+    const rows = Array.from(document.querySelectorAll<HTMLElement>('.work-row'));
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('.grid-card'));
+
+    const applyFilter = (on: boolean) => {
+      let visible = 0;
+      rows.forEach(el => {
+        const show = !on || el.dataset.ai === '1';
+        el.hidden = !show;
+        if (show) visible++;
+      });
+      cards.forEach(el => {
+        const show = !on || el.dataset.ai === '1';
+        el.style.display = show ? '' : 'none';
+      });
+      if (countEl) countEl.textContent = visible.toString().padStart(2, '0');
+      try { localStorage.setItem('ai-only', on ? '1' : '0'); } catch (e) {}
+    };
+
+    if (aiOnly) {
+      aiOnly.addEventListener('change', () => applyFilter(aiOnly.checked));
+      // 恢复上次选择
+      try {
+        if (localStorage.getItem('ai-only') === '1') {
+          aiOnly.checked = true;
+          applyFilter(true);
+        }
+      } catch (e) {}
+    }
   }
   setupHome();
   document.addEventListener('astro:after-swap', setupHome);

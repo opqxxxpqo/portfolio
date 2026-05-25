@@ -28,6 +28,9 @@ const works = defineCollection({
     duration: z.string().optional(),
     durationEn: z.string().optional(),
     tags: z.array(z.string()).optional(),
+    // ai: 这个作品是否「AI 辅助完成」。用于首页「只看 AI 辅助作品」筛选。
+    // 与 category 解耦：river-lea 是 visual-design 但也用了 Claude Code，照样算 AI 辅助。
+    ai: z.boolean().optional().default(false),
     featured: z.boolean().optional().default(false),
     longform: z.boolean().optional().default(false),
     // hidden: 不在首页 list 和分类页 list 出现；仍然有自己的详情页 URL

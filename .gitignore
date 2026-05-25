@@ -2,6 +2,9 @@
 dist/
 .astro/
 
+# 本地草稿（待润色的内容，不入库）
+drafts/
+
 # Dependencies
 node_modules/
 

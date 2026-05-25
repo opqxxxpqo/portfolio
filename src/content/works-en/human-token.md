@@ -4,19 +4,28 @@ summary: 'A floating widget that quantifies keystrokes, clicks and mouse motion 
 role: "Solo dev"
 ---
 
-## What it is
+## Positioning
 
-A widget that takes a time window of human "output" — keystrokes, clicks, mouse travel — and collapses it into a single number through a fixed formula. The companion HUD is a draggable, edge-collapsible overlay that updates in real time.
-On desktop, Rust's `rdev` captures OS-level global keyboard and mouse events; state persists to local JSON.
+A floating desktop widget that turns keystrokes, clicks, and mouse travel into one steadily climbing number — making "human output" something you can actually watch.
 
-## Limits of the browser-simulated build
+## Key Decisions
 
-- For security reasons an iframe can only listen to events fired inside it — **you have to click into the embed above first**
-- No 5-hour rolling window here; just one hard cap (200k)
-- The collapse animation is a CSS transition, nowhere near as smooth as the desktop app's native window behavior
+1. Defined output with a single fixed formula instead of a "smarter" AI score — I wanted sessions to be directly comparable.
+2. Captured OS-level global events with Rust + rdev, accepting that the browser build can only listen to in-page events.
+3. Handed most of the low-level Rust to AI while keeping integration testing, interaction logic, and decay-tuning for myself.
 
-## Where AI sits in the workflow
+## Iteration
 
-- Overall architecture, the token formula, and the decay mechanism — Claude / Codex proposed options, I chose
-- The Rust side (rdev integration, tray, cross-platform permissions) is almost entirely AI-written; I handled integration testing and parameter tuning
-- Visual style, copy, interaction details — my calls
+V1 browser counter → V2 desktop floating widget → V3 local persistence and cross-session accumulation.
+
+## Built with
+
+Claude Code, Codex, Tauri, Rust, vanilla JS · ~half a day
+
+## If I rebuilt this
+
+Swap the hard cap for a rolling decay, so the number behaves like a long-term metabolism instead of a counter that hits a ceiling.
+
+---
+
+> The embed above is the browser-simulated build: for security an iframe only hears events fired inside it, so **click into the frame before you start typing**. It has no 5-hour rolling window (just a 200k hard cap), and the collapse is only a CSS transition — not as smooth as the desktop app's native window.

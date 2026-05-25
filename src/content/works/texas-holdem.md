@@ -2,6 +2,7 @@
 title: "Texas Hold'em · 肉鸽变体"
 titleEn: "Texas Hold'em · Roguelike Variant"
 category: ai-prototype
+ai: true
 date: 2026-05-01
 cover: /works/texas-holdem/cover.jpg
 summary: "把德州扑克和 UNO 抽卡机制糅在一起的肉鸽小游戏 —— 每轮抽卡组手牌，再上桌跟 AI 玩 no-limit Texas Hold'em。"
@@ -24,3 +25,24 @@ embeds:
     height: 720
     title: "在线试玩 · 电脑端体验更佳"
 ---
+
+## 项目定位
+
+一个把德州扑克和 Draft 构筑揉在一起的肉鸽：每轮先抽牌组手牌，再上桌跟 AI 打无限注德扑。
+
+## 关键决策
+
+1. 把 Draft 接进扑克，让概率操控从下注之前就开始——你坐下之前，牌局已经变了。
+2. 砍掉过于混乱的道具卡系统——它削弱了扑克最核心的心理博弈。
+
+## 迭代过程
+
+V1 Draft + Poker 基础循环 → V2 AI 行为调校 → V3 UI 可读性与节奏优化。
+
+## 使用工具
+
+Claude Code、ChatGPT、Figma · 约 1–2 天
+
+## 如果重做一次
+
+加长期 meta 成长，让玩家慢慢养成自己的长期打法。
