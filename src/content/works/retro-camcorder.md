@@ -3,6 +3,8 @@ title: "LoFi Motion Cam · 复古摄像机"
 titleEn: "LoFi Motion Cam"
 category: ai-prototype
 ai: true
+chip: 移动端 App
+chipEn: Mobile App
 date: 2026-05-19
 cover: /works/retro-camcorder/cover.jpg
 summary: "把手机摄像头变成 2000 年代 MiniDV / 老式运动相机的 App。鱼眼、480P 低清、VHS 噪点、运动拖影、烧录式 HUD，整机是哑光黑新复古硬件 UI。"
@@ -21,6 +23,7 @@ tags:
   - 硬件感 UI
 links:
   - label: "GitHub 仓库"
+    labelEn: "GitHub repo"
     url: https://github.com/opqxxxpqo/retro-wangan-camcorder
 ---
 

@@ -3,6 +3,8 @@ title: "健身 App · 原型"
 titleEn: "Fitness App · Prototype"
 category: ai-prototype
 ai: true
+chip: 移动端 UI
+chipEn: Mobile UI
 date: 2026-05-18
 cover: /works/fitness-app/cover.jpg
 summary: "健身 App 的四屏 UI 原型。Figma 设计 + Claude Code / Codex 实现。完整 app 下载链接待补。"

@@ -100,14 +100,10 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
                     <span class="lang-zh">{w.data.title}</span>
                     <span class="lang-en">{(w.data as any).titleEn || w.data.title}</span>
                   </span>
-                  {w.data.category !== 'ai-prototype' ? (
-                    <span class="row-cat">
-                      <span class="lang-zh">{cat?.labelZh || cat?.label || w.data.category}</span>
-                      <span class="lang-en">{cat?.label || w.data.category}</span>
-                    </span>
-                  ) : (
-                    <span class="row-cat" aria-hidden="true"></span>
-                  )}
+                  <span class="row-cat">
+                    <span class="lang-zh">{w.data.chip || cat?.labelZh || cat?.label || w.data.category}</span>
+                    <span class="lang-en">{w.data.chipEn || w.data.chip || cat?.label || w.data.category}</span>
+                  </span>
                   <svg class="row-chevron" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="M13.17 12L8.22 7.05l1.41-1.41L16 12l-6.37 6.37-1.41-1.42L13.17 12z"/>
                   </svg>
@@ -151,10 +147,12 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
               <div class="card-body">
                 <div class="card-meta">
                   <span class="card-year">{yearFmt(w.data.date)}</span>
-                  {w.data.category !== 'ai-prototype' && (
-                    <span class="card-cat">{cat?.label || w.data.category}</span>
-                  )}
+                  <span class="card-cat">
+                    <span class="lang-zh">{w.data.chip || cat?.labelZh || cat?.label || w.data.category}</span>
+                    <span class="lang-en">{w.data.chipEn || w.data.chip || cat?.label || w.data.category}</span>
+                  </span>
                 </div>
+
                 <h3 class="card-title">
                   <span class="lang-zh">{w.data.title}</span>
                   <span class="lang-en">{(w.data as any).titleEn || w.data.title}</span>

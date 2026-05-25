@@ -19,11 +19,13 @@ tags:
   - 环境设计
 links:
   - label: "GitHub 仓库"
+    labelEn: "GitHub repo"
     url: https://github.com/opqxxxpqo/html-presentation
 embeds:
   - url: /works/river-lea/index.html
     height: 720
     title: 全屏演示 · 鼠标移动触发镜头
+    titleEn: Full-screen demo · mouse movement drives the camera
 ---
 
 单文件 HTML 演示，不依赖任何框架。鼠标按住拖动可移动画面，hover 会暴露透视图。

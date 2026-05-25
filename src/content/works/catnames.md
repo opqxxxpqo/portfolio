@@ -3,6 +3,8 @@ title: "Catnames · 猫猫派对"
 titleEn: "Catnames · Party Game"
 category: ai-prototype
 ai: true
+chip: 派对游戏
+chipEn: Party Game
 date: 2026-05-15
 cover: /works/catnames/cover.jpg
 summary: "2—8 人的派对小游戏：用单词线索引导队友在猫卡上找到目标猫。三种模式，合作 / 竞争 / 角色隐身玩法切换。"
@@ -20,11 +22,13 @@ tags:
   - 多人合作
 links:
   - label: "在新窗口打开完整体验"
+    labelEn: "Open the full experience in a new tab"
     url: https://catnames-party-game-x3qi.onrender.com/
 embeds:
   - url: https://catnames-party-game-x3qi.onrender.com/
     height: 720
     title: "在线试玩 · 电脑端体验更佳"
+    titleEn: "Play online · best on desktop"
 ---
 
 ## 项目定位

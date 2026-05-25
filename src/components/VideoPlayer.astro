@@ -19,7 +19,8 @@ const { src, poster, title } = Astro.props;
     preload="metadata"
     title={title}
   >
-    你的浏览器不支持 video 标签。<a href={src} download>点此下载视频 ↓</a>
+    <span class="lang-zh">你的浏览器不支持 video 标签。<a href={src} download>点此下载视频 ↓</a></span>
+    <span class="lang-en">Your browser doesn't support the video tag. <a href={src} download>Download the video ↓</a></span>
   </video>
 </div>
 

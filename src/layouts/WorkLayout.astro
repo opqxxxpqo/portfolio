@@ -8,6 +8,7 @@ import PDFViewer from '~/components/PDFViewer.astro';
 import ModelViewer from '~/components/ModelViewer.astro';
 import EmbedFrame from '~/components/EmbedFrame.astro';
 import LinkList from '~/components/LinkList.astro';
+import { tagEn } from '~/lib/tags';
 
 export interface Props {
   work: any;
@@ -106,7 +107,10 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
                 <span class="lang-zh">标签</span>
                 <span class="lang-en">Tags</span>
               </dt>
-              <dd class="tags-line">{data.tags.join(' · ')}</dd>
+              <dd class="tags-line">
+                <span class="lang-zh">{data.tags.join(' · ')}</span>
+                <span class="lang-en">{data.tags.map((t: string) => tagEn(t)).join(' · ')}</span>
+              </dd>
             </div>
           )}
         </dl>
@@ -150,7 +154,10 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
                 ) : (
                   <span class="item-placeholder" data-type={it.type}>
                     <span class="placeholder-type">{it.type.toUpperCase()}</span>
-                    <span class="placeholder-title">{it.title}</span>
+                    <span class="placeholder-title">
+                      <span class="lang-zh">{it.title}</span>
+                      <span class="lang-en">{it.titleEn || it.title}</span>
+                    </span>
                   </span>
                 )}
                 <span class="item-overlay" aria-hidden="true">
@@ -230,7 +237,10 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
             function openItem(idx) {
               const it = items[idx];
               if (!it) return;
-              titleEl.textContent = it.title + (it.note ? '  ·  ' + it.note : '');
+              const en = (document.documentElement.getAttribute('lang') || 'zh').toLowerCase().indexOf('en') === 0;
+              const t = en && it.titleEn ? it.titleEn : it.title;
+              const n = en && it.noteEn ? it.noteEn : it.note;
+              titleEl.textContent = t + (n ? '  ·  ' + n : '');
               stage.innerHTML = render(it);
               if (typeof dialog.showModal === 'function') dialog.showModal();
               else dialog.setAttribute('open', '');
@@ -320,7 +330,7 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
             <span class="lang-en">Interactive Demo</span>
           </h2>
           {data.embeds.map((e: any) => (
-            <EmbedFrame url={e.url} height={e.height} title={e.title} />
+            <EmbedFrame url={e.url} height={e.height} title={e.title} titleEn={e.titleEn} />
           ))}
         </section>
       )}

@@ -19,40 +19,53 @@ items:
   - type: image
     src: /works/blind-box/layout-1.jpg
     title: "并列展示 · 01"
+    titleEn: "Lineup · 01"
   - type: image
     src: /works/blind-box/layout-2.jpg
     title: "并列展示 · 02"
+    titleEn: "Lineup · 02"
   - type: image
     src: /works/blind-box/layout-3.jpg
     title: "并列展示 · 03"
+    titleEn: "Lineup · 03"
   - type: image
     src: /works/blind-box/layout-4.jpg
     title: "并列展示 · 04"
+    titleEn: "Lineup · 04"
   - type: image
     src: /works/blind-box/layout-5.jpg
     title: "并列展示 · 05"
+    titleEn: "Lineup · 05"
   - type: image
     src: /works/blind-box/banana.jpg
     title: "角色 · 香蕉"
+    titleEn: "Character · Banana"
   - type: image
     src: /works/blind-box/box.jpg
     title: "角色 · 盒子"
+    titleEn: "Character · Box"
   - type: image
     src: /works/blind-box/cart.jpg
     title: "角色 · 购物车"
+    titleEn: "Character · Cart"
   - type: image
     src: /works/blind-box/cone.jpg
     title: "角色 · 路障"
+    titleEn: "Character · Cone"
   - type: image
     src: /works/blind-box/bag.jpg
     title: "角色 · 手提袋"
+    titleEn: "Character · Bag"
   - type: image
     src: /works/blind-box/untitled-2.jpg
     title: "角色 · 02"
+    titleEn: "Character · 02"
   - type: image
     src: /works/blind-box/untitled-8.jpg
     title: "角色 · 08"
+    titleEn: "Character · 08"
   - type: image
     src: /works/blind-box/total-3.jpg
     title: "总览 · 03"
+    titleEn: "Overview · 03"
 ---

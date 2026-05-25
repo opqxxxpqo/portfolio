@@ -1,6 +1,6 @@
 ---
 export interface Props {
-  links: { label: string; url: string }[];
+  links: { label: string; labelEn?: string; url: string }[];
 }
 const { links } = Astro.props;
 ---
@@ -9,7 +9,10 @@ const { links } = Astro.props;
   {links.map(l => (
     <li>
       <a href={l.url} target="_blank" rel="noopener" class="link-row">
-        <span class="label">{l.label}</span>
+        <span class="label">
+          <span class="lang-zh">{l.label}</span>
+          <span class="lang-en">{l.labelEn || l.label}</span>
+        </span>
         <span class="arrow">↗</span>
       </a>
     </li>

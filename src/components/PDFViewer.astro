@@ -14,7 +14,10 @@ const embedSrc = noDownload ? `${src}#toolbar=1&navpanes=0&scrollbar=1&statusbar
   <div class="pdf-bar">
     <span class="pdf-name">{fileName}</span>
     {!noDownload && (
-      <a href={src} download class="pdf-download">下载 PDF ↓</a>
+      <a href={src} download class="pdf-download">
+        <span class="lang-zh">下载 PDF ↓</span>
+        <span class="lang-en">Download PDF ↓</span>
+      </a>
     )}
   </div>
   <object
@@ -23,9 +26,13 @@ const embedSrc = noDownload ? `${src}#toolbar=1&navpanes=0&scrollbar=1&statusbar
     style={`width: 100%; height: ${height}px;`}
   >
     <div class="pdf-fallback">
-      你的浏览器不支持内嵌 PDF。
+      <span class="lang-zh">你的浏览器不支持内嵌 PDF。</span>
+      <span class="lang-en">Your browser can't display this PDF inline.</span>
       {!noDownload && (
-        <a href={src} class="link-underline">点击下载</a>
+        <a href={src} class="link-underline">
+          <span class="lang-zh">点击下载</span>
+          <span class="lang-en">Download instead</span>
+        </a>
       )}
     </div>
   </object>

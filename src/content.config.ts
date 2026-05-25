@@ -31,6 +31,10 @@ const works = defineCollection({
     // ai: 这个作品是否「AI 辅助完成」。用于首页「只看 AI 辅助作品」筛选。
     // 与 category 解耦：river-lea 是 visual-design 但也用了 Claude Code，照样算 AI 辅助。
     ai: z.boolean().optional().default(false),
+    // chip / chipEn: 首页 list/grid 右侧显示的小标签。设了就用它覆盖默认分类标签。
+    // 给 ai-prototype 作品用——"AI 原型"区分度太低，换成更具体的（如"派对游戏"）。
+    chip: z.string().optional(),
+    chipEn: z.string().optional(),
     featured: z.boolean().optional().default(false),
     longform: z.boolean().optional().default(false),
     // hidden: 不在首页 list 和分类页 list 出现；仍然有自己的详情页 URL
@@ -62,7 +66,8 @@ const works = defineCollection({
           // 允许全 URL（http://...）或站内绝对路径（/works/xxx/...）
           url: z.string().refine(s => /^(https?:\/\/|\/)/.test(s), 'url 必须是 http(s) 或以 / 开头的站内路径'),
           height: z.number().positive(),
-          title: z.string()
+          title: z.string(),
+          titleEn: z.string().optional()
         })
       )
       .optional(),
@@ -70,6 +75,7 @@ const works = defineCollection({
       .array(
         z.object({
           label: z.string(),
+          labelEn: z.string().optional(),
           url: z.string().url()
         })
       )
@@ -81,12 +87,12 @@ const works = defineCollection({
     items: z
       .array(
         z.discriminatedUnion('type', [
-          z.object({ type: z.literal('bilibili'), src: z.string(), title: z.string(), poster: z.string().optional(), note: z.string().optional() }),
-          z.object({ type: z.literal('video'),    src: z.string(), title: z.string(), poster: z.string().optional(), note: z.string().optional() }),
-          z.object({ type: z.literal('model'),    src: z.string(), title: z.string(), poster: z.string().optional(), note: z.string().optional() }),
-          z.object({ type: z.literal('image'),    src: z.string(), title: z.string(), poster: z.string().optional(), note: z.string().optional(), alt: z.string().optional() }),
+          z.object({ type: z.literal('bilibili'), src: z.string(), title: z.string(), titleEn: z.string().optional(), poster: z.string().optional(), note: z.string().optional(), noteEn: z.string().optional() }),
+          z.object({ type: z.literal('video'),    src: z.string(), title: z.string(), titleEn: z.string().optional(), poster: z.string().optional(), note: z.string().optional(), noteEn: z.string().optional() }),
+          z.object({ type: z.literal('model'),    src: z.string(), title: z.string(), titleEn: z.string().optional(), poster: z.string().optional(), note: z.string().optional(), noteEn: z.string().optional() }),
+          z.object({ type: z.literal('image'),    src: z.string(), title: z.string(), titleEn: z.string().optional(), poster: z.string().optional(), note: z.string().optional(), noteEn: z.string().optional(), alt: z.string().optional() }),
           // link 类型：点击直接跳转到另一个 URL（不弹模态）。src 可以是站内 /works/xxx 或外部 https://
-          z.object({ type: z.literal('link'),     src: z.string(), title: z.string(), poster: z.string().optional(), note: z.string().optional(), external: z.boolean().optional() })
+          z.object({ type: z.literal('link'),     src: z.string(), title: z.string(), titleEn: z.string().optional(), poster: z.string().optional(), note: z.string().optional(), noteEn: z.string().optional(), external: z.boolean().optional() })
         ])
       )
       .optional()

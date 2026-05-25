@@ -3,6 +3,8 @@ title: "Digital Conductor"
 titleEn: "Digital Conductor"
 category: ai-prototype
 ai: true
+chip: 生成式音乐
+chipEn: Generative Music
 date: 2026-05-18
 cover: /works/behavior-translation/cover.jpg
 summary: "把数字行为转译为交响乐的实验性交互系统。键盘、鼠标、停顿与操作密度被静默记录，实时映射为音乐结构、动态 orchestration 与可视化数据流。"
@@ -21,15 +23,19 @@ tags:
   - 实验交互
 links:
   - label: "在新窗口打开 Web Demo"
+    labelEn: "Open Web Demo in a new tab"
     url: https://opqxxxpqo.github.io/behavior-translation-terminal/renderer.html
   - label: "GitHub 仓库"
+    labelEn: "GitHub repo"
     url: https://github.com/opqxxxpqo/behavior-translation-terminal
   - label: "Windows 程序下载 (latest release)"
+    labelEn: "Windows download (latest release)"
     url: https://github.com/opqxxxpqo/behavior-translation-terminal/releases/latest
 embeds:
   - url: https://opqxxxpqo.github.io/behavior-translation-terminal/renderer.html
     height: 720
     title: "Web Demo · 回放可视化 · 电脑端体验更佳"
+    titleEn: "Web Demo · playback visualization · best on desktop"
 ---
 
 ## 项目定位

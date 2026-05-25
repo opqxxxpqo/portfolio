@@ -25,7 +25,10 @@ const { src, alt = '3D 模型', poster } = Astro.props;
     <button slot="ar-button" style="display:none"></button>
     <div slot="progress-bar" class="progress-bar"></div>
   </model-viewer>
-  <button class="toggle-rotate" type="button" aria-label="切换自动旋转">⟳ 自动旋转</button>
+  <button class="toggle-rotate" type="button" aria-label="切换自动旋转 / Toggle auto-rotate">
+    <span class="lang-zh">⟳ 自动旋转</span>
+    <span class="lang-en">⟳ Auto-rotate</span>
+  </button>
 </div>
 
 <script>

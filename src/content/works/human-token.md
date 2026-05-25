@@ -3,6 +3,8 @@ title: "Human Token"
 titleEn: "Human Token"
 category: ai-prototype
 ai: true
+chip: 桌面工具
+chipEn: Desktop Tool
 date: 2026-05-15
 cover: /works/human-token/cover.jpg
 summary: '把键盘、鼠标、移动量化成"人类输出代币"的悬浮窗小工具。当前为浏览器仿真版，桌面 app 抓取的是 OS 级全局事件。'
@@ -24,6 +26,7 @@ embeds:
   - url: /works/human-token/demo/index.html
     height: 640
     title: 浏览器仿真版 · 点进去开始打字
+    titleEn: Browser simulation · click in and start typing
 ---
 
 ## 项目定位

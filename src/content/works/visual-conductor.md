@@ -3,6 +3,8 @@ title: "Visual Conductor"
 titleEn: "Visual Conductor"
 category: ai-prototype
 ai: true
+chip: 手势交互
+chipEn: Gesture UI
 date: 2026-05-20
 cover: /works/visual-conductor/cover.svg
 summary: "用摄像头捕捉手势、把手部动作转译成音乐的浏览器交互。三种模式：指挥古典乐、弹虚拟古琴、演奏特雷门琴。无需任何外接硬件。"
@@ -21,13 +23,16 @@ tags:
   - Web Audio
 links:
   - label: "在新窗口打开完整体验"
+    labelEn: "Open the full experience in a new tab"
     url: https://visual-conductor.onrender.com/
   - label: "GitHub 仓库"
+    labelEn: "GitHub repo"
     url: https://github.com/opqxxxpqo/visual-conductor
 embeds:
   - url: https://visual-conductor.onrender.com/
     height: 720
     title: "在线试玩 · 需摄像头权限 · 电脑端体验更佳"
+    titleEn: "Play online · needs camera access · best on desktop"
 ---
 
 ## 项目定位

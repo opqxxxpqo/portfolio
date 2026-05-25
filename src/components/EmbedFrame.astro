@@ -3,14 +3,21 @@ export interface Props {
   url: string;
   height: number;
   title: string;
+  titleEn?: string;
 }
-const { url, height, title } = Astro.props;
+const { url, height, title, titleEn } = Astro.props;
 ---
 
 <div class="embed-block">
   <div class="embed-bar">
-    <span class="embed-title">{title}</span>
-    <a href={url} target="_blank" rel="noopener" class="embed-link">新窗口打开 ↗</a>
+    <span class="embed-title">
+      <span class="lang-zh">{title}</span>
+      <span class="lang-en">{titleEn || title}</span>
+    </span>
+    <a href={url} target="_blank" rel="noopener" class="embed-link">
+      <span class="lang-zh">新窗口打开 ↗</span>
+      <span class="lang-en">Open in new tab ↗</span>
+    </a>
   </div>
   <iframe
     src={url}
