@@ -7,8 +7,8 @@ chip: 移动端 UI
 chipEn: Mobile UI
 date: 2026-05-18
 cover: /works/fitness-app/cover.jpg
-summary: "健身 App 的四屏 UI 原型。Figma 设计 + Claude Code / Codex 实现。完整 app 下载链接待补。"
-summaryEn: "Four-screen UI prototype of a fitness app. Designed in Figma, implemented with Claude Code / Codex. A full app download link will follow."
+summary: "围绕低负担记录设计的健身 App 原型：训练中快速记录、组间休息、动作进度和复盘状态都被压到最少操作。"
+summaryEn: "A low-friction fitness logging prototype: fast in-workout recording, rest timing, per-exercise progress, and review states with as little interaction overhead as possible."
 role: "独立完成"
 roleEn: "Solo"
 tools:
@@ -20,6 +20,10 @@ tags:
   - UI 原型
   - 健身
   - 移动端
+links:
+  - label: "GitHub 仓库"
+    labelEn: "GitHub repo"
+    url: https://github.com/opqxxxpqo/app-fitness-log
 itemsLayout: portrait
 coverFit: contain
 items:

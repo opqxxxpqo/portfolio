@@ -24,6 +24,9 @@ links:
   - label: "在新窗口打开完整体验"
     labelEn: "Open the full experience in a new tab"
     url: https://catnames-party-game-x3qi.onrender.com/
+  - label: "GitHub 仓库"
+    labelEn: "GitHub repo"
+    url: https://github.com/opqxxxpqo/game-catnames-party-game
 embeds:
   - url: https://catnames-party-game-x3qi.onrender.com/
     height: 720

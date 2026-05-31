@@ -1,6 +1,6 @@
 ---
 title: "Fitness App · Prototype"
-summary: "Four-screen UI prototype of a fitness app. Designed in Figma, implemented with Claude Code / Codex. A full app download link will follow."
+summary: "A low-friction fitness logging prototype: fast in-workout recording, rest timing, per-exercise progress, and review states with as little interaction overhead as possible."
 role: "Solo"
 ---
 

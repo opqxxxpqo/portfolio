@@ -21,10 +21,13 @@ tags:
   - 移动端 App
   - 复古影像
   - 硬件感 UI
-links:
-  - label: "GitHub 仓库"
-    labelEn: "GitHub repo"
-    url: https://github.com/opqxxxpqo/retro-wangan-camcorder
+coverFit: contain
+itemsLayout: portrait
+items:
+  - type: image
+    src: /works/retro-camcorder/cover.jpg
+    title: "硬件感取景器 UI"
+    titleEn: "Hardware-style viewfinder UI"
 ---
 
 ## 项目定位

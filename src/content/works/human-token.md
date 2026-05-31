@@ -21,6 +21,10 @@ tags:
   - AI 编程
   - 桌面工具
   - 行为可视化
+links:
+  - label: "GitHub 仓库"
+    labelEn: "GitHub repo"
+    url: https://github.com/opqxxxpqo/human-token
 featured: true
 embeds:
   - url: /works/human-token/demo/index.html

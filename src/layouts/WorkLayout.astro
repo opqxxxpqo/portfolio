@@ -38,6 +38,8 @@ const dateFmtEn = new Intl.DateTimeFormat('en-GB', {
 
 const proseClass = data.longform ? 'prose prose-longform' : 'prose';
 const containerClass = data.longform ? 'container-narrow' : 'container';
+const topLinks = Array.isArray(data.links) ? data.links : [];
+const hasEmbeddedDemo = Array.isArray(data.embeds) && data.embeds.length > 0;
 ---
 
 <BaseLayout
@@ -114,6 +116,22 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
             </div>
           )}
         </dl>
+      )}
+      {(hasEmbeddedDemo || topLinks.length > 0) && (
+        <nav class="work-actions" aria-label="Case study links">
+          {hasEmbeddedDemo && (
+            <a href="#interactive-demo" class="work-action">
+              <span class="lang-zh">查看页面内 Demo →</span>
+              <span class="lang-en">View embedded demo →</span>
+            </a>
+          )}
+          {topLinks.map((link: any) => (
+            <a href={link.url} class="work-action work-action--secondary" target="_blank" rel="noopener">
+              <span class="lang-zh">{link.label}</span>
+              <span class="lang-en">{link.labelEn || link.label}</span>
+            </a>
+          ))}
+        </nav>
       )}
     </header>
 
@@ -324,7 +342,7 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
       )}
 
       {data.embeds && data.embeds.length > 0 && (
-        <section class="media-section">
+        <section class="media-section" id="interactive-demo">
           <h2 class="media-title">
             <span class="lang-zh">互动 Demo</span>
             <span class="lang-en">Interactive Demo</span>
@@ -492,6 +510,38 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
     color: var(--fg);
   }
   .tags-line { color: var(--fg-soft); font-size: 0.9375rem; }
+
+  .work-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .work-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 7px 12px;
+    border: var(--border-w) solid var(--border);
+    color: var(--fg);
+    background: var(--bg);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+  }
+  .work-action:hover {
+    background: var(--accent);
+    color: var(--accent-text);
+    border-color: var(--accent);
+  }
+  .work-action--secondary {
+    color: var(--fg-soft);
+    font-weight: 600;
+  }
 
   /* ---------- ITEMS GRID + MODAL（items 字段渲染） ---------- */
   .items-grid {
