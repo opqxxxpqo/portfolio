@@ -19,6 +19,8 @@ const works = defineCollection({
     category: z.enum(CATEGORIES),
     date: z.coerce.date(),
     cover: z.string(), // public/ 下的相对路径，例 /works/research-sample/cover.svg
+    // poster: 首页调频器舞台用的宽幅海报图（重设计新增），没有时回落到 cover
+    poster: z.string().optional(),
     summary: z.string(),
     summaryEn: z.string().optional(),
 

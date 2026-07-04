@@ -12,62 +12,111 @@ const works = all
 
 const yearFmt = (d: Date) => d.getFullYear().toString();
 const pad = (n: number) => n.toString().padStart(2, '0');
+
+// 调频器电台数据：每个作品是一个频点，均匀铺在 FM 频段上
+const stations = works.map((w, i) => {
+  const cat = CATEGORY_MAP[w.data.category as keyof typeof CATEGORY_MAP];
+  const pos = (i + 0.5) / works.length; // 0..1 频段位置
+  return {
+    id: w.id,
+    pos,
+    freq: (87.5 + pos * (108 - 87.5)).toFixed(1),
+    titleZh: w.data.title,
+    titleEn: (w.data as any).titleEn || w.data.title,
+    chipZh: w.data.chip || cat?.labelZh || cat?.label || w.data.category,
+    chipEn: w.data.chipEn || w.data.chip || cat?.label || w.data.category,
+    year: yearFmt(w.data.date),
+    poster: (w.data as any).poster || w.data.cover
+  };
+});
+const first = stations[0];
 ---
 
 <BaseLayout
   title="鲁琦 Qi Lu · 作品集"
   description="拉夫堡大学服务设计创新硕士 · 视觉传达背景 · 服务设计 / UX·UI / AI 原型 / 视觉与 3D · 持续更新"
 >
-  <!-- HERO：整屏大字陈述句 -->
-  <section class="hero">
-    <div class="container hero-grid">
-      <p class="hero-kicker mono-label">
-        <span class="lang-zh"><span data-scramble>鲁琦 — 作品集 2026</span></span>
-        <span class="lang-en"><span data-scramble>QI LU — PORTFOLIO 2026</span></span>
-      </p>
-
-      <h1 class="hero-statement">
-        <span class="lang-zh">
-          <span class="line"><span data-scramble>设计工程师，</span></span>
-          <span class="line"><span data-scramble>交付能落地的</span><em class="statement-accent" data-scramble>AI 原型。</em></span>
-        </span>
-        <span class="lang-en">
-          <span class="line"><span data-scramble>DESIGN ENGINEER,</span></span>
-          <span class="line"><span data-scramble>SHIPPING</span> <em class="statement-accent" data-scramble>AI PROTOTYPES</em><span data-scramble> THAT WORK.</span></span>
-        </span>
-      </h1>
-
-      <div class="hero-foot">
-        <p class="hero-sub">
-          <span class="lang-zh">拉夫堡大学 服务设计创新硕士<br />视觉传达背景 · 现居英国</span>
-          <span class="lang-en">MSc Service Design Innovation, Loughborough<br />Visual communication background · Based in the UK</span>
+  <!-- ========== 调频器面板 ========== -->
+  <section class="tuner" id="tuner" data-skin="dark" tabindex="0" aria-label="Project tuner">
+    <div class="tuner-inner">
+      <!-- 顶行：台标 · 定位语 · 皮肤切换 · 频率读数 -->
+      <div class="tuner-top">
+        <span class="tn-brand mono-label">QI LU — FM</span>
+        <p class="tn-tagline mono-label">
+          <span class="lang-zh"><span data-scramble>设计工程师 · 交付能落地的 AI 原型</span></span>
+          <span class="lang-en"><span data-scramble>DESIGN ENGINEER — SHIPPING AI PROTOTYPES THAT WORK</span></span>
         </p>
-        <div class="hero-links">
-          <a href="mailto:luqiapp2007@163.com" class="hero-link" data-scramble-hover>
-            <span class="lang-zh"><span data-scramble>邮件 ↗</span></span>
-            <span class="lang-en"><span data-scramble>EMAIL ↗</span></span>
-          </a>
-          <a href="/resume.pdf" class="hero-link" data-scramble-hover>
-            <span class="lang-zh"><span data-scramble>简历 PDF ↓</span></span>
-            <span class="lang-en"><span data-scramble>RESUME PDF ↓</span></span>
-          </a>
-        </div>
+        <button class="tn-skin mono-label" id="tn-skin" type="button" title="面板明暗 A/B">◐ A/B</button>
+        <span class="tn-freq" id="tn-freq">{first.freq}<small> MHz</small></span>
       </div>
 
-      <p class="hero-scroll mono-label" aria-hidden="true">
-        <span class="lang-zh">下滑查看 {works.length} 件作品 ↓</span>
-        <span class="lang-en">SCROLL — {works.length} WORKS ↓</span>
-      </p>
+      <!-- 频率刻度带 + 红色指针 -->
+      <div class="tn-scale" id="tn-scale">
+        <div class="tn-ticks" aria-hidden="true"></div>
+        {stations.map((s, i) => (
+          <button
+            class="tn-station"
+            type="button"
+            style={`left:${s.pos * 100}%`}
+            data-idx={i}
+            aria-label={`${s.titleZh} — ${s.freq} MHz`}
+          >
+            <span class="tn-station-mark" aria-hidden="true"></span>
+            <span class="tn-station-no mono-label">{pad(i + 1)}</span>
+          </button>
+        ))}
+        <div class="tn-needle" id="tn-needle" aria-hidden="true"></div>
+      </div>
+
+      <!-- 底行：当前台名 · 信号强度 -->
+      <div class="tuner-bottom">
+        <span class="tn-now mono-label">
+          <span id="tn-idx">{pad(1)}</span>/{pad(stations.length)} ·
+          <span class="lang-zh"><span id="tn-name-zh" data-scramble>{first.titleZh}</span></span>
+          <span class="lang-en"><span id="tn-name-en" data-scramble>{first.titleEn}</span></span>
+        </span>
+        <span class="tn-hint mono-label" aria-hidden="true">
+          <span class="lang-zh">拖动红线 / 滚轮调台 →</span>
+          <span class="lang-en">DRAG THE RED LINE / SCROLL TO TUNE →</span>
+        </span>
+        <span class="tn-signal" id="tn-signal" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i>
+        </span>
+      </div>
     </div>
   </section>
 
-  <!-- WORKS：行式索引 + 浮动媒体预览 -->
+  <!-- ========== 当前项目舞台 ========== -->
+  <section class="stage">
+    <div class="container stage-meta">
+      <span class="stage-idx mono-label" id="stage-idx">{pad(1)}</span>
+      <h2 class="stage-title">
+        <span class="lang-zh"><span id="stage-title-zh" data-scramble>{first.titleZh}</span></span>
+        <span class="lang-en"><span id="stage-title-en" data-scramble>{first.titleEn}</span></span>
+      </h2>
+      <span class="stage-cat mono-label">
+        <span class="lang-zh" id="stage-cat-zh">{first.chipZh}</span>
+        <span class="lang-en" id="stage-cat-en">{first.chipEn}</span>
+        <span class="stage-year">( <span id="stage-year">{first.year}</span> )</span>
+      </span>
+      <a class="stage-link mono-label" id="stage-link" href={`/works/${first.id}`} data-astro-prefetch>
+        <span class="lang-zh">查看 case study →</span>
+        <span class="lang-en">VIEW CASE STUDY →</span>
+      </a>
+    </div>
+    <a class="stage-poster px-host" id="stage-poster" href={`/works/${first.id}`} aria-label="当前项目" data-astro-prefetch>
+      <img id="stage-img" src={first.poster} alt="" decoding="async" />
+      <canvas id="stage-canvas" aria-hidden="true"></canvas>
+    </a>
+  </section>
+
+  <!-- ========== INDEX 行式清单（可快速扫描） ========== -->
   <section class="works" id="works">
     <div class="container">
       <div class="works-head">
         <span class="mono-label">
-          <span class="lang-zh">作品 — <span id="works-count">{pad(works.length)}</span> · 时间倒序</span>
-          <span class="lang-en">WORKS — <span id="works-count-en">{pad(works.length)}</span> · LATEST FIRST</span>
+          <span class="lang-zh">全部作品 — <span id="works-count">{pad(works.length)}</span> · 时间倒序</span>
+          <span class="lang-en">INDEX — <span id="works-count-en">{pad(works.length)}</span> · LATEST FIRST</span>
         </span>
         <label class="ai-filter" for="ai-only">
           <input type="checkbox" id="ai-only" />
@@ -84,12 +133,7 @@ const pad = (n: number) => n.toString().padStart(2, '0');
           const cat = CATEGORY_MAP[w.data.category as keyof typeof CATEGORY_MAP];
           return (
             <li class="row" data-ai={w.data.ai ? '1' : '0'}>
-              <a
-                href={`/works/${w.id}`}
-                class="row-link"
-                data-preview={w.data.cover}
-                data-astro-prefetch
-              >
+              <a href={`/works/${w.id}`} class="row-link" data-astro-prefetch>
                 <span class="row-idx mono-label">{pad(i + 1)}</span>
                 <span class="row-main">
                   <span class="row-thumb px-host" aria-hidden="true">
@@ -113,86 +157,237 @@ const pad = (n: number) => n.toString().padStart(2, '0');
         })}
       </ol>
     </div>
-
-    <!-- 浮动预览：桌面 hover 行时跟随光标（指针粗糙设备不启用） -->
-    <div class="row-preview px-host" id="row-preview" aria-hidden="true">
-      <img id="row-preview-img" src="" alt="" decoding="async" />
-    </div>
   </section>
+
+  <script type="application/json" id="stations-data" set:html={JSON.stringify(stations)} />
 </BaseLayout>
 
 <style>
-  /* ---------- HERO ---------- */
-  .hero {
-    min-height: calc(100svh - 61px); /* 视口高减 header */
-    display: flex;
-    align-items: stretch;
+  /* ============ 调频器面板 ============ */
+  .tuner {
+    /* 皮肤变量：A = 深色硬件 HUD */
+    --tn-bg: #121211;
+    --tn-fg: #e6e5e1;
+    --tn-muted: #85847b;
+    --tn-line: rgba(230, 229, 225, 0.25);
+    --tn-red: #e5352b;
+
+    background: var(--tn-bg);
+    color: var(--tn-fg);
     border-bottom: 1px solid var(--hairline);
+    outline: none;
+    user-select: none;
   }
-  .hero-grid {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    padding-top: clamp(48px, 9vh, 110px);
-    padding-bottom: 28px;
+  /* 皮肤 B = 灰白纸面 */
+  .tuner[data-skin='paper'] {
+    --tn-bg: var(--bg);
+    --tn-fg: var(--fg);
+    --tn-muted: var(--fg-muted);
+    --tn-line: var(--hairline);
   }
-  .hero-kicker { margin: 0 0 auto; }
-
-  .hero-statement {
-    font-family: var(--font-display);
-    font-size: clamp(2.5rem, 7.2vw, 6.75rem);
-    font-weight: 900;
-    line-height: 1.02;
-    letter-spacing: -0.03em;
-    margin: 32px 0;
-    text-transform: uppercase;
-  }
-  .hero-statement .line { display: block; }
-  .statement-accent {
-    font-style: normal;
-    color: var(--accent);
-    white-space: nowrap;
+  .tuner-inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 18px 32px 22px;
   }
 
-  .hero-foot {
-    margin-top: auto;
-    padding-top: 32px;
+  .tuner-top {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
+    align-items: baseline;
     gap: 24px;
-    border-top: 1px solid var(--hairline);
   }
-  .hero-sub {
-    font-size: 0.9375rem;
-    line-height: 1.6;
-    color: var(--fg-muted);
-    margin: 0;
-  }
-  .hero-links { display: flex; gap: 28px; }
-  .hero-link {
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--fg);
-    border-bottom: 1px solid var(--fg);
-    padding-bottom: 3px;
+  .tuner-top .mono-label { color: var(--tn-muted); }
+  .tn-brand { color: var(--tn-fg) !important; white-space: nowrap; }
+  .tn-tagline { flex: 1; margin: 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tn-skin {
+    background: none;
+    border: 1px solid var(--tn-line);
+    color: var(--tn-muted);
+    padding: 3px 8px;
+    cursor: pointer;
     transition: color var(--transition), border-color var(--transition);
   }
-  .hero-link:hover { color: var(--accent); border-color: var(--accent); }
+  .tn-skin:hover { color: var(--tn-fg); border-color: var(--tn-fg); }
+  .tn-freq {
+    font-family: var(--font-mono);
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--tn-fg);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .tn-freq small { font-size: 0.6875rem; color: var(--tn-muted); letter-spacing: 0.12em; }
 
-  .hero-scroll { margin: 28px 0 0; }
+  /* 刻度带 */
+  .tn-scale {
+    position: relative;
+    height: 72px;
+    margin: 18px 0 14px;
+    cursor: ew-resize;
+    touch-action: none; /* 手指横滑调台，不滚页面 */
+  }
+  .tn-ticks {
+    position: absolute;
+    inset: 12px 0 24px;
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--tn-line) 0,
+      var(--tn-line) 1px,
+      transparent 1px,
+      transparent 9px
+    );
+  }
+  /* 每逢大刻度加高：叠一层更稀疏的渐变 */
+  .tn-ticks::after {
+    content: '';
+    position: absolute;
+    inset: -6px 0 0;
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--tn-line) 0,
+      var(--tn-line) 1px,
+      transparent 1px,
+      transparent 45px
+    );
+  }
+  .tn-station {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 28px;
+    transform: translateX(-50%);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+  .tn-station-mark {
+    position: absolute;
+    left: 50%;
+    top: 4px;
+    bottom: 22px;
+    width: 3px;
+    transform: translateX(-50%);
+    background: var(--tn-fg);
+    opacity: 0.75;
+    transition: opacity var(--transition), background var(--transition);
+  }
+  .tn-station:hover .tn-station-mark { opacity: 1; }
+  .tn-station.is-active .tn-station-mark { background: var(--tn-red); opacity: 1; }
+  .tn-station-no {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    color: var(--tn-muted);
+    font-size: 0.625rem;
+    transition: color var(--transition);
+  }
+  .tn-station.is-active .tn-station-no { color: var(--tn-red); }
 
-  /* ---------- WORKS 行式索引 ---------- */
-  .works { padding: 0 0 48px; position: relative; }
+  .tn-needle {
+    position: absolute;
+    top: -4px;
+    bottom: 14px;
+    left: 0;
+    width: 2px;
+    background: var(--tn-red);
+    box-shadow: 0 0 8px rgba(229, 53, 43, 0.55);
+    pointer-events: none;
+    will-change: transform;
+  }
+  .tn-needle::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--tn-red);
+  }
+
+  .tuner-bottom {
+    display: flex;
+    align-items: baseline;
+    gap: 24px;
+  }
+  .tn-now { color: var(--tn-fg) !important; min-width: 0; }
+  .tn-hint { flex: 1; text-align: right; color: var(--tn-muted); }
+  .tn-signal { display: inline-flex; gap: 3px; align-items: flex-end; }
+  .tn-signal i {
+    width: 4px;
+    background: var(--tn-muted);
+    opacity: 0.35;
+    transition: opacity 120ms ease, background 120ms ease;
+  }
+  .tn-signal i:nth-child(1) { height: 5px; }
+  .tn-signal i:nth-child(2) { height: 8px; }
+  .tn-signal i:nth-child(3) { height: 11px; }
+  .tn-signal i:nth-child(4) { height: 14px; }
+  .tn-signal i:nth-child(5) { height: 17px; }
+  .tn-signal i.on { background: var(--tn-red); opacity: 1; }
+
+  /* ============ 项目舞台 ============ */
+  .stage { border-bottom: 1px solid var(--hairline); }
+  .stage-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    padding: 18px 32px;
+  }
+  .stage-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    margin: 0;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .stage-cat { white-space: nowrap; }
+  .stage-year { margin-left: 6px; }
+  .stage-link {
+    margin-left: auto;
+    color: var(--fg);
+    border-bottom: 1px solid var(--fg);
+    padding-bottom: 2px;
+    white-space: nowrap;
+    transition: color var(--transition), border-color var(--transition);
+  }
+  .stage-link:hover { color: var(--accent); border-color: var(--accent); }
+
+  .stage-poster {
+    display: block;
+    width: 100%;
+    height: clamp(340px, 62vh, 680px);
+    background: #0c0c0b;
+    border-top: 1px solid var(--hairline);
+  }
+  .stage-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .stage-poster canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    pointer-events: none;
+  }
+
+  /* ============ INDEX 行式清单 ============ */
+  .works { padding: 24px 0 48px; position: relative; }
   .works-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
-    padding: 20px 0;
+    padding: 16px 0;
   }
 
   .rows { list-style: none; margin: 0; padding: 0; }
@@ -205,21 +400,21 @@ const pad = (n: number) => n.toString().padStart(2, '0');
     grid-template-columns: 64px 1fr auto;
     align-items: baseline;
     gap: 24px;
-    padding: 26px 0;
+    padding: 22px 0;
     color: var(--fg);
   }
   .row-idx { transition: color var(--transition); }
   .row-main { min-width: 0; }
-  .row-thumb { display: none; } /* 桌面用浮动预览，缩略图只给移动端 */
+  .row-thumb { display: none; } /* 缩略图只给移动端 */
 
   .row-title {
     font-family: var(--font-display);
-    font-size: clamp(1.5rem, 3.6vw, 3rem);
+    font-size: clamp(1.375rem, 3vw, 2.25rem);
     font-weight: 900;
     line-height: 1.05;
     letter-spacing: -0.02em;
     margin: 0;
-    transition: transform 300ms var(--ease-expo), color var(--transition);
+    transition: transform 300ms var(--ease-expo);
   }
   .row-meta {
     display: flex;
@@ -233,33 +428,10 @@ const pad = (n: number) => n.toString().padStart(2, '0');
     color: var(--fg-muted);
     font-weight: 500;
   }
-
   .row-link:hover .row-title { transform: translateX(10px); }
   .row-link:hover .row-idx { color: var(--accent); }
 
-  /* ---------- 浮动预览 ---------- */
-  .row-preview {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 320px;
-    aspect-ratio: 16 / 10;
-    z-index: 40;
-    pointer-events: none;
-    opacity: 0;
-    border: 1px solid var(--border);
-    background: var(--bg-soft);
-    transition: opacity 200ms ease;
-    will-change: transform;
-  }
-  .row-preview.is-visible { opacity: 1; }
-  .row-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  /* ---------- AI 筛选 ---------- */
+  /* ============ AI 筛选 ============ */
   .ai-filter {
     display: inline-flex;
     align-items: center;
@@ -284,18 +456,23 @@ const pad = (n: number) => n.toString().padStart(2, '0');
   .ai-filter:hover .ai-filter-label { color: var(--fg); }
   .ai-filter-label { transition: color var(--transition); white-space: nowrap; }
 
-  /* ---------- 移动端：行变堆叠卡，缩略图内联 + 像素揭示 ---------- */
+  /* ============ 移动端 ============ */
   @media (max-width: 768px) {
-    .hero { min-height: calc(100svh - 53px); }
-    .hero-statement { font-size: clamp(2.25rem, 11vw, 4rem); margin: 24px 0; }
-    .hero-foot { flex-direction: column; align-items: flex-start; gap: 20px; }
-    .hero-links { gap: 20px; }
+    .tuner-inner { padding: 14px 20px 16px; }
+    .tuner-top { flex-wrap: wrap; gap: 10px 16px; }
+    .tn-tagline { flex-basis: 100%; order: 5; }
+    .tn-freq { margin-left: auto; }
+    .tn-scale { height: 60px; margin: 14px 0 10px; }
+    .tuner-bottom { flex-wrap: wrap; gap: 8px 16px; }
+    .tn-hint { display: none; }
+    .tn-signal { margin-left: auto; }
 
-    .row-link {
-      grid-template-columns: 1fr;
-      gap: 12px;
-      padding: 22px 0;
-    }
+    .stage-meta { flex-wrap: wrap; gap: 8px 14px; padding: 14px 20px; }
+    .stage-title { white-space: normal; flex-basis: 100%; order: 5; }
+    .stage-link { margin-left: 0; }
+    .stage-poster { height: clamp(240px, 42vh, 420px); }
+
+    .row-link { grid-template-columns: 1fr; gap: 12px; padding: 20px 0; }
     .row-idx { display: none; }
     .row-thumb {
       display: block;
@@ -304,92 +481,300 @@ const pad = (n: number) => n.toString().padStart(2, '0');
       border: 1px solid var(--hairline);
       margin-bottom: 4px;
     }
-    .row-thumb img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .row-title { font-size: clamp(1.375rem, 6.5vw, 1.75rem); }
+    .row-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .row-title { font-size: clamp(1.25rem, 6vw, 1.625rem); }
     .row-link:hover .row-title { transform: none; }
-    .row-meta { gap: 12px; }
-    .row-preview { display: none; }
-
-    .works-head { flex-wrap: wrap; padding: 16px 0; }
+    .works-head { flex-wrap: wrap; padding: 14px 0; }
   }
 </style>
 
 <script>
-  // 浮动预览：hover 行 → 预览图跟随光标（带 lerp 惯性），换行时像素揭示
-  function setupPreview() {
-    const preview = document.getElementById('row-preview');
-    const img = document.getElementById('row-preview-img') as HTMLImageElement | null;
-    const rows = Array.from(document.querySelectorAll<HTMLAnchorElement>('.row-link'));
-    if (!preview || !img || rows.length === 0) return;
-    if (preview.dataset.bound) return;
-    preview.dataset.bound = '1';
+  // ============================================================
+  // 收音机调频器：拖红线/滚轮/点频点/方向键 调台
+  // 指针离频点越近信号越强；对不准时海报是粗像素态、台名乱码；
+  // 锁定频点后像素分档变清晰（复用 fx 的思路，画在舞台 canvas 上）
+  // ============================================================
+  type Station = {
+    id: string; pos: number; freq: string;
+    titleZh: string; titleEn: string;
+    chipZh: string; chipEn: string;
+    year: string; poster: string;
+  };
 
-    // 触屏/粗指针不启用
-    if (!window.matchMedia('(pointer: fine)').matches) return;
+  function setupTuner() {
+    const tuner = document.getElementById('tuner');
+    const dataEl = document.getElementById('stations-data');
+    if (!tuner || !dataEl || tuner.dataset.bound) return;
+    tuner.dataset.bound = '1';
 
-    let targetX = 0, targetY = 0, curX = 0, curY = 0;
-    let active = false;
+    const stations: Station[] = JSON.parse(dataEl.textContent || '[]');
+    if (stations.length === 0) return;
+
+    const scale = document.getElementById('tn-scale')!;
+    const needle = document.getElementById('tn-needle')!;
+    const freqEl = document.getElementById('tn-freq')!;
+    const idxEl = document.getElementById('tn-idx')!;
+    const nameZh = document.getElementById('tn-name-zh')!;
+    const nameEn = document.getElementById('tn-name-en')!;
+    const signal = document.getElementById('tn-signal')!;
+    const signalBars = Array.from(signal.querySelectorAll('i'));
+    const stationBtns = Array.from(tuner.querySelectorAll<HTMLElement>('.tn-station'));
+
+    const stageIdx = document.getElementById('stage-idx')!;
+    const stageTitleZh = document.getElementById('stage-title-zh')!;
+    const stageTitleEn = document.getElementById('stage-title-en')!;
+    const stageCatZh = document.getElementById('stage-cat-zh')!;
+    const stageCatEn = document.getElementById('stage-cat-en')!;
+    const stageYear = document.getElementById('stage-year')!;
+    const stageLink = document.getElementById('stage-link') as HTMLAnchorElement;
+    const stagePoster = document.getElementById('stage-poster') as HTMLAnchorElement;
+    const stageImg = document.getElementById('stage-img') as HTMLImageElement;
+    const canvas = document.getElementById('stage-canvas') as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d');
+    const tiny = document.createElement('canvas');
+    const tctx = tiny.getContext('2d');
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const spacing = 1 / stations.length;
+    const capture = spacing * 0.32; // 捕获半径：小于它算「收到信号」
+
+    let v = stations[0].pos;      // 指针位置 0..1
+    let targetV: number | null = null; // 吸附动画目标
+    let currentIdx = -1;          // 当前锁定的电台
+    let lastLevel = -1;           // 上次绘制的像素档位
+    let snapTimer = 0;
     let raf = 0;
 
-    const tick = () => {
-      curX += (targetX - curX) * 0.18;
-      curY += (targetY - curY) * 0.18;
-      preview.style.transform = `translate3d(${curX}px, ${curY}px, 0)`;
-      if (active) raf = requestAnimationFrame(tick);
+    const pad2 = (n: number) => String(n + 1).padStart(2, '0');
+
+    // ---------- 舞台 canvas：按档位画粗像素 ----------
+    const drawLevel = (level: number) => {
+      // level: 0=最糊 … 3=较清，-1=清晰（移除遮罩）
+      if (!ctx || !tctx) return;
+      if (level < 0) { canvas.style.display = 'none'; lastLevel = -1; return; }
+      if (level === lastLevel && canvas.style.display !== 'none') return;
+      lastLevel = level;
+      if (!stageImg.complete || !stageImg.naturalWidth) return;
+      const w = stagePoster.clientWidth, h = stagePoster.clientHeight;
+      if (!w || !h) return;
+      canvas.width = w; canvas.height = h;
+      canvas.style.display = 'block';
+      const factors = [0.015, 0.04, 0.1, 0.24];
+      const f = factors[Math.min(level, factors.length - 1)];
+      const tw = Math.max(2, Math.round(w * f));
+      const th = Math.max(2, Math.round(h * f));
+      tiny.width = tw; tiny.height = th;
+      const s = Math.max(tw / stageImg.naturalWidth, th / stageImg.naturalHeight);
+      tctx.imageSmoothingEnabled = true;
+      tctx.drawImage(stageImg, (tw - stageImg.naturalWidth * s) / 2, (th - stageImg.naturalHeight * s) / 2, stageImg.naturalWidth * s, stageImg.naturalHeight * s);
+      ctx.imageSmoothingEnabled = false;
+      ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(tiny, 0, 0, tw, th, 0, 0, w, h);
     };
 
-    const place = (e: MouseEvent) => {
-      const w = 320, h = 200, gap = 28;
-      let x = e.clientX + gap;
-      let y = e.clientY - h / 2;
-      if (x + w > window.innerWidth - 16) x = e.clientX - w - gap;
-      y = Math.max(16, Math.min(window.innerHeight - h - 16, y));
-      targetX = x; targetY = y;
+    // 锁定后：分档变清晰
+    let revealTimer = 0;
+    const revealSteps = () => {
+      window.clearTimeout(revealTimer);
+      if (reduced) { drawLevel(-1); return; }
+      let lv = Math.max(lastLevel, 1);
+      const step = () => {
+        lv++;
+        if (lv > 3) { drawLevel(-1); return; }
+        drawLevel(lv);
+        revealTimer = window.setTimeout(step, 110);
+      };
+      step();
     };
 
-    rows.forEach(row => {
-      row.addEventListener('mouseenter', e => {
-        const src = row.dataset.preview;
-        if (!src) return;
-        if (img.getAttribute('src') !== src) {
-          img.src = src;
-          const reveal = () => (window as any).__fx?.pixelReveal(img, 90);
-          if (img.complete) reveal();
-          else img.addEventListener('load', reveal, { once: true });
-        }
-        place(e as MouseEvent);
-        curX = targetX; curY = targetY; // 初次出现不做飞入
-        preview.classList.add('is-visible');
-        active = true;
-        cancelAnimationFrame(raf);
-        raf = requestAnimationFrame(tick);
+    // ---------- 电台切换 ----------
+    const scrambleEl = (el: HTMLElement) => (window as any).__fx?.scramble?.(el, { stagger: 16, jitter: 80 });
+
+    const setStation = (i: number) => {
+      if (i === currentIdx) return;
+      currentIdx = i;
+      const s = stations[i];
+
+      idxEl.textContent = pad2(i);
+      stageIdx.textContent = pad2(i);
+      stageYear.textContent = s.year;
+      stageCatZh.textContent = s.chipZh;
+      stageCatEn.textContent = s.chipEn;
+      stageLink.href = `/works/${s.id}`;
+      stagePoster.href = `/works/${s.id}`;
+
+      // 台名 + 舞台标题：更新原文并乱码翻牌
+      for (const [el, txt] of [
+        [nameZh, s.titleZh], [nameEn, s.titleEn],
+        [stageTitleZh, s.titleZh], [stageTitleEn, s.titleEn]
+      ] as [HTMLElement, string][]) {
+        el.dataset.fxText = txt;
+        el.textContent = txt;
+        scrambleEl(el);
+      }
+
+      stationBtns.forEach((b, bi) => b.classList.toggle('is-active', bi === i));
+
+      // 换海报：先糊住，加载完按档位揭示
+      const swap = () => { drawLevel(0); revealSteps(); };
+      if (stageImg.src.endsWith(s.poster)) { revealSteps(); }
+      else {
+        drawLevel(0);
+        stageImg.src = s.poster;
+        if (stageImg.complete) swap();
+        else stageImg.addEventListener('load', swap, { once: true });
+      }
+    };
+
+    // ---------- 指针位置 → 界面状态 ----------
+    const nearest = (val: number) => {
+      let best = 0, bd = Infinity;
+      stations.forEach((s, i) => {
+        const d = Math.abs(s.pos - val);
+        if (d < bd) { bd = d; best = i; }
       });
-      row.addEventListener('mousemove', e => place(e as MouseEvent));
-      row.addEventListener('mouseleave', () => {
-        preview.classList.remove('is-visible');
-        active = false;
-        cancelAnimationFrame(raf);
+      return { idx: best, dist: bd };
+    };
+
+    const render = () => {
+      needle.style.transform = `translateX(${v * scale.clientWidth}px)`;
+      freqEl.innerHTML = (87.5 + v * (108 - 87.5)).toFixed(1) + '<small> MHz</small>';
+
+      const { idx, dist } = nearest(v);
+      const p = Math.max(0, 1 - dist / capture); // 信号强度 0..1
+      signalBars.forEach((b, bi) => b.classList.toggle('on', bi < Math.round(p * 5)));
+
+      if (dist <= capture) {
+        setStation(idx);
+      } else {
+        // 失谐：海报糊住(最近台的图)、信号归零
+        currentIdx = -1;
+        window.clearTimeout(revealTimer);
+        const s = stations[idx];
+        if (!stageImg.src.endsWith(s.poster)) {
+          stageImg.src = s.poster;
+          if (!stageImg.complete) stageImg.addEventListener('load', () => drawLevel(0), { once: true });
+        }
+        lastLevel = -2; // 强制重画
+        drawLevel(dist < capture * 2 ? 1 : 0);
+      }
+    };
+
+    const setV = (val: number) => {
+      v = Math.min(1, Math.max(0, val));
+      render();
+    };
+
+    // 吸附到最近频点（惯性动画）
+    const snapToNearest = () => {
+      const { idx } = nearest(v);
+      targetV = stations[idx].pos;
+      cancelAnimationFrame(raf);
+      const tick = () => {
+        if (targetV === null) return;
+        v += (targetV - v) * (reduced ? 1 : 0.22);
+        if (Math.abs(targetV - v) < 0.0005) { v = targetV; targetV = null; render(); return; }
+        render();
+        raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    };
+    const queueSnap = (delay = 400) => {
+      window.clearTimeout(snapTimer);
+      snapTimer = window.setTimeout(snapToNearest, delay);
+    };
+
+    // ---------- 输入 ----------
+    // 拖动（鼠标/手指同一套 pointer events）
+    let dragging = false;
+    scale.addEventListener('pointerdown', e => {
+      dragging = true;
+      targetV = null;
+      window.clearTimeout(snapTimer);
+      // 按在频点按钮上：不捕获指针（捕获会吃掉按钮的 click），交给 click 跳台；
+      // 按在空白刻度上：捕获 + 直接移针开始拖动
+      if (!(e.target as HTMLElement).closest('.tn-station')) {
+        scale.setPointerCapture(e.pointerId);
+        const rect = scale.getBoundingClientRect();
+        setV((e.clientX - rect.left) / rect.width);
+      }
+    });
+    scale.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      const rect = scale.getBoundingClientRect();
+      setV((e.clientX - rect.left) / rect.width);
+    });
+    const endDrag = (e: PointerEvent) => {
+      if (!dragging) return;
+      dragging = false;
+      // 松手在频点按钮上时让 click 接管，避免 snap 抢跑
+      if (!(e.target as HTMLElement).closest?.('.tn-station')) queueSnap(120);
+    };
+    scale.addEventListener('pointerup', endDrag);
+    scale.addEventListener('pointercancel', endDrag);
+
+    // 滚轮（只在刻度带上滚 = 调台；面板其他区域不劫持页面滚动）
+    scale.addEventListener(
+      'wheel',
+      e => {
+        e.preventDefault();
+        targetV = null;
+        setV(v + (e.deltaY + e.deltaX) * 0.00035);
+        queueSnap();
+      },
+      { passive: false }
+    );
+
+    // 点频点直接跳台
+    stationBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        targetV = stations[Number(btn.dataset.idx)].pos;
+        snapToNearest0(Number(btn.dataset.idx));
       });
     });
+    const snapToNearest0 = (i: number) => {
+      window.clearTimeout(snapTimer); // 取消待执行的就近吸附，避免覆盖跳台目标
+      targetV = stations[i].pos;
+      cancelAnimationFrame(raf);
+      const tick = () => {
+        if (targetV === null) return;
+        v += (targetV - v) * (reduced ? 1 : 0.16);
+        if (Math.abs(targetV - v) < 0.0005) { v = targetV; targetV = null; render(); return; }
+        render();
+        raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    };
 
-    // 滚动时行会从光标下滑走而不触发 mouseleave，直接收起预览
-    window.addEventListener(
-      'scroll',
-      () => {
-        if (!active) return;
-        preview.classList.remove('is-visible');
-        active = false;
-        cancelAnimationFrame(raf);
-      },
-      { passive: true }
-    );
+    // 方向键换台
+    tuner.addEventListener('keydown', e => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      e.preventDefault();
+      const { idx } = nearest(v);
+      const next = Math.min(stations.length - 1, Math.max(0, idx + (e.key === 'ArrowRight' ? 1 : -1)));
+      snapToNearest0(next);
+    });
+
+    // 皮肤 A/B
+    const skinBtn = document.getElementById('tn-skin');
+    skinBtn?.addEventListener('click', () => {
+      tuner.dataset.skin = tuner.dataset.skin === 'dark' ? 'paper' : 'dark';
+      try { localStorage.setItem('tuner-skin', tuner.dataset.skin!); } catch (e) {}
+    });
+    try {
+      const saved = localStorage.getItem('tuner-skin');
+      if (saved === 'dark' || saved === 'paper') tuner.dataset.skin = saved;
+    } catch (e) {}
+
+    // 视口变化重排指针
+    window.addEventListener('resize', () => render());
+
+    // 初始：锁在第一台
+    currentIdx = -1;
+    render();
   }
 
-  // AI 筛选
+  // ---------- INDEX 清单的 AI 筛选 ----------
   function setupFilter() {
     const aiOnly = document.getElementById('ai-only') as HTMLInputElement | null;
     const rows = Array.from(document.querySelectorAll<HTMLElement>('.row'));
@@ -421,7 +806,7 @@ const pad = (n: number) => n.toString().padStart(2, '0');
   }
 
   function setupHome() {
-    setupPreview();
+    setupTuner();
     setupFilter();
   }
   setupHome();
