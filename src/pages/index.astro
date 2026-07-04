@@ -21,12 +21,14 @@ const stations = works.map((w, i) => {
   return {
     id: w.id,
     pos,
-    freq: (87.5 + pos * (108 - 87.5)).toFixed(1),
-    titleZh: w.data.title,
-    titleEn: (w.data as any).titleEn || w.data.title
+    freq: (87.5 + pos * (108 - 87.5)).toFixed(1)
   };
 });
 const first = stations[0];
+
+// 刻度带上的 MHz 数字标注（真实 FM 拨盘式）
+const MHZ_LABELS = [88, 90, 92, 94, 96, 98, 100, 102, 104, 106, 108];
+const mhzPos = (f: number) => ((f - 87.5) / (108 - 87.5)) * 100;
 ---
 
 <BaseLayout
@@ -34,39 +36,32 @@ const first = stations[0];
   title="鲁琦 Qi Lu · 作品集"
   description="拉夫堡大学服务设计创新硕士 · 视觉传达背景 · 服务设计 / UX·UI / AI 原型 / 视觉与 3D · 持续更新"
 >
-  <!-- ========== 固定调频器面板（白色机面，自带导航） ========== -->
+  <!-- ========== 固定调频器面板（白色机面） ========== -->
   <section class="tuner" id="tuner" tabindex="0" aria-label="Project tuner">
     <div class="tuner-inner">
-      <!-- 左：大字台标 + 定位语 -->
-      <div class="tn-left">
-        <a href="/" class="tn-wordmark">Qi Lu Portfolio</a>
-        <p class="tn-tagline mono-label">
-          <span class="lang-zh">设计工程师 · 交付能落地的 AI 原型</span>
-          <span class="lang-en">DESIGN ENGINEER — SHIPPING AI PROTOTYPES THAT WORK</span>
-        </p>
-      </div>
+      <!-- 台标：点击进关于页 -->
+      <a href="/about" class="tn-wordmark" data-astro-prefetch>Qi Lu Portfolio</a>
 
-      <!-- 右：导航行 → 频率读数 → 刻度带 → 台名行 -->
       <div class="tn-right">
         <div class="tn-toprow">
-          <nav class="tn-nav" aria-label="Site">
-            <a href="/categories" class="mono-label" data-scramble-hover>
-              <span class="lang-zh"><span data-scramble>分类</span></span>
-              <span class="lang-en"><span data-scramble>CATEGORIES</span></span>
-            </a>
-            <a href="/about" class="mono-label" data-scramble-hover>
-              <span class="lang-zh"><span data-scramble>关于</span></span>
-              <span class="lang-en"><span data-scramble>ABOUT</span></span>
-            </a>
-          </nav>
           <div class="tn-tools">
             <LangToggle />
             <ThemeToggle />
           </div>
+          <span class="tn-signal" id="tn-signal" aria-hidden="true">
+            <i></i><i></i><i></i><i></i><i></i>
+          </span>
           <span class="tn-freq" id="tn-freq">{first.freq}<small> MHz</small></span>
         </div>
 
         <div class="tn-scale" id="tn-scale">
+          <!-- MHz 数字标注行 -->
+          <div class="tn-mhz" aria-hidden="true">
+            {MHZ_LABELS.map(f => (
+              <span style={`left:${mhzPos(f)}%`}>{f}</span>
+            ))}
+          </div>
+          <!-- 三层刻度：密小刻度 / 中刻度 / 大刻度 -->
           <div class="tn-ticks" aria-hidden="true"></div>
           {stations.map((s, i) => (
             <button
@@ -74,7 +69,7 @@ const first = stations[0];
               type="button"
               style={`left:${s.pos * 100}%`}
               data-idx={i}
-              aria-label={`${s.titleZh} — ${s.freq} MHz`}
+              aria-label={`Project ${pad(i + 1)} — ${s.freq} MHz`}
             >
               <span class="tn-station-mark" aria-hidden="true"></span>
               <span class="tn-station-no mono-label">{pad(i + 1)}</span>
@@ -82,26 +77,11 @@ const first = stations[0];
           ))}
           <div class="tn-needle" id="tn-needle" aria-hidden="true"></div>
         </div>
-
-        <div class="tn-nowrow">
-          <span class="tn-now mono-label">
-            <span id="tn-idx">{pad(1)}</span>/{pad(stations.length)} ·
-            <span class="lang-zh"><span id="tn-name-zh" data-scramble>{first.titleZh}</span></span>
-            <span class="lang-en"><span id="tn-name-en" data-scramble>{first.titleEn}</span></span>
-          </span>
-          <span class="tn-hint mono-label" aria-hidden="true">
-            <span class="lang-zh">滚动或拖动红线调台 ↓</span>
-            <span class="lang-en">DRAG THE RED LINE / SCROLL TO TUNE ↓</span>
-          </span>
-          <span class="tn-signal" id="tn-signal" aria-hidden="true">
-            <i></i><i></i><i></i><i></i><i></i>
-          </span>
-        </div>
       </div>
     </div>
   </section>
 
-  <!-- ========== 项目流：sticky 叠层，下一个盖住上一个 ========== -->
+  <!-- ========== 项目流：桌面 sticky 叠层盖入，移动端短幅列表流 ========== -->
   <div class="feed" id="feed">
     {works.map((w, i) => {
       const cat = CATEGORY_MAP[w.data.category as keyof typeof CATEGORY_MAP];
@@ -129,7 +109,6 @@ const first = stations[0];
               alt={`${w.data.title} 海报`}
               loading={i <= 1 ? 'eager' : 'lazy'}
               decoding="async"
-              data-pixelate
             />
           </span>
         </a>
@@ -146,7 +125,8 @@ const first = stations[0];
     --tn-bg: #ffffff;
     --tn-fg: #121211;
     --tn-muted: #8b897f;
-    --tn-line: rgba(18, 18, 17, 0.3);
+    --tn-line: rgba(18, 18, 17, 0.32);
+    --tn-line-soft: rgba(18, 18, 17, 0.16);
     --tn-red: #e5352b;
 
     position: fixed;
@@ -163,38 +143,32 @@ const first = stations[0];
   .tuner-inner {
     max-width: var(--max-width);
     margin: 0 auto;
-    padding: 18px 32px 14px;
+    padding: 16px 32px 14px;
     display: flex;
-    align-items: stretch;
+    align-items: center;
     gap: 40px;
   }
 
-  /* 左：大字台标 */
-  .tn-left {
+  .tn-wordmark {
     flex: 1;
     min-width: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-  .tn-wordmark {
     font-family: var(--font-sans);
     font-weight: 300;
-    font-size: clamp(2rem, 4.6vw, 4rem);
-    line-height: 1.0;
+    font-size: clamp(2rem, 4.2vw, 3.75rem);
+    line-height: 1.05;
     letter-spacing: -0.01em;
     color: var(--tn-fg);
     white-space: nowrap;
+    transition: opacity var(--transition);
   }
-  .tn-tagline { margin: 10px 0 0; color: var(--tn-muted); }
+  .tn-wordmark:hover { opacity: 0.6; }
 
-  /* 右：控制区 */
   .tn-right {
-    flex: 1.4;
+    flex: 1.35;
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
   .tn-toprow {
     display: flex;
@@ -202,16 +176,26 @@ const first = stations[0];
     justify-content: flex-end;
     gap: 16px;
   }
-  .tn-nav { display: flex; gap: 14px; }
-  .tn-nav a { color: var(--tn-muted); white-space: nowrap; transition: color var(--transition); }
-  .tn-nav a:hover { color: var(--tn-fg); }
   .tn-tools { display: flex; gap: 6px; align-items: center; }
   .tn-tools :global(button) {
     background: transparent !important;
-    border-color: var(--tn-line) !important;
+    border-color: var(--tn-line-soft) !important;
     color: var(--tn-fg) !important;
     height: 28px !important;
   }
+  .tn-signal { display: inline-flex; gap: 3px; align-items: flex-end; }
+  .tn-signal i {
+    width: 4px;
+    background: var(--tn-muted);
+    opacity: 0.3;
+    transition: opacity 120ms ease, background 120ms ease;
+  }
+  .tn-signal i:nth-child(1) { height: 5px; }
+  .tn-signal i:nth-child(2) { height: 8px; }
+  .tn-signal i:nth-child(3) { height: 11px; }
+  .tn-signal i:nth-child(4) { height: 14px; }
+  .tn-signal i:nth-child(5) { height: 17px; }
+  .tn-signal i.on { background: var(--tn-red); opacity: 1; }
   .tn-freq {
     font-family: var(--font-mono);
     font-size: 1rem;
@@ -227,41 +211,77 @@ const first = stations[0];
   }
   .tn-freq small { font-size: 0.625rem; color: var(--tn-muted); letter-spacing: 0.12em; }
 
-  /* 刻度带 */
+  /* ---------- 刻度带：真实 FM 拨盘解剖 ---------- */
   .tn-scale {
     position: relative;
-    height: 58px;
+    height: 72px;
     cursor: ew-resize;
     touch-action: none;
+    /* 两端渐隐，像玻璃窗里的拨盘 */
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+  }
+  .tn-mhz {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 12px;
+    pointer-events: none;
+  }
+  .tn-mhz span {
+    position: absolute;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.08em;
+    color: var(--tn-muted);
+    font-variant-numeric: tabular-nums;
   }
   .tn-ticks {
     position: absolute;
-    inset: 8px 0 20px;
+    inset: 16px 0 22px;
+    /* 小刻度：密 */
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--tn-line-soft) 0,
+      var(--tn-line-soft) 1px,
+      transparent 1px,
+      transparent 5px
+    );
+  }
+  /* 中刻度：1MHz */
+  .tn-ticks::before {
+    content: '';
+    position: absolute;
+    inset: -3px 0 30%;
     background-image: repeating-linear-gradient(
       to right,
       var(--tn-line) 0,
       var(--tn-line) 1px,
       transparent 1px,
-      transparent 9px
+      transparent calc(100% / 20.5)
     );
   }
+  /* 大刻度：2MHz，更高更实 */
   .tn-ticks::after {
     content: '';
     position: absolute;
-    inset: -4px 0 0;
+    inset: -6px 0 0;
     background-image: repeating-linear-gradient(
       to right,
-      var(--tn-line) 0,
-      var(--tn-line) 1px,
+      var(--tn-fg) 0,
+      var(--tn-fg) 1px,
       transparent 1px,
-      transparent 45px
+      transparent calc(100% / 10.25)
     );
+    opacity: 0.55;
   }
   .tn-station {
     position: absolute;
-    top: 0;
+    top: 8px;
     bottom: 0;
-    width: 28px;
+    width: 26px;
     transform: translateX(-50%);
     background: none;
     border: none;
@@ -271,16 +291,15 @@ const first = stations[0];
   .tn-station-mark {
     position: absolute;
     left: 50%;
-    top: 2px;
-    bottom: 18px;
-    width: 3px;
+    top: 4px;
+    bottom: 16px;
+    width: 4px;
     transform: translateX(-50%);
     background: var(--tn-fg);
-    opacity: 0.8;
-    transition: opacity var(--transition), background var(--transition);
+    transition: background var(--transition);
   }
-  .tn-station:hover .tn-station-mark { opacity: 1; }
-  .tn-station.is-active .tn-station-mark { background: var(--tn-red); opacity: 1; }
+  .tn-station:hover .tn-station-mark { background: var(--tn-red); }
+  .tn-station.is-active .tn-station-mark { background: var(--tn-red); }
   .tn-station-no {
     position: absolute;
     left: 50%;
@@ -294,9 +313,9 @@ const first = stations[0];
 
   .tn-needle {
     position: absolute;
-    top: -4px;
-    bottom: 10px;
-    left: -1px; /* 2px 针身的一半，让 translateX 后针心正对频点 */
+    top: 10px;
+    bottom: 14px;
+    left: -1px; /* 2px 针身的一半，针心正对频点 */
     width: 2px;
     background: var(--tn-red);
     box-shadow: 0 0 8px rgba(229, 53, 43, 0.55);
@@ -306,46 +325,22 @@ const first = stations[0];
   .tn-needle::after {
     content: '';
     position: absolute;
-    top: -5px;
+    top: -6px;
     left: 50%;
     transform: translateX(-50%);
     border: 5px solid transparent;
     border-top-color: var(--tn-red);
   }
 
-  .tn-nowrow {
-    display: flex;
-    align-items: baseline;
-    gap: 20px;
-  }
-  .tn-now { color: var(--tn-fg) !important; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .tn-hint { flex: 1; text-align: right; color: var(--tn-muted); }
-  .tn-signal { display: inline-flex; gap: 3px; align-items: flex-end; }
-  .tn-signal i {
-    width: 4px;
-    background: var(--tn-muted);
-    opacity: 0.35;
-    transition: opacity 120ms ease, background 120ms ease;
-  }
-  .tn-signal i:nth-child(1) { height: 5px; }
-  .tn-signal i:nth-child(2) { height: 8px; }
-  .tn-signal i:nth-child(3) { height: 11px; }
-  .tn-signal i:nth-child(4) { height: 14px; }
-  .tn-signal i:nth-child(5) { height: 17px; }
-  .tn-signal i.on { background: var(--tn-red); opacity: 1; }
-
-  /* ============ 项目流：sticky 叠层 ============ */
-  /* 所有 item 同一父级、同一 sticky top：上一个钉住不动，
-     下一个从下方滑上来盖掉它（adoratorio 的 cover 滚动） */
-  .feed {
-    padding-top: var(--tuner-h, 150px);
-  }
+  /* ============ 项目流 ============ */
+  .feed { padding-top: var(--tuner-h, 140px); }
+  /* 桌面：sticky 叠层，下一个盖住上一个 */
   .feed-item {
     position: sticky;
-    top: var(--tuner-h, 150px);
+    top: var(--tuner-h, 140px);
     display: flex;
     flex-direction: column;
-    height: calc(100svh - var(--tuner-h, 150px));
+    height: calc(100svh - var(--tuner-h, 140px));
     color: var(--fg);
     background: var(--bg); /* 不透明才能盖住上一个 */
     border-top: 1px solid var(--hairline);
@@ -394,38 +389,43 @@ const first = stations[0];
     object-fit: cover;
   }
 
-  /* ============ 移动端 ============ */
+  /* ============ 移动端：adoratorio 式短幅列表流 ============ */
   @media (max-width: 768px) {
     .tuner-inner {
       flex-direction: column;
-      gap: 10px;
-      padding: 12px 20px 12px;
+      align-items: stretch;
+      gap: 8px;
+      padding: 12px 20px 10px;
     }
-    .tn-wordmark { font-size: clamp(1.5rem, 8vw, 2rem); }
-    .tn-tagline { display: none; }
-    .tn-left { flex-direction: row; align-items: center; justify-content: space-between; }
-    .tn-right { gap: 6px; }
+    .tn-wordmark { font-size: clamp(1.75rem, 9vw, 2.25rem); }
     .tn-toprow { justify-content: space-between; gap: 10px; }
     .tn-freq { font-size: 0.875rem; padding: 4px 8px; }
-    .tn-scale { height: 50px; }
-    .tn-nowrow { gap: 12px; }
-    .tn-hint { display: none; }
-    .tn-signal { margin-left: auto; }
+    .tn-scale { height: 62px; }
 
-    .feed-meta { flex-wrap: wrap; gap: 6px 12px; padding: 12px 20px; }
-    .feed-title { white-space: normal; flex-basis: 100%; order: 5; }
-    .feed-view { margin-left: 0; }
+    /* 列表流：不 sticky、不占满屏，短幅海报一条条排 */
+    .feed-item {
+      position: static;
+      height: auto;
+    }
+    .feed-meta { flex-wrap: wrap; gap: 4px 12px; padding: 12px 20px; }
+    .feed-title { white-space: normal; flex-basis: 100%; order: 5; font-size: 1.25rem; }
+    .feed-view { display: none; } /* 整卡可点，链接提示省掉 */
+    .feed-poster {
+      flex: none;
+      height: clamp(150px, 30vh, 260px);
+    }
   }
 </style>
 
 <script>
   // ============================================================
-  // 固定调频器 + sticky 叠层项目流：滚动即调台
-  //  · 滚动进度 = 项目序号插值；项目完整在屏时指针「咬」在频点上（棘轮凹槽）
-  //  · 过渡段（下一张盖上来的过程）指针滑向下一频点、信号衰减
-  //  · 拖红线松手 / 点频点 / 方向键 → 平滑滚动到对应项目
+  // 调频器物理 + 项目流
+  //  · 指针有配重：目标位置 → 物理位置 lerp 追赶（拖动跟手、滚动带滞后）
+  //  · 拖动带惯性：松手按速度投掷，滑行落到投影最近的频点（可甩过多台）
+  //  · 盖入质感：新海报按覆盖进度分档粗像素 → 锁台瞬间变清晰（收到信号）
+  //  · 桌面 sticky 叠层 / 移动端列表流，几何计算分模式
   // ============================================================
-  type Station = { id: string; pos: number; freq: string; titleZh: string; titleEn: string };
+  type Station = { id: string; pos: number; freq: string };
 
   function setupTuner() {
     const tuner = document.getElementById('tuner');
@@ -441,15 +441,13 @@ const first = stations[0];
     const scale = document.getElementById('tn-scale')!;
     const needle = document.getElementById('tn-needle')!;
     const freqEl = document.getElementById('tn-freq')!;
-    const idxEl = document.getElementById('tn-idx')!;
-    const nameZh = document.getElementById('tn-name-zh')!;
-    const nameEn = document.getElementById('tn-name-en')!;
     const signalBars = Array.from(document.querySelectorAll('#tn-signal i'));
     const stationBtns = Array.from(tuner.querySelectorAll<HTMLElement>('.tn-station'));
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const pad2 = (n: number) => String(n + 1).padStart(2, '0');
+    const mobileMq = window.matchMedia('(max-width: 768px)');
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+    const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 
     let currentIdx = -1;
     let dragging = false;
@@ -461,56 +459,170 @@ const first = stations[0];
     setPanelH();
     new ResizeObserver(setPanelH).observe(tuner);
 
-    // ---------- 指针/读数绘制 ----------
-    const setNeedle = (v: number) => {
+    // ---------- 指针物理：target → physical 追赶 ----------
+    let tv = stations[0].pos; // 逻辑目标
+    let pv = tv;              // 物理位置（画出来的）
+    let physRaf = 0;
+    const drawNeedle = (v: number) => {
       needle.style.transform = `translateX(${v * scale.clientWidth}px)`;
       freqEl.innerHTML = (87.5 + v * (108 - 87.5)).toFixed(1) + '<small> MHz</small>';
     };
+    const physTick = () => {
+      // 拖动时跟手快（0.5），滚动驱动时带配重滞后（0.22）
+      pv += (tv - pv) * (reduced ? 1 : dragging ? 0.5 : 0.22);
+      if (Math.abs(tv - pv) < 0.0004) {
+        pv = tv;
+        drawNeedle(pv);
+        physRaf = 0;
+        return;
+      }
+      drawNeedle(pv);
+      physRaf = requestAnimationFrame(physTick);
+    };
+    const setTarget = (v: number) => {
+      tv = clamp01(v);
+      if (!physRaf) physRaf = requestAnimationFrame(physTick);
+    };
 
-    // ---------- 台名切换 ----------
-    const scrambleEl = (el: HTMLElement) => (window as any).__fx?.scramble?.(el, { stagger: 16, jitter: 80 });
+    // ---------- 盖入质感：按覆盖进度给海报分档粗像素 ----------
+    type Pix = { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D; tiny: HTMLCanvasElement; tctx: CanvasRenderingContext2D; level: number };
+    const pixMap = new Map<HTMLElement, Pix>();
+    const FACTORS = [0.02, 0.05, 0.12, 0.26];
+
+    const pixFor = (item: HTMLElement): Pix | null => {
+      let p = pixMap.get(item);
+      if (p) return p;
+      const host = item.querySelector<HTMLElement>('.feed-poster');
+      if (!host) return null;
+      const canvas = document.createElement('canvas');
+      canvas.className = 'px-canvas';
+      const ctx = canvas.getContext('2d');
+      const tiny = document.createElement('canvas');
+      const tctx = tiny.getContext('2d');
+      if (!ctx || !tctx) return null;
+      host.appendChild(canvas);
+      p = { canvas, ctx, tiny, tctx, level: -1 };
+      pixMap.set(item, p);
+      return p;
+    };
+
+    // level: 0..3 = 粗→细遮罩，-1 = 清晰（隐藏遮罩）
+    const setPixLevel = (item: HTMLElement, level: number) => {
+      if (reduced) level = -1;
+      const p = pixFor(item);
+      if (!p) return;
+      if (level === p.level) return;
+      p.level = level;
+      if (level < 0) { p.canvas.style.display = 'none'; return; }
+      const img = item.querySelector<HTMLImageElement>('.feed-poster img');
+      const host = item.querySelector<HTMLElement>('.feed-poster');
+      if (!img || !host || !img.complete || !img.naturalWidth) { p.canvas.style.display = 'none'; p.level = -1; return; }
+      const w = host.clientWidth, h = host.clientHeight;
+      if (!w || !h) return;
+      p.canvas.width = w; p.canvas.height = h;
+      p.canvas.style.display = 'block';
+      const f = FACTORS[Math.min(level, FACTORS.length - 1)];
+      const tw = Math.max(2, Math.round(w * f));
+      const th = Math.max(2, Math.round(h * f));
+      p.tiny.width = tw; p.tiny.height = th;
+      const s = Math.max(tw / img.naturalWidth, th / img.naturalHeight);
+      p.tctx.imageSmoothingEnabled = true;
+      p.tctx.drawImage(img, (tw - img.naturalWidth * s) / 2, (th - img.naturalHeight * s) / 2, img.naturalWidth * s, img.naturalHeight * s);
+      p.ctx.imageSmoothingEnabled = false;
+      p.ctx.clearRect(0, 0, w, h);
+      p.ctx.drawImage(p.tiny, 0, 0, tw, th, 0, 0, w, h);
+    };
+
+    // 覆盖进度 → 档位：刚探头最糊，快盖满时变清
+    const levelFromFrac = (frac: number) =>
+      frac < 0.3 ? 0 : frac < 0.55 ? 1 : frac < 0.78 ? 2 : frac < 0.94 ? 3 : -1;
+
+    // ---------- 几何：当前进度 (i, frac) ----------
+    const itemH = () => items[0].offsetHeight || 1;
+    const anchorY = (el: HTMLElement) => {
+      const r = el.getBoundingClientRect();
+      return r.top + r.height / 2 - window.innerHeight / 2;
+    };
+    const progress = (): { i: number; frac: number } => {
+      if (!mobileMq.matches) {
+        const raw = Math.min(items.length - 1, Math.max(0, window.scrollY / itemH()));
+        const i = Math.min(items.length - 2, Math.floor(raw));
+        return { i, frac: Math.min(1, raw - i) };
+      }
+      // 移动端列表流：视口中心在哪两个项目中心之间
+      let i = 0;
+      while (i < items.length - 1 && anchorY(items[i + 1]) < 0) i++;
+      const a = anchorY(items[i]);
+      if (a >= 0 || i === items.length - 1) return { i, frac: 0 };
+      const b = anchorY(items[i + 1]);
+      return { i, frac: clamp01(a / (a - b)) };
+    };
+
+    // ---------- 棘轮凹槽 ----------
+    const DETENT = 0.18;
+    const detent = (t: number) => (t <= DETENT ? 0 : t >= 1 - DETENT ? 1 : (t - DETENT) / (1 - 2 * DETENT));
+
     const setStation = (i: number) => {
       if (i === currentIdx) return;
       currentIdx = i;
-      const s = stations[i];
-      idxEl.textContent = pad2(i);
-      for (const [el, txt] of [[nameZh, s.titleZh], [nameEn, s.titleEn]] as [HTMLElement, string][]) {
-        el.dataset.fxText = txt;
-        el.textContent = txt;
-        if (!reduced) scrambleEl(el);
-      }
       stationBtns.forEach((b, bi) => b.classList.toggle('is-active', bi === i));
     };
 
-    // ---------- 滚动进度 → 指针（棘轮凹槽手感） ----------
-    // sticky 叠层里 rect 不再随滚动变，直接用 scrollY / 单项高度算进度
-    const itemH = () => items[0].offsetHeight || 1;
-
-    // 凹槽：过渡段前后各 18% 内指针咬死在频点上
-    const DETENT = 0.18;
-    const detent = (t: number) => {
-      if (t <= DETENT) return 0;
-      if (t >= 1 - DETENT) return 1;
-      return (t - DETENT) / (1 - 2 * DETENT);
-    };
-
     const renderFromScroll = () => {
-      const raw = Math.min(items.length - 1, Math.max(0, window.scrollY / itemH()));
-      const i = Math.min(items.length - 2, Math.floor(raw));
-      const frac = raw - i; // 0=第 i 张完整在屏，1=第 i+1 张完整盖上
-
-      const isLast = raw >= items.length - 1;
-      const t = isLast ? 1 : detent(frac);
-      const v = isLast ? stations[items.length - 1].pos : lerp(stations[i].pos, stations[i + 1].pos, t);
-      setNeedle(v);
+      const { i, frac } = progress();
+      const t = detent(frac);
+      const v = i >= items.length - 1 ? stations[items.length - 1].pos : lerp(stations[i].pos, stations[i + 1].pos, t);
+      setTarget(v);
 
       // 信号：锁台满格，过渡段中点归零
-      const off = isLast ? 0 : Math.min(frac, 1 - frac) * 2; // 0=锁台 1=正中间
-      const p = Math.max(0, 1 - off * 1.6);
+      const off = Math.min(frac, 1 - frac) * 2;
+      const p = frac === 0 ? 1 : Math.max(0, 1 - off * 1.6);
       signalBars.forEach((b, bi) => b.classList.toggle('on', bi < Math.round(p * 5)));
 
-      setStation(isLast ? items.length - 1 : frac < 0.5 ? i : i + 1);
+      setStation(frac < 0.5 ? i : Math.min(items.length - 1, i + 1));
+
+      // 桌面：盖入的下一张按进度上纹理；当前张与其余清晰
+      // 移动端列表流多项同屏，滚动驱动会一直闪——改为进视口一次性揭示（见下方 IO）
+      if (!mobileMq.matches) {
+        if (i + 1 < items.length) setPixLevel(items[i + 1], frac === 0 ? -1 : levelFromFrac(frac));
+        setPixLevel(items[i], -1);
+        if (i + 2 < items.length) setPixLevel(items[i + 2], 0); // 预热再下一张（懒加载后首帧糊住）
+      }
     };
+
+    // 一次性阶梯揭示（开机 / 移动端进视口用）
+    const revealOnce = (item: HTMLElement) => {
+      if (reduced) return;
+      const img = item.querySelector<HTMLImageElement>('.feed-poster img');
+      const run = () => {
+        let lv = 0;
+        setPixLevel(item, 0);
+        const step = () => {
+          lv++;
+          if (lv > 3) { setPixLevel(item, -1); return; }
+          setPixLevel(item, lv);
+          setTimeout(step, 110);
+        };
+        setTimeout(step, 110);
+      };
+      if (img?.complete && img.naturalWidth) run();
+      else img?.addEventListener('load', run, { once: true });
+    };
+
+    // 移动端：项目进视口时播一次像素揭示
+    const seen = new WeakSet<Element>();
+    const io = new IntersectionObserver(
+      entries => {
+        for (const e of entries) {
+          if (!e.isIntersecting || seen.has(e.target)) continue;
+          seen.add(e.target);
+          io.unobserve(e.target);
+          if (mobileMq.matches) revealOnce(e.target as HTMLElement);
+        }
+      },
+      { threshold: 0.25 }
+    );
+    items.slice(1).forEach(it => io.observe(it));
 
     let ticking = false;
     const onScroll = () => {
@@ -525,34 +637,47 @@ const first = stations[0];
 
     // ---------- 指针 → 滚动 ----------
     const scrollToItem = (i: number) => {
-      window.scrollTo({ top: i * itemH(), behavior: reduced ? 'auto' : 'smooth' });
+      const top = mobileMq.matches ? items[i].offsetTop - tuner.offsetHeight : i * itemH();
+      window.scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' });
     };
 
-    // 拖红线：跟手移动，松手吸到最近频点并滚过去
-    let ghostV = 0;
-    const dragTo = (clientX: number) => {
+    // 拖红线：跟手 + 速度采样；松手按惯性投掷落台
+    let lastX = 0, lastT = 0, velocity = 0; // velocity: pos/ms
+    const posFromX = (clientX: number) => {
       const rect = scale.getBoundingClientRect();
-      ghostV = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
-      setNeedle(ghostV);
+      return clamp01((clientX - rect.left) / rect.width);
     };
     scale.addEventListener('pointerdown', e => {
       if ((e.target as HTMLElement).closest('.tn-station')) return; // 频点交给 click
       dragging = true;
       scale.setPointerCapture(e.pointerId);
-      dragTo(e.clientX);
+      lastX = e.clientX;
+      lastT = performance.now();
+      velocity = 0;
+      setTarget(posFromX(e.clientX));
     });
     scale.addEventListener('pointermove', e => {
-      if (dragging) dragTo(e.clientX);
+      if (!dragging) return;
+      const now = performance.now();
+      const x = posFromX(e.clientX);
+      const dt = Math.max(1, now - lastT);
+      velocity = velocity * 0.7 + ((x - posFromX(lastX)) / dt) * 0.3; // 平滑速度
+      lastX = e.clientX;
+      lastT = now;
+      setTarget(x);
     });
     const endDrag = () => {
       if (!dragging) return;
       dragging = false;
+      // 惯性投影：往速度方向多滑一段（甩得越快滑得越远），落到投影最近的频点
+      const projected = clamp01(tv + velocity * 140);
       let best = 0, bd = Infinity;
       stations.forEach((s, i) => {
-        const d = Math.abs(s.pos - ghostV);
+        const d = Math.abs(s.pos - projected);
         if (d < bd) { bd = d; best = i; }
       });
       scrollToItem(best);
+      velocity = 0;
     };
     scale.addEventListener('pointerup', endDrag);
     scale.addEventListener('pointercancel', endDrag);
@@ -573,8 +698,12 @@ const first = stations[0];
       scrollToItem(next);
     });
 
-    // 初始
+    // 断点切换时几何模型变了，重算一帧
+    mobileMq.addEventListener?.('change', () => renderFromScroll());
+
+    // 初始：第一张做一次快速开机揭示
     renderFromScroll();
+    if (window.scrollY < itemH() * 0.5) revealOnce(items[0]);
   }
 
   setupTuner();
