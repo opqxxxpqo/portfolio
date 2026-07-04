@@ -23,6 +23,9 @@ links:
   - label: "在新窗口打开完整体验"
     labelEn: "Open the full experience in a new tab"
     url: https://texas-holdem-cw4a.onrender.com/
+  - label: "GitHub 仓库"
+    labelEn: "GitHub repo"
+    url: https://github.com/opqxxxpqo/game-texas-holdem
 embeds:
   - url: https://texas-holdem-cw4a.onrender.com/
     height: 720

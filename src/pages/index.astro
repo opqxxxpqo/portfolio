@@ -91,6 +91,7 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
       <ol class="work-rows">
         {works.map((w, i) => {
           const cat = CATEGORY_MAP[w.data.category as keyof typeof CATEGORY_MAP];
+          const quickLinks = Array.isArray((w.data as any).links) ? (w.data as any).links.slice(0, 3) : [];
           return (
             <li class="work-row" data-cat={w.data.category} data-ai={w.data.ai ? '1' : '0'}>
               <details name="works" class="work-details">
@@ -114,10 +115,18 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
                       <span class="lang-zh">{w.data.summary}</span>
                       <span class="lang-en">{(w.data as any).summaryEn || w.data.summary}</span>
                     </p>
-                    <a href={`/works/${w.id}`} class="row-link" data-astro-prefetch>
-                      <span class="lang-zh">查看作品 →</span>
-                      <span class="lang-en">View work →</span>
-                    </a>
+                    <div class="row-actions">
+                      <a href={`/works/${w.id}`} class="row-link" data-astro-prefetch>
+                        <span class="lang-zh">查看 case study →</span>
+                        <span class="lang-en">View case study →</span>
+                      </a>
+                      {quickLinks.map((link: any) => (
+                        <a href={link.url} class="row-link row-link--secondary" target="_blank" rel="noopener">
+                          <span class="lang-zh">{link.label}</span>
+                          <span class="lang-en">{link.labelEn || link.label}</span>
+                        </a>
+                      ))}
+                    </div>
                   </div>
                   {!w.data.hideListCover && (
                     <a href={`/works/${w.id}`} class={`row-cover row-cover--${w.data.coverFit || 'cover'}`} data-astro-prefetch aria-label={`${w.data.title} 详情`}>
@@ -139,9 +148,10 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
       <div class="grid">
         {works.map(w => {
           const cat = CATEGORY_MAP[w.data.category as keyof typeof CATEGORY_MAP];
+          const hasDemo = Array.isArray((w.data as any).embeds) && (w.data as any).embeds.length > 0;
           return (
             <a href={`/works/${w.id}`} class="grid-card" data-cat={w.data.category} data-ai={w.data.ai ? '1' : '0'} data-astro-prefetch>
-              <div class="card-cover">
+              <div class={`card-cover card-cover--${w.data.coverFit || 'cover'}`}>
                 <img src={w.data.cover} alt={`${w.data.title} 封面`} loading="lazy" decoding="async" />
               </div>
               <div class="card-body">
@@ -151,6 +161,12 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
                     <span class="lang-zh">{w.data.chip || cat?.labelZh || cat?.label || w.data.category}</span>
                     <span class="lang-en">{w.data.chipEn || w.data.chip || cat?.label || w.data.category}</span>
                   </span>
+                  {hasDemo && (
+                    <span class="card-demo">
+                      <span class="lang-zh">Demo</span>
+                      <span class="lang-en">Demo</span>
+                    </span>
+                  )}
                 </div>
 
                 <h3 class="card-title">
@@ -418,6 +434,12 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
     color: var(--fg-soft);
     margin: 0;
   }
+  .row-actions {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
   .row-link {
     align-self: flex-start;
     font-family: var(--font-mono);
@@ -432,6 +454,16 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
   .row-link:hover {
     background: var(--accent);
     color: var(--accent-text);
+  }
+  .row-link--secondary {
+    border: var(--border-w) solid var(--border);
+    padding: 4px 10px;
+    color: var(--fg-soft);
+    background: transparent;
+    font-size: 0.8125rem;
+  }
+  .row-link--secondary:hover {
+    border-color: var(--accent);
   }
   .row-cover {
     display: block;
@@ -497,10 +529,15 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
     object-fit: cover;
     transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
   }
+  .card-cover--contain img {
+    object-fit: contain;
+    background: var(--bg-soft);
+  }
   .grid-card:hover .card-cover img { transform: scale(1.03); }
   .card-body { padding: 20px; }
   .card-meta {
     display: flex;
+    flex-wrap: wrap;
     gap: 12px;
     font-family: var(--font-mono);
     font-size: 0.75rem;
@@ -510,6 +547,13 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
     color: var(--fg-muted);
   }
   .grid-card:hover .card-meta { color: var(--invert-fg); opacity: 0.7; }
+  .card-demo {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .grid-card:hover .card-demo {
+    color: var(--invert-fg);
+  }
   .card-title {
     font-family: var(--font-display);
     font-size: 1.25rem;
