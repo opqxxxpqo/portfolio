@@ -566,6 +566,17 @@ const mhzPos = (f: number) => ((f - 87.5) / (108 - 87.5)) * 100;
       if (i === currentIdx) return;
       currentIdx = i;
       stationBtns.forEach((b, bi) => b.classList.toggle('is-active', bi === i));
+
+      // 项目划上来的到位瞬间：标题乱码翻牌 + 海报像素揭示
+      if (!reduced) {
+        items[i]
+          .querySelectorAll<HTMLElement>('.feed-title .lang-zh, .feed-title .lang-en')
+          .forEach(el => {
+            if (el.offsetParent !== null) (window as any).__fx?.scramble?.(el, { stagger: 18, jitter: 90 });
+          });
+        // 移动端图像由进视口 IO 负责，避免中心穿越时反复重播
+        if (!mobileMq.matches) revealOnce(items[i]);
+      }
     };
 
     const renderFromScroll = () => {
@@ -583,23 +594,35 @@ const mhzPos = (f: number) => ((f - 87.5) / (108 - 87.5)) * 100;
 
       // 桌面：盖入的下一张按进度上纹理；当前张与其余清晰
       // 移动端列表流多项同屏，滚动驱动会一直闪——改为进视口一次性揭示（见下方 IO）
+      // 正在播放到位揭示的项目不覆写，避免两个写入源打架
       if (!mobileMq.matches) {
-        if (i + 1 < items.length) setPixLevel(items[i + 1], frac === 0 ? -1 : levelFromFrac(frac));
-        setPixLevel(items[i], -1);
-        if (i + 2 < items.length) setPixLevel(items[i + 2], 0); // 预热再下一张（懒加载后首帧糊住）
+        if (i + 1 < items.length && !revealing.has(items[i + 1]))
+          setPixLevel(items[i + 1], frac === 0 ? -1 : levelFromFrac(frac));
+        if (!revealing.has(items[i])) setPixLevel(items[i], -1);
+        if (i + 2 < items.length && !revealing.has(items[i + 2]))
+          setPixLevel(items[i + 2], 0); // 预热再下一张（懒加载后首帧糊住）
       }
     };
 
-    // 一次性阶梯揭示（开机 / 移动端进视口用）
+    // 一次性阶梯揭示（到位瞬间 / 移动端进视口用）
+    // revealing 集合：揭示进行中的项目，滚动驱动的纹理写入要让路
+    const revealing = new WeakSet<HTMLElement>();
     const revealOnce = (item: HTMLElement) => {
-      if (reduced) return;
+      if (reduced || revealing.has(item)) return;
       const img = item.querySelector<HTMLImageElement>('.feed-poster img');
       const run = () => {
-        let lv = 0;
-        setPixLevel(item, 0);
+        revealing.add(item);
+        // 从当前档位继续（慢滚时已有 frac 纹理，别从最糊重头闪）
+        const cur = pixMap.get(item)?.level ?? -1;
+        let lv = cur >= 0 ? cur : 0;
+        setPixLevel(item, lv);
         const step = () => {
           lv++;
-          if (lv > 3) { setPixLevel(item, -1); return; }
+          if (lv > 3) {
+            setPixLevel(item, -1);
+            revealing.delete(item);
+            return;
+          }
           setPixLevel(item, lv);
           setTimeout(step, 110);
         };
@@ -701,9 +724,8 @@ const mhzPos = (f: number) => ((f - 87.5) / (108 - 87.5)) * 100;
     // 断点切换时几何模型变了，重算一帧
     mobileMq.addEventListener?.('change', () => renderFromScroll());
 
-    // 初始：第一张做一次快速开机揭示
+    // 初始：setStation 会给当前项目播开机揭示 + 标题翻牌
     renderFromScroll();
-    if (window.scrollY < itemH() * 0.5) revealOnce(items[0]);
   }
 
   setupTuner();
