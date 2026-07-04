@@ -30,6 +30,9 @@ links:
   - label: "下载安卓版 APK"
     labelEn: "Download the Android APK"
     url: https://github.com/opqxxxpqo/lofi-motion-cam/releases/download/v2.0.2/LoFiMotionCam-2.0.2.apk
+  - label: "GitHub 仓库"
+    labelEn: "GitHub repo"
+    url: https://github.com/opqxxxpqo/lofi-motion-cam
 embeds:
   - url: https://opqxxxpqo.github.io/lofi-motion-cam/
     height: 780
