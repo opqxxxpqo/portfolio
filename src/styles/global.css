@@ -197,6 +197,15 @@ p { margin: 0 0 1em; }
 }
 .prose ul, .prose ol { padding-left: 1.5em; margin-bottom: 1em; }
 .prose li { margin-bottom: 0.4em; }
+/* 正文插图：限高，避免竖屏截图按全宽渲染成巨型图 */
+.prose img {
+  display: block;
+  max-width: 100%;
+  max-height: 70vh;
+  width: auto;
+  margin: 1.5em auto;
+  border: var(--border-w) solid var(--border);
+}
 .prose strong { color: var(--fg); font-weight: 700; }
 .prose code {
   font-family: var(--font-mono);

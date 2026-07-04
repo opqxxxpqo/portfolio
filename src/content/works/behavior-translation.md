@@ -55,7 +55,3 @@ V1 浏览器键鼠模拟 → V2 桌面级全局行为捕捉 → V3 不同行为�
 ## 使用工具
 
 Claude Code、Codex、Python、HTML / JavaScript · 约 1–2 天
-
-## 如果重做一次
-
-加一层长期行为记忆，让音乐能跨多天持续演化，而不只是反映单次 session；音色也按行为密度判断情绪、做得更丰富。或者干脆并进 Human Token 里。

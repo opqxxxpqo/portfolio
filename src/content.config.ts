@@ -57,7 +57,20 @@ const works = defineCollection({
     // 多媒体字段，按需启用
     gallery: z.array(z.string()).optional(),
     bilibili: z.array(z.string()).optional(),     // BV 号数组
-    videos: z.array(z.string()).optional(),       // 自托管 mp4 路径
+    // 自托管 mp4：字符串 = 默认播放器（带控件、点击播放）
+    // 对象形式可加 loop: true = GIF 式自动循环播放（静音、无控件），适合动态演示素材
+    videos: z
+      .array(
+        z.union([
+          z.string(),
+          z.object({
+            src: z.string(),
+            loop: z.boolean().optional().default(false),
+            poster: z.string().optional()
+          })
+        ])
+      )
+      .optional(),
     pdfs: z.array(z.string()).optional(),
     models: z.array(z.string()).optional(),       // .glb 路径
     embeds: z

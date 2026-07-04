@@ -21,7 +21,3 @@ V1 in-browser keyboard/mouse simulation → V2 OS-level global capture → V3 di
 ## Built with
 
 Claude Code, Codex, Python, HTML / JavaScript · ~1–2 days
-
-## If I rebuilt this
-
-Add long-term behavioral memory so the music keeps evolving across days instead of resetting each session, and make timbre richer by reading emotion from behavior density. Or fold it straight into Human Token.

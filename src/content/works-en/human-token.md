@@ -22,10 +22,6 @@ V1 browser counter → V2 desktop floating widget → V3 local persistence and c
 
 Claude Code, Codex, Tauri, Rust, vanilla JS · ~half a day
 
-## If I rebuilt this
-
-Swap the hard cap for a rolling decay, so the number behaves like a long-term metabolism instead of a counter that hits a ceiling.
-
 ---
 
 > The embed above is the browser-simulated build: for security an iframe only hears events fired inside it, so **click into the frame before you start typing**. It has no 5-hour rolling window (just a 200k hard cap), and the collapse is only a CSS transition — not as smooth as the desktop app's native window.

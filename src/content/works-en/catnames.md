@@ -21,7 +21,3 @@ V1 local single-device prototype, HTTP Cats in place of word cards → V2 LAN / 
 ## Built with
 
 Claude Code, Codex, Socket.IO, Express · ~2–3 days
-
-## If I rebuilt this
-
-Add asymmetric mobile play, giving different players different kinds of information.

@@ -299,7 +299,11 @@ const containerClass = data.longform ? 'container-narrow' : 'container';
             <span class="lang-zh">视频</span>
             <span class="lang-en">Video</span>
           </h2>
-          {data.videos.map((v: string) => <VideoPlayer src={v} poster={data.cover} title={data.title} />)}
+          {data.videos.map((v: string | { src: string; loop?: boolean; poster?: string }) =>
+            typeof v === 'string'
+              ? <VideoPlayer src={v} poster={data.cover} title={data.title} />
+              : <VideoPlayer src={v.src} poster={v.poster} title={data.title} loop={v.loop} />
+          )}
         </section>
       )}
 

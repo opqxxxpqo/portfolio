@@ -46,7 +46,3 @@ V1 Draft + Poker 基础循环 → V2 AI 行为调校 → V3 UI 可读性与节�
 ## 使用工具
 
 Claude Code、ChatGPT、Figma · 约 1–2 天
-
-## 如果重做一次
-
-加长期 meta 成长，让玩家慢慢养成自己的长期打法。

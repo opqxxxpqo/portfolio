@@ -20,7 +20,3 @@ V1 draft + poker core loop → V2 AI behavior tuning → V3 UI readability and p
 ## Built with
 
 Claude Code, ChatGPT, Figma · ~1–2 days
-
-## If I rebuilt this
-
-Add long-term meta progression so players gradually grow their own style.

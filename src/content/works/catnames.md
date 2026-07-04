@@ -48,7 +48,3 @@ V1 本地单机原型，用 HTTP Cats 替代传统词卡 → V2 局域网 / 同�
 ## 使用工具
 
 Claude Code、Codex、Socket.IO、Express · 约 2–3 天
-
-## 如果重做一次
-
-加移动端非对称玩法，让不同玩家拿到不同类型的信息。

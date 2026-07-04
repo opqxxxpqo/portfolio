@@ -1,22 +1,27 @@
 ---
 // 自托管 mp4 播放器。默认静音 + 显示控件 + lazy metadata。
 // 不开 autoplay：避免移动端流量浪费 / 让用户自己点。
+// loop 模式例外：GIF 式自动循环（autoplay + loop + 无控件），给动态演示素材用，
+// 静音自动播放是浏览器允许的，但视频本身要压小（≤5MB）。
 export interface Props {
   src: string;
   poster?: string;
   title?: string;
+  loop?: boolean;
 }
-const { src, poster, title } = Astro.props;
+const { src, poster, title, loop = false } = Astro.props;
 ---
 
 <div class="video-block">
   <video
     src={src}
     poster={poster}
-    controls
+    controls={!loop}
     muted
     playsinline
-    preload="metadata"
+    autoplay={loop}
+    loop={loop}
+    preload={loop ? 'auto' : 'metadata'}
     title={title}
   >
     <span class="lang-zh">你的浏览器不支持 video 标签。<a href={src} download>点此下载视频 ↓</a></span>
