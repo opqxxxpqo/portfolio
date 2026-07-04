@@ -16,7 +16,7 @@ const { title, description, ogImage, noindex } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="zh-CN" data-theme="dark">
+<html lang="zh-CN" data-theme="light">
   <head>
     <!-- 语言初始化：早于渲染读 localStorage / navigator.language 决定中英。
          设置 <html lang> 后所有 .lang-zh / .lang-en CSS 规则会立刻生效，避免闪烁。 -->
@@ -105,5 +105,8 @@ const { title, description, ogImage, noindex } = Astro.props;
     <Header />
     <main id="main"><slot /></main>
     <Footer />
+    <script>
+      import '~/scripts/fx';
+    </script>
   </body>
 </html>

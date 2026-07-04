@@ -9,15 +9,17 @@ const isActive = (href: string) => {
 };
 
 const navItems = [
-  { href: '/', zh: '首页', en: 'Home' },
-  { href: '/categories', zh: '分类', en: 'Categories' },
-  { href: '/about', zh: '关于我', en: 'About' }
+  { href: '/', zh: '首页', en: 'INDEX' },
+  { href: '/categories', zh: '分类', en: 'CATEGORIES' },
+  { href: '/about', zh: '关于', en: 'ABOUT' }
 ];
 ---
 
 <header class="site-header">
   <div class="header-inner">
-    <a href="/" class="brand">Qi Lu</a>
+    <a href="/" class="brand" data-scramble-hover>
+      <span data-scramble>QI LU®</span>
+    </a>
     <nav>
       <ul>
         {navItems.map(item => (
@@ -25,9 +27,10 @@ const navItems = [
             <a
               href={item.href}
               class={isActive(item.href) ? 'nav-link is-active' : 'nav-link'}
+              data-scramble-hover
             >
-              <span class="lang-zh">{item.zh}</span>
-              <span class="lang-en">{item.en}</span>
+              <span class="lang-zh"><span data-scramble>{item.zh}</span></span>
+              <span class="lang-en"><span data-scramble>{item.en}</span></span>
             </a>
           </li>
         ))}
@@ -46,59 +49,54 @@ const navItems = [
     top: 0;
     z-index: 50;
     background: var(--bg);
-    border-bottom: var(--border-w) solid var(--border);
+    border-bottom: 1px solid var(--hairline);
   }
   .header-inner {
     max-width: var(--max-width);
     margin: 0 auto;
-    padding: 18px 32px;
+    padding: 16px 32px;
     display: flex;
     align-items: center;
     gap: 40px;
   }
   .brand {
-    font-family: var(--font-display);
-    font-weight: 900;
-    font-size: 1.25rem;
-    letter-spacing: -0.01em;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.9375rem;
+    letter-spacing: 0.08em;
     color: var(--fg);
-    text-transform: uppercase;
   }
-  nav { flex: 1; }
+  nav { flex: 1; display: flex; justify-content: flex-end; }
   nav ul {
     list-style: none;
     display: flex;
-    gap: 4px;
+    gap: 28px;
     padding: 0;
     margin: 0;
   }
   .nav-link {
     display: inline-block;
-    padding: 6px 14px;
-    font-size: 0.9375rem;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
     font-weight: 600;
-    color: var(--fg);
-    border: var(--border-w) solid transparent;
-    transition: all var(--transition);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    transition: color var(--transition);
   }
-  .nav-link:hover {
-    background: var(--fg);
-    color: var(--bg);
-  }
+  .nav-link:hover { color: var(--fg); }
   .nav-link.is-active {
-    border-color: var(--fg);
+    color: var(--fg);
+    border-bottom: 1px solid var(--fg);
+    padding-bottom: 2px;
   }
-  .nav-link.is-active:hover {
-    background: var(--fg);
-    color: var(--bg);
-  }
-  .header-tools { display: flex; gap: 8px; align-items: center; }
+  .header-tools { display: flex; gap: 8px; align-items: center; margin-left: 12px; }
 
   @media (max-width: 640px) {
-    .header-inner { gap: 12px; padding: 14px 20px; }
-    nav ul { gap: 2px; }
-    .nav-link { padding: 4px 8px; font-size: 0.875rem; }
-    .brand { font-size: 1rem; }
-    .header-tools { gap: 4px; }
+    .header-inner { gap: 12px; padding: 12px 20px; }
+    nav ul { gap: 14px; }
+    .nav-link { font-size: 0.6875rem; letter-spacing: 0.08em; }
+    .brand { font-size: 0.8125rem; }
+    .header-tools { gap: 4px; margin-left: 0; }
   }
 </style>
