@@ -573,105 +573,12 @@ for (let f = 88; f <= 108; f += 0.5) {
       if (!physRaf) physRaf = requestAnimationFrame(physTick);
     };
 
-    // ---------- 像素遮罩 ----------
-    type Pix = { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D; tiny: HTMLCanvasElement; tctx: CanvasRenderingContext2D; level: number };
-    const pixMap = new Map<HTMLElement, Pix>();
-    const FACTORS = [0.02, 0.05, 0.12, 0.26];
-
-    const pixFor = (item: HTMLElement): Pix | null => {
-      let p = pixMap.get(item);
-      if (p) return p;
-      const host = item.querySelector<HTMLElement>('.feed-poster');
-      if (!host) return null;
-      const canvas = document.createElement('canvas');
-      canvas.className = 'px-canvas';
-      const ctx = canvas.getContext('2d');
-      const tiny = document.createElement('canvas');
-      const tctx = tiny.getContext('2d');
-      if (!ctx || !tctx) return null;
-      host.appendChild(canvas);
-      p = { canvas, ctx, tiny, tctx, level: -1 };
-      pixMap.set(item, p);
-      return p;
-    };
-
-    const setPixLevel = (item: HTMLElement, level: number) => {
-      if (reduced) level = -1;
-      const p = pixFor(item);
-      if (!p) return;
-      if (level === p.level) return;
-      p.level = level;
-      if (level < 0) { p.canvas.style.display = 'none'; return; }
-      const img = item.querySelector<HTMLImageElement>('.feed-poster img');
-      const host = item.querySelector<HTMLElement>('.feed-poster');
-      if (!img || !host || !img.complete || !img.naturalWidth) { p.canvas.style.display = 'none'; p.level = -1; return; }
-      const w = host.clientWidth, h = host.clientHeight;
-      if (!w || !h) return;
-      p.canvas.width = w; p.canvas.height = h;
-      p.canvas.style.display = 'block';
-      const f = FACTORS[Math.min(level, FACTORS.length - 1)];
-      const tw = Math.max(2, Math.round(w * f));
-      const th = Math.max(2, Math.round(h * f));
-      p.tiny.width = tw; p.tiny.height = th;
-      const s = Math.max(tw / img.naturalWidth, th / img.naturalHeight);
-      p.tctx.imageSmoothingEnabled = true;
-      p.tctx.drawImage(img, (tw - img.naturalWidth * s) / 2, (th - img.naturalHeight * s) / 2, img.naturalWidth * s, img.naturalHeight * s);
-      p.ctx.imageSmoothingEnabled = false;
-      p.ctx.clearRect(0, 0, w, h);
-      p.ctx.drawImage(p.tiny, 0, 0, tw, th, 0, 0, w, h);
-    };
-
-    const levelFromFrac = (frac: number) =>
-      frac < 0.3 ? 0 : frac < 0.55 ? 1 : frac < 0.78 ? 2 : frac < 0.94 ? 3 : -1;
-
-    // 一次性阶梯揭示（到位瞬间 / 移动端进视口用）
-    const revealing = new WeakSet<HTMLElement>();
-    const revealOnce = (item: HTMLElement) => {
-      if (reduced || revealing.has(item)) return;
-      const img = item.querySelector<HTMLImageElement>('.feed-poster img');
-      const run = () => {
-        revealing.add(item);
-        const cur = pixMap.get(item)?.level ?? -1;
-        let lv = cur >= 0 ? cur : 0;
-        setPixLevel(item, lv);
-        const step = () => {
-          lv++;
-          if (lv > 3) {
-            setPixLevel(item, -1);
-            revealing.delete(item);
-            return;
-          }
-          setPixLevel(item, lv);
-          setTimeout(step, 110);
-        };
-        setTimeout(step, 110);
-      };
-      if (img?.complete && img.naturalWidth) run();
-      else img?.addEventListener('load', run, { once: true });
-    };
-
-    // 移动端：项目进视口时播一次像素揭示
-    const seen = new WeakSet<Element>();
-    const io = new IntersectionObserver(
-      entries => {
-        for (const e of entries) {
-          if (!e.isIntersecting || seen.has(e.target)) continue;
-          seen.add(e.target);
-          io.unobserve(e.target);
-          if (mobileMq.matches) revealOnce(e.target as HTMLElement);
-        }
-      },
-      { threshold: 0.25 }
-    );
-    items.slice(1).forEach(it => io.observe(it));
-
     // ---------- 帧序列擦洗（滚动正放 / 上滚倒带）----------
     type Scrub = {
       item: HTMLElement; canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D;
       imgs: HTMLImageElement[]; count: number; ready: boolean; lastIdx: number;
     };
     const scrubs: Scrub[] = [];
-    const scrubSet = new Set<HTMLElement>();
     // 桌面 + 允许动效才预载帧；移动端 / reduced 直接用静态 poster，省流量
     if (!mobileMq.matches && !reduced) {
       items.forEach(item => {
@@ -700,7 +607,6 @@ for (let f = 88; f <= 108; f += 0.5) {
           imgs.push(im);
         }
         scrubs.push(s);
-        scrubSet.add(item);
       });
     }
     const sizeScrub = (s: Scrub) => {
@@ -738,14 +644,13 @@ for (let f = 88; f <= 108; f += 0.5) {
       currentIdx = i;
       stationBtns.forEach((b, bi) => b.classList.toggle('is-active', bi === i));
 
+      // 到位瞬间：标题乱码翻牌（海报直接静态显示，无像素揭示）
       if (!reduced) {
         items[i]
           .querySelectorAll<HTMLElement>('.feed-title .lang-zh, .feed-title .lang-en')
           .forEach(el => {
             if (el.offsetParent !== null) (window as any).__fx?.scramble?.(el, { stagger: 18, jitter: 90 });
           });
-        // 帧序列项不做像素揭示（由擦洗画布负责视觉）
-        if (!mobileMq.matches && !scrubSet.has(items[i])) revealOnce(items[i]);
       }
     };
 
@@ -795,16 +700,6 @@ for (let f = 88; f <= 108; f += 0.5) {
         if (s.item === items[i]) drawScrub(s, frac * (s.count - 1));
         else drawScrub(s, 0);
       });
-
-      // 桌面：盖入的下一张按进度上纹理；到位揭示进行中的不覆写
-      // 帧序列项用擦洗画布，跳过像素揭示（两个画布会打架）
-      if (!mobileMq.matches) {
-        if (i + 1 < items.length && !revealing.has(items[i + 1]) && !scrubSet.has(items[i + 1]))
-          setPixLevel(items[i + 1], frac === 0 ? -1 : levelFromFrac(frac));
-        if (!revealing.has(items[i]) && !scrubSet.has(items[i])) setPixLevel(items[i], -1);
-        if (i + 2 < items.length && !revealing.has(items[i + 2]) && !scrubSet.has(items[i + 2]))
-          setPixLevel(items[i + 2], 0); // 预热再下一张
-      }
     };
 
     let ticking = false;
