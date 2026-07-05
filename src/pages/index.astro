@@ -608,8 +608,8 @@ for (let f = 88; f <= 108; f += 0.5) {
         for (let k = 1; k <= count; k++) {
           const im = new Image();
           im.decoding = 'async';
-          im.src = base + String(k).padStart(2, '0') + '.' + ext;
-          im.onload = () => {
+          // onload/onerror 必须在 src 之前挂，否则缓存命中的帧会先触发 load、计数漏掉，导致永不 ready
+          const done = () => {
             if (++loaded === count) {
               s.ready = true;
               canvas.classList.add('ready');
@@ -617,6 +617,9 @@ for (let f = 88; f <= 108; f += 0.5) {
               drawScrub(s, 0);
             }
           };
+          im.onload = done;
+          im.onerror = done; // 单帧失败也别卡死整组
+          im.src = base + String(k).padStart(2, '0') + '.' + ext;
           imgs.push(im);
         }
         scrubs.push(s);
