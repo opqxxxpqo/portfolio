@@ -224,21 +224,34 @@ for (let f = 88; f <= 108; f += 0.5) {
     margin: 0;
     z-index: 1;
   }
-  /* 着陆页切换按钮：当前语言放大加粗（覆盖 LangToggle 默认样式） */
+  /* 着陆页切换按钮：低调细体、无底色无边框、淡色（覆盖 LangToggle 默认样式） */
   .landing-lang :global(.lang-toggle) {
-    height: 42px;
-    padding: 0 16px;
-    gap: 8px;
-    font-size: 0.9375rem;
+    height: auto;
+    padding: 0;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    font-family: var(--font-sans);
+    font-weight: 300;
+    font-size: 0.8125rem;
+    letter-spacing: 0.08em;
+    color: #8b897f;
+  }
+  .landing-lang :global(.lang-toggle:hover) {
+    background: transparent;
+    color: #55534c;
   }
   .landing-lang :global(.seg) {
-    font-size: 0.875rem;
-    transition: font-size var(--transition), font-weight var(--transition), opacity var(--transition);
+    font-weight: 300;
+    opacity: 0.4;
+    transition: opacity var(--transition);
   }
+  .landing-lang :global(.seg-sep) { opacity: 0.25; }
+  /* 当前语言：仅靠不透明度轻微区分，不加粗不放大 */
   :global(html[lang^='zh']) .landing-lang :global(.seg-zh),
   :global(html[lang^='en']) .landing-lang :global(.seg-en) {
-    font-size: 1.25rem;
-    font-weight: 900;
+    opacity: 0.9;
+    font-weight: 300;
   }
 
   /* ============ 固定调频器：居中窄容器 ============ */
