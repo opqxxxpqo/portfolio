@@ -462,6 +462,7 @@ for (let f = 88; f <= 108; f += 0.5) {
 
   .feed-poster {
     display: block;
+    position: relative;
     flex: 1;
     min-height: 0;
     width: 100%;
@@ -471,6 +472,18 @@ for (let f = 88; f <= 108; f += 0.5) {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+  /* 顶部固定渐变阴影：CSS 叠加层，覆盖静态图 / 帧序列 / 视频，换素材自动保留 */
+  .feed-poster::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%);
+    pointer-events: none;
+    z-index: 2;
   }
   /* 帧序列擦洗画布：盖在静态 poster 上，帧就绪后显示 */
   .scrub-canvas {
