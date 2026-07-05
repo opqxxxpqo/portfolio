@@ -711,10 +711,16 @@ for (let f = 88; f <= 108; f += 0.5) {
 
       setStation(frac < 0.5 ? i : Math.min(items.length - 1, i + 1));
 
-      // 帧序列擦洗：当前钉住项按 frac 擦洗（滚动正放 / 上滚倒带），其余停在首帧
+      // 帧序列擦洗：按海报自身「从视口底部升起 → 到位钉住」的进度播放
+      //   p=0 刚从底部露头（首帧）→ p=1 到位钉住（末帧）；上滚时反向回退＝倒带
+      //   对所有项一致，包括第一个（从着陆页下方升起）
+      const stickyTop = tuner.offsetHeight;
+      const vh = window.innerHeight;
+      const denom = vh - stickyTop || 1;
       scrubs.forEach(s => {
-        if (s.item === items[i]) drawScrub(s, frac * (s.count - 1));
-        else drawScrub(s, 0);
+        const top = s.item.getBoundingClientRect().top;
+        const p = clamp01((vh - top) / denom);
+        drawScrub(s, p * (s.count - 1));
       });
     };
 
