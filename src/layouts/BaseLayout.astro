@@ -57,6 +57,20 @@ const { title, description, ogImage, noindex, hideHeader = false } = Astro.props
       media="print"
       onload="this.media='all'"
     />
+    <!-- 着陆页手写衬线台标：中文霞鹜文楷（细楷）+ 英文 Cormorant Light 斜体
+         （CJK 按 unicode-range 分包，只下用到的字） -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-lite-webfont@1.6.0/style.css"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fontsource/cormorant@5/300-italic.css"
+      media="print"
+      onload="this.media='all'"
+    />
     <noscript>
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.16/index.css" />
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/archivo-black@5.0.20/400.css" />
