@@ -21,6 +21,15 @@ const works = defineCollection({
     cover: z.string(), // public/ 下的相对路径，例 /works/research-sample/cover.svg
     // poster: 首页调频器舞台用的宽幅海报图（重设计新增），没有时回落到 cover
     poster: z.string().optional(),
+    // frameSeq: 首页海报做成滚动擦洗的帧序列（滚动正放 / 上滚倒带）。
+    // 帧文件命名 01.ext…{count}.ext，两位补零。没设则用静态 poster/cover。
+    frameSeq: z
+      .object({
+        base: z.string(),           // 例 /works/modeling/frames/
+        count: z.number().int().positive(),
+        ext: z.string().optional().default('jpg')
+      })
+      .optional(),
     summary: z.string(),
     summaryEn: z.string().optional(),
 

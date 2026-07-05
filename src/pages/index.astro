@@ -112,8 +112,18 @@ for (let f = 88; f <= 108; f += 0.5) {
   <div class="feed" id="feed">
     {works.map((w, i) => {
       const cat = CATEGORY_MAP[w.data.category as keyof typeof CATEGORY_MAP];
+      const fseq = (w.data as any).frameSeq as { base: string; count: number; ext?: string } | undefined;
       return (
-        <a class="feed-item" data-idx={i} id={`fi-${i}`} href={`/works/${w.id}`} data-astro-prefetch>
+        <a
+          class="feed-item"
+          data-idx={i}
+          id={`fi-${i}`}
+          href={`/works/${w.id}`}
+          data-astro-prefetch
+          data-frames-base={fseq ? fseq.base : undefined}
+          data-frames-count={fseq ? String(fseq.count) : undefined}
+          data-frames-ext={fseq ? (fseq.ext || 'jpg') : undefined}
+        >
           <span class="feed-meta">
             <span class="feed-idx mono-label">{pad(i + 1)}</span>
             <span class="feed-title">
@@ -137,6 +147,7 @@ for (let f = 88; f <= 108; f += 0.5) {
               loading={i <= 1 ? 'eager' : 'lazy'}
               decoding="async"
             />
+            {fseq && <canvas class="scrub-canvas" aria-hidden="true"></canvas>}
           </span>
         </a>
       );
@@ -461,6 +472,17 @@ for (let f = 88; f <= 108; f += 0.5) {
     height: 100%;
     object-fit: cover;
   }
+  /* 帧序列擦洗画布：盖在静态 poster 上，帧就绪后显示 */
+  .scrub-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 200ms ease;
+  }
+  .scrub-canvas.ready { opacity: 1; }
 
   /* ============ 移动端 ============ */
   @media (max-width: 768px) {
@@ -643,6 +665,73 @@ for (let f = 88; f <= 108; f += 0.5) {
     );
     items.slice(1).forEach(it => io.observe(it));
 
+    // ---------- 帧序列擦洗（滚动正放 / 上滚倒带）----------
+    type Scrub = {
+      item: HTMLElement; canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D;
+      imgs: HTMLImageElement[]; count: number; ready: boolean; lastIdx: number;
+    };
+    const scrubs: Scrub[] = [];
+    const scrubSet = new Set<HTMLElement>();
+    // 桌面 + 允许动效才预载帧；移动端 / reduced 直接用静态 poster，省流量
+    if (!mobileMq.matches && !reduced) {
+      items.forEach(item => {
+        const base = item.dataset.framesBase;
+        const count = Number(item.dataset.framesCount || 0);
+        const ext = item.dataset.framesExt || 'jpg';
+        const canvas = item.querySelector<HTMLCanvasElement>('.scrub-canvas');
+        if (!base || !count || !canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        const imgs: HTMLImageElement[] = [];
+        let loaded = 0;
+        const s: Scrub = { item, canvas, ctx, imgs, count, ready: false, lastIdx: -1 };
+        for (let k = 1; k <= count; k++) {
+          const im = new Image();
+          im.decoding = 'async';
+          im.src = base + String(k).padStart(2, '0') + '.' + ext;
+          im.onload = () => {
+            if (++loaded === count) {
+              s.ready = true;
+              canvas.classList.add('ready');
+              sizeScrub(s);
+              drawScrub(s, 0);
+            }
+          };
+          imgs.push(im);
+        }
+        scrubs.push(s);
+        scrubSet.add(item);
+      });
+    }
+    const sizeScrub = (s: Scrub) => {
+      const host = s.item.querySelector<HTMLElement>('.feed-poster');
+      if (!host) return;
+      const w = host.clientWidth, h = host.clientHeight;
+      if (!w || !h) return;
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      s.canvas.width = Math.round(w * dpr);
+      s.canvas.height = Math.round(h * dpr);
+      s.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      s.lastIdx = -1; // 尺寸变了强制重绘
+    };
+    const drawScrub = (s: Scrub, idx: number) => {
+      if (!s.ready) return;
+      idx = Math.max(0, Math.min(s.count - 1, Math.round(idx)));
+      if (idx === s.lastIdx) return;
+      const im = s.imgs[idx];
+      if (!im || !im.complete || !im.naturalWidth) return;
+      const host = s.item.querySelector<HTMLElement>('.feed-poster');
+      if (!host) return;
+      const w = host.clientWidth, h = host.clientHeight;
+      if (!s.canvas.width) sizeScrub(s);
+      const scale = Math.max(w / im.naturalWidth, h / im.naturalHeight);
+      const dw = im.naturalWidth * scale, dh = im.naturalHeight * scale;
+      s.ctx.clearRect(0, 0, w, h);
+      s.ctx.drawImage(im, (w - dw) / 2, (h - dh) / 2, dw, dh);
+      s.lastIdx = idx;
+    };
+    window.addEventListener('resize', () => scrubs.forEach(s => { sizeScrub(s); drawScrub(s, s.lastIdx < 0 ? 0 : s.lastIdx); }));
+
     // ---------- 台切换：高亮 + 标题翻牌 + 海报揭示 ----------
     const setStation = (i: number) => {
       if (i === currentIdx) return;
@@ -655,7 +744,8 @@ for (let f = 88; f <= 108; f += 0.5) {
           .forEach(el => {
             if (el.offsetParent !== null) (window as any).__fx?.scramble?.(el, { stagger: 18, jitter: 90 });
           });
-        if (!mobileMq.matches) revealOnce(items[i]);
+        // 帧序列项不做像素揭示（由擦洗画布负责视觉）
+        if (!mobileMq.matches && !scrubSet.has(items[i])) revealOnce(items[i]);
       }
     };
 
@@ -700,12 +790,19 @@ for (let f = 88; f <= 108; f += 0.5) {
 
       setStation(frac < 0.5 ? i : Math.min(items.length - 1, i + 1));
 
+      // 帧序列擦洗：当前钉住项按 frac 擦洗（滚动正放 / 上滚倒带），其余停在首帧
+      scrubs.forEach(s => {
+        if (s.item === items[i]) drawScrub(s, frac * (s.count - 1));
+        else drawScrub(s, 0);
+      });
+
       // 桌面：盖入的下一张按进度上纹理；到位揭示进行中的不覆写
+      // 帧序列项用擦洗画布，跳过像素揭示（两个画布会打架）
       if (!mobileMq.matches) {
-        if (i + 1 < items.length && !revealing.has(items[i + 1]))
+        if (i + 1 < items.length && !revealing.has(items[i + 1]) && !scrubSet.has(items[i + 1]))
           setPixLevel(items[i + 1], frac === 0 ? -1 : levelFromFrac(frac));
-        if (!revealing.has(items[i])) setPixLevel(items[i], -1);
-        if (i + 2 < items.length && !revealing.has(items[i + 2]))
+        if (!revealing.has(items[i]) && !scrubSet.has(items[i])) setPixLevel(items[i], -1);
+        if (i + 2 < items.length && !revealing.has(items[i + 2]) && !scrubSet.has(items[i + 2]))
           setPixLevel(items[i + 2], 0); // 预热再下一张
       }
     };
