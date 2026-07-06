@@ -724,15 +724,22 @@ for (let f = 88; f <= 108; f += 0.5) {
 
       setStation(frac < 0.5 ? i : Math.min(items.length - 1, i + 1));
 
-      // 帧序列擦洗：按海报自身「从视口底部升起 → 到位钉住」的进度播放
-      //   p=0 刚从底部露头（首帧）→ p=1 到位钉住（末帧）；上滚时反向回退＝倒带
-      //   对所有项一致，包括第一个（从着陆页下方升起）
+      // 帧序列擦洗：贯穿海报的整个可见周期播放
+      //   前半 = 自身从视口底部升起到钉住（riseP 0→1）
+      //   后半 = 钉住后被下一张从底部升起盖住（coverP 0→1）
+      //   合成 p=(riseP+coverP)/2：p=0 刚露头（首帧）→ p=0.5 到位 → p=1 被完全盖住（末帧）
+      //   上滚时全程反向回退＝倒带；最后一张无覆盖阶段，升起即播完
       const stickyTop = tuner.offsetHeight;
       const vh = window.innerHeight;
       const denom = vh - stickyTop || 1;
       scrubs.forEach(s => {
-        const top = s.item.getBoundingClientRect().top;
-        const p = clamp01((vh - top) / denom);
+        const idx = Number(s.item.dataset.idx);
+        const riseP = clamp01((vh - s.item.getBoundingClientRect().top) / denom);
+        let p = riseP;
+        if (idx + 1 < items.length) {
+          const coverP = clamp01((vh - items[idx + 1].getBoundingClientRect().top) / denom);
+          p = (riseP + coverP) / 2;
+        }
         drawScrub(s, p * (s.count - 1));
       });
     };
