@@ -26,7 +26,6 @@ const stations = works.map((w, i) => {
     freq: freq.toFixed(1)
   };
 });
-const first = stations[0];
 
 // 刻度：每 0.5MHz 一根，精确定位（不用 repeating-gradient，杜绝参差杂线）
 // tier: major = 2MHz（带数字标注）/ mid = 1MHz / minor = 0.5MHz
@@ -74,10 +73,7 @@ for (let f = 88; f <= 108; f += 0.5) {
         <div class="tn-tools">
           <LangToggle />
         </div>
-        <span class="tn-signal" id="tn-signal" aria-hidden="true">
-          <i></i><i></i><i></i><i></i><i></i>
-        </span>
-        <span class="tn-freq" id="tn-freq">{first.freq}<small> MHz</small></span>
+        <canvas class="tn-wave" id="tn-wave" aria-hidden="true"></canvas>
       </div>
 
       <div class="tn-scale" id="tn-scale">
@@ -296,41 +292,24 @@ for (let f = 88; f <= 108; f += 0.5) {
     align-items: center;
     gap: 16px;
   }
-  .tn-tools { display: flex; gap: 6px; align-items: center; }
+  /* 中文/EN 在调频左侧，圆角边框 */
+  .tn-tools { display: flex; gap: 6px; align-items: center; flex: none; }
   .tn-tools :global(button) {
     background: transparent !important;
     border-color: var(--tn-line-soft) !important;
     color: var(--tn-fg) !important;
-    height: 26px !important;
+    height: 28px !important;
+    border-radius: 6px !important;
   }
-  .tn-signal { margin-left: auto; display: inline-flex; gap: 3px; align-items: flex-end; }
-  .tn-signal i {
-    width: 4px;
-    background: var(--tn-muted);
-    opacity: 0.3;
-    transition: opacity 120ms ease, background 120ms ease;
-  }
-  .tn-signal i:nth-child(1) { height: 5px; }
-  .tn-signal i:nth-child(2) { height: 8px; }
-  .tn-signal i:nth-child(3) { height: 11px; }
-  .tn-signal i:nth-child(4) { height: 14px; }
-  .tn-signal i:nth-child(5) { height: 17px; }
-  .tn-signal i.on { background: var(--tn-red); opacity: 1; }
-  .tn-freq {
-    font-family: var(--font-mono);
-    font-size: 0.9375rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    color: var(--tn-fg);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    background: #ffffff;
+  /* 电波示波器：占满右侧，随调台在「干净正弦 ↔ 噪声」间响应 */
+  .tn-wave {
+    flex: 1;
+    height: 28px;
+    min-width: 0;
     border: 1px solid var(--tn-line-soft);
-    padding: 3px 10px;
-    min-width: 9ch;
-    text-align: right;
+    border-radius: 6px;
+    background: var(--bg-soft);
   }
-  .tn-freq small { font-size: 0.625rem; color: var(--tn-muted); letter-spacing: 0.12em; }
 
   /* ---------- 刻度带：精确刻度，无杂线 ---------- */
   .tn-scale {
@@ -556,8 +535,6 @@ for (let f = 88; f <= 108; f += 0.5) {
 
     const scale = document.getElementById('tn-scale')!;
     const needle = document.getElementById('tn-needle')!;
-    const freqEl = document.getElementById('tn-freq')!;
-    const signalBars = Array.from(document.querySelectorAll('#tn-signal i'));
     const stationBtns = Array.from(tuner.querySelectorAll<HTMLElement>('.tn-station'));
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -581,8 +558,47 @@ for (let f = 88; f <= 108; f += 0.5) {
     let physRaf = 0;
     const drawNeedle = (v: number) => {
       needle.style.transform = `translateX(${v * scale.clientWidth}px)`;
-      freqEl.innerHTML = (87.5 + v * (108 - 87.5)).toFixed(1) + '<small> MHz</small>';
     };
+
+    // ---------- 电波示波器：信号强度驱动「干净正弦 ↔ 噪声」 ----------
+    // signalStrength: 1=锁台（干净波）… 0=失谐（雪花噪声）；由滚动/调台实时更新
+    let signalStrength = 1;
+    const waveEl = document.getElementById('tn-wave') as HTMLCanvasElement | null;
+    if (waveEl && !reduced) {
+      const wctx = waveEl.getContext('2d');
+      if (wctx) {
+        let wphase = 0;
+        const sizeWave = () => {
+          const dpr = Math.min(2, window.devicePixelRatio || 1);
+          waveEl.width = Math.max(1, Math.round(waveEl.clientWidth * dpr));
+          waveEl.height = Math.max(1, Math.round(waveEl.clientHeight * dpr));
+          wctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        };
+        sizeWave();
+        new ResizeObserver(sizeWave).observe(waveEl);
+        const waveTick = () => {
+          const w = waveEl.clientWidth, h = waveEl.clientHeight;
+          if (w && h) {
+            wctx.clearRect(0, 0, w, h);
+            wphase += 0.05 + signalStrength * 0.08; // 锁台时波流动更快
+            const mid = h / 2;
+            const noise = 1 - signalStrength;      // 0 干净 → 1 雪花
+            wctx.beginPath();
+            for (let x = 0; x <= w; x += 2) {
+              const carrier = Math.sin(x * 0.09 + wphase) * (h * 0.3) * (0.35 + 0.65 * signalStrength);
+              const jitter = (Math.random() - 0.5) * h * 0.7 * noise;
+              const y = mid + carrier + jitter;
+              x === 0 ? wctx.moveTo(x, y) : wctx.lineTo(x, y);
+            }
+            wctx.strokeStyle = signalStrength > 0.5 ? '#002fa7' : '#e5352b'; // 锁台蓝 / 失谐红
+            wctx.lineWidth = 1.4;
+            wctx.stroke();
+          }
+          requestAnimationFrame(waveTick);
+        };
+        requestAnimationFrame(waveTick);
+      }
+    }
     const physTick = () => {
       pv += (tv - pv) * (reduced ? 1 : dragging ? 0.5 : 0.22);
       if (Math.abs(tv - pv) < 0.0004) {
@@ -718,9 +734,9 @@ for (let f = 88; f <= 108; f += 0.5) {
       const v = i >= items.length - 1 ? stations[items.length - 1].pos : lerp(stations[i].pos, stations[i + 1].pos, t);
       setTarget(v);
 
+      // 信号强度：锁台=1（干净波），两台正中=0（噪声）→ 驱动电波示波器
       const off = Math.min(frac, 1 - frac) * 2;
-      const p = frac === 0 ? 1 : Math.max(0, 1 - off * 1.6);
-      signalBars.forEach((b, bi) => b.classList.toggle('on', bi < Math.round(p * 5)));
+      signalStrength = frac === 0 ? 1 : Math.max(0, 1 - off * 1.6);
 
       setStation(frac < 0.5 ? i : Math.min(items.length - 1, i + 1));
 
