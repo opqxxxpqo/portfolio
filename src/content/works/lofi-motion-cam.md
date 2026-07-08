@@ -7,6 +7,11 @@ chip: 拟物相机
 chipEn: Skeuomorphic Cam
 date: 2026-05-24
 cover: /works/lofi-motion-cam/cover.jpg
+poster: /works/lofi-motion-cam/poster.webp
+frameSeq:
+  base: /works/lofi-motion-cam/frames/
+  count: 50
+  ext: webp
 summary: "拟物磁带相机 App，把摄像头实时处理成 LoFi/VHS 质感并录制；质感全由 Blender 烘焙，代码只做动效与实时滤镜。"
 summaryEn: "A skeuomorphic tape-camcorder that runs your camera through real-time LoFi/VHS filters and records the result — every surface baked in Blender, code only drives motion and the live shader."
 role: "独立开发（AI 结对）"
