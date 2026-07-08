@@ -7,6 +7,8 @@ import { CATEGORY_MAP } from '~/lib/categories';
 import { buildSlides } from '~/lib/slides';
 
 const all = await getCollection('works');
+const worksEnAll = await getCollection('worksEn');
+const enBodyMap = new Map(worksEnAll.map(e => [e.id, e.body || '']));
 
 // 隐藏 hidden:true 的作品（合集子项），按时间倒序
 const works = all
@@ -18,7 +20,7 @@ const pad = (n: number) => n.toString().padStart(2, '0');
 
 // 幻灯片 deck：有 slides 的项目点击弹浮窗，其余回落独立页
 const decks = works
-  .map(w => ({ slug: w.id, title: w.data.title, titleEn: (w.data as any).titleEn || w.data.title, slides: buildSlides(w) }))
+  .map(w => ({ slug: w.id, title: w.data.title, titleEn: (w.data as any).titleEn || w.data.title, slides: buildSlides(w, enBodyMap.get(w.id)) }))
   .filter((d): d is { slug: string; title: string; titleEn: string; slides: NonNullable<ReturnType<typeof buildSlides>> } => d.slides !== null);
 
 // 每个作品是一个频点。频点必须落在尺子的格点上（整 MHz），数字和刻度才对得上：
