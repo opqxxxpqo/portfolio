@@ -1,0 +1,481 @@
+---
+// 详情页浮空幻灯片：点首页项目 → 就地弹出浮窗，横向翻页。
+// 每个项目渲染一个惰性 <template>（克隆前图片不加载）；点击时克隆进浮窗初始化。
+// 没有 deck 的项目点击回落到 /works/<slug> 独立页。
+import type { Slide } from '~/lib/slides';
+
+export interface Props {
+  decks: { slug: string; title: string; titleEn: string; slides: Slide[] }[];
+}
+const { decks } = Astro.props;
+---
+
+{decks.map(deck => (
+  <template class="deck-tpl" data-slug={deck.slug} data-title={deck.title} data-title-en={deck.titleEn}>
+    <div class="pv-track">
+      {deck.slides.map(s => {
+        if (s.layout === 'cover') {
+          return (
+            <article class="slide slide--cover">
+              <div class="slide-visual">
+                {'src' in s.img
+                  ? <img src={s.img.src} alt="" loading="lazy" decoding="async" />
+                  : <div class="slide-ph"><span class="mono-label">{s.img.ph}</span></div>}
+              </div>
+              <div class="slide-copy">
+                <h2 class="slide-title" data-fx>
+                  <span class="lang-zh">{s.title}</span>
+                  <span class="lang-en">{s.titleEn}</span>
+                </h2>
+                <p class="slide-tagline">
+                  <span class="lang-zh">{s.tagline}</span>
+                  <span class="lang-en">{s.taglineEn}</span>
+                </p>
+                <dl class="slide-meta">
+                  {s.meta.map(m => (
+                    <div>
+                      <dt class="mono-label">
+                        <span class="lang-zh">{m.label}</span><span class="lang-en">{m.labelEn}</span>
+                      </dt>
+                      <dd>
+                        <span class="lang-zh">{m.value}</span><span class="lang-en">{m.valueEn}</span>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </article>
+          );
+        }
+        if (s.layout === 'text') {
+          return (
+            <article class={`slide slide--text ${s.side === 'left' ? 'is-left' : ''}`}>
+              <div class="slide-copy">
+                <h3 class="slide-heading" data-fx>
+                  <span class="lang-zh">{s.heading}</span>
+                  <span class="lang-en">{s.headingEn}</span>
+                </h3>
+                <div class="slide-body">
+                  <div class="lang-zh">{s.body.map(p => <p>{p}</p>)}</div>
+                  <div class="lang-en">{s.bodyEn.map(p => <p>{p}</p>)}</div>
+                </div>
+              </div>
+              <div class="slide-visual">
+                {'src' in s.img
+                  ? <img src={s.img.src} alt="" loading="lazy" decoding="async" />
+                  : <div class="slide-ph"><span class="mono-label">{s.img.ph}</span></div>}
+              </div>
+            </article>
+          );
+        }
+        if (s.layout === 'image') {
+          return (
+            <article class="slide slide--image">
+              <img src={s.img.src} alt="" loading="lazy" decoding="async" />
+            </article>
+          );
+        }
+        if (s.layout === 'gallery') {
+          return (
+            <article class="slide slide--gallery">
+              <div class="gallery-grid">
+                {s.imgs.map(im => <img src={im.src} alt="" loading="lazy" decoding="async" />)}
+              </div>
+            </article>
+          );
+        }
+        // links
+        return (
+          <article class="slide slide--links">
+            <div class="slide-copy">
+              <h3 class="slide-heading" data-fx>
+                <span class="lang-zh">{s.heading}</span>
+                <span class="lang-en">{s.headingEn}</span>
+              </h3>
+              {s.body && (
+                <div class="slide-body">
+                  <div class="lang-zh">{s.body.map(p => <p>{p}</p>)}</div>
+                  <div class="lang-en">{(s.bodyEn || s.body).map(p => <p>{p}</p>)}</div>
+                </div>
+              )}
+              <div class="slide-links">
+                {s.links.map(l => (
+                  <a href={l.url} target="_blank" rel="noopener" class="slide-link">
+                    <span class="lang-zh">{l.label} ↗</span>
+                    <span class="lang-en">{l.labelEn} ↗</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  </template>
+))}
+
+<!-- 浮窗外壳（单例，复用） -->
+<div class="pv" id="pv" hidden aria-hidden="true">
+  <div class="pv-backdrop" data-pv-close></div>
+  <div class="pv-window" role="dialog" aria-modal="true" aria-label="项目详情">
+    <header class="pv-top">
+      <span class="pv-title mono-label" id="pv-title"></span>
+      <button class="pv-close" type="button" data-pv-close aria-label="关闭">✕</button>
+    </header>
+    <div class="pv-stage" id="pv-stage"></div>
+    <button class="pv-edge pv-edge--l" type="button" data-pv-prev aria-label="上一张"></button>
+    <button class="pv-edge pv-edge--r" type="button" data-pv-next aria-label="下一张"></button>
+    <footer class="pv-nav">
+      <button class="pv-arrow" type="button" data-pv-prev aria-label="上一张">←</button>
+      <span class="pv-dots" id="pv-dots"></span>
+      <span class="pv-count mono-label" id="pv-count"></span>
+      <button class="pv-arrow" type="button" data-pv-next aria-label="下一张">→</button>
+    </footer>
+  </div>
+</div>
+
+<style>
+  .pv {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(16px, 4vh, 48px);
+  }
+  .pv[hidden] { display: none; }
+  .pv-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(12, 12, 11, 0.55);
+    opacity: 0;
+    transition: opacity 320ms ease;
+  }
+  .pv.is-open .pv-backdrop { opacity: 1; }
+
+  .pv-window {
+    position: relative;
+    width: min(1200px, 100%);
+    height: min(760px, 100%);
+    background: #ffffff;
+    color: #121211;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(0.94);
+    opacity: 0;
+    transition: transform 380ms var(--ease-expo), opacity 300ms ease;
+  }
+  .pv.is-open .pv-window { transform: scale(1); opacity: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    .pv-backdrop, .pv-window { transition: none; }
+  }
+
+  .pv-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--hairline);
+    flex: none;
+  }
+  .pv-title { color: var(--fg-muted); }
+  .pv-close {
+    width: 30px; height: 30px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: transparent;
+    border: 1px solid var(--tn-line-soft, rgba(18,18,17,.2));
+    border-radius: 6px;
+    color: #121211;
+    font-size: 0.8125rem;
+    transition: background var(--transition), color var(--transition);
+  }
+  .pv-close:hover { background: #121211; color: #fff; }
+
+  .pv-stage {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .pv-track {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    transition: transform 460ms var(--ease-expo);
+  }
+  @media (prefers-reduced-motion: reduce) { .pv-track { transition: none; } }
+
+  .slide {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* 封面 / 图文：两栏 */
+  .slide--cover, .slide--text {
+    align-items: stretch;
+  }
+  .slide-visual {
+    flex: 0 0 56%;
+    min-width: 0;
+    background: #0c0c0b;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .slide-visual img { width: 100%; height: 100%; object-fit: cover; }
+  .slide-ph {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background:
+      repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0 12px, transparent 12px 24px), #17171a;
+    padding: 24px; text-align: center;
+  }
+  .slide-ph .mono-label { color: rgba(255,255,255,.5); }
+
+  .slide-copy {
+    flex: 1;
+    min-width: 0;
+    padding: clamp(24px, 4vw, 52px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+    overflow-y: auto;
+  }
+  .slide--text.is-left { flex-direction: row-reverse; }
+
+  .slide-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 2.6vw, 2.5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .slide-tagline { font-size: 1rem; line-height: 1.6; color: var(--fg-soft); margin: 0; }
+  .slide-meta {
+    margin: 8px 0 0; display: grid; gap: 10px;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .slide-meta dt { margin: 0 0 2px; }
+  .slide-meta dd { margin: 0; font-size: 0.875rem; }
+
+  .slide-heading {
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
+    font-weight: 900;
+    margin: 0;
+  }
+  .slide-body p { font-size: 0.9375rem; line-height: 1.65; color: var(--fg-soft); margin: 0 0 0.8em; }
+  .slide-body p:last-child { margin-bottom: 0; }
+
+  /* 全幅大图 */
+  .slide--image { background: #0c0c0b; align-items: center; justify-content: center; }
+  .slide--image img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+  /* 角色网格 */
+  .slide--gallery { padding: clamp(20px, 3vw, 40px); overflow-y: auto; }
+  .gallery-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    align-content: start;
+  }
+  .gallery-grid img {
+    width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
+    background: var(--bg-soft); border: 1px solid var(--hairline);
+  }
+
+  /* 链接收尾 */
+  .slide--links { align-items: center; justify-content: center; }
+  .slide--links .slide-copy { align-items: flex-start; max-width: 640px; }
+  .slide-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+  .slide-link {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    border: 1px solid #121211;
+    border-radius: 6px;
+    color: #121211;
+    transition: background var(--transition), color var(--transition);
+  }
+  .slide-link:hover { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+
+  /* 左右点击热区 */
+  .pv-edge {
+    position: absolute;
+    top: 52px; bottom: 56px;
+    width: 15%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 2;
+  }
+  .pv-edge--l { left: 0; }
+  .pv-edge--r { right: 0; }
+  .pv-edge[hidden] { display: none; }
+
+  /* 底部导航 */
+  .pv-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 12px 20px;
+    border-top: 1px solid var(--hairline);
+    flex: none;
+  }
+  .pv-arrow {
+    width: 30px; height: 30px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: transparent; border: 1px solid var(--hairline); border-radius: 6px;
+    color: #121211; font-family: var(--font-mono);
+    transition: background var(--transition), color var(--transition), opacity var(--transition);
+  }
+  .pv-arrow:hover { background: #121211; color: #fff; }
+  .pv-arrow:disabled { opacity: 0.25; cursor: default; }
+  .pv-arrow:disabled:hover { background: transparent; color: #121211; }
+  .pv-dots { display: inline-flex; gap: 7px; }
+  .pv-dots i {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--fg-muted); opacity: 0.35;
+    transition: opacity var(--transition), background var(--transition);
+    cursor: pointer;
+  }
+  .pv-dots i.on { opacity: 1; background: var(--accent); }
+  .pv-count { color: var(--fg-muted); min-width: 5ch; text-align: right; }
+
+  @media (max-width: 768px) {
+    .pv { padding: 0; }
+    .pv-window { width: 100%; height: 100%; border: none; border-radius: 0; }
+    .slide--cover, .slide--text, .slide--text.is-left { flex-direction: column; }
+    .slide-visual { flex: 0 0 44%; }
+    .slide-copy { justify-content: flex-start; }
+    .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    .pv-edge { display: none; }
+  }
+</style>
+
+<script>
+  function setupSlideshow() {
+    const pv = document.getElementById('pv');
+    const stage = document.getElementById('pv-stage');
+    const titleEl = document.getElementById('pv-title');
+    const dotsEl = document.getElementById('pv-dots');
+    const countEl = document.getElementById('pv-count');
+    if (!pv || !stage || !titleEl || !dotsEl || !countEl || pv.dataset.bound) return;
+    pv.dataset.bound = '1';
+
+    const decks = new Map<string, HTMLTemplateElement>();
+    document.querySelectorAll<HTMLTemplateElement>('.deck-tpl').forEach(t => {
+      if (t.dataset.slug) decks.set(t.dataset.slug, t);
+    });
+    if (decks.size === 0) return;
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const pad2 = (n: number) => String(n).padStart(2, '0');
+    let track: HTMLElement | null = null;
+    let slides: HTMLElement[] = [];
+    let idx = 0;
+    const arrows = () => Array.from(pv.querySelectorAll<HTMLButtonElement>('.pv-arrow'));
+
+    const scrambleActive = () => {
+      if (reduced || !slides[idx]) return;
+      slides[idx].querySelectorAll<HTMLElement>('[data-fx] .lang-zh, [data-fx] .lang-en')
+        .forEach(el => { if (el.offsetParent !== null) (window as any).__fx?.scramble?.(el, { stagger: 16, jitter: 80 }); });
+    };
+
+    const goto = (n: number) => {
+      idx = Math.max(0, Math.min(slides.length - 1, n));
+      if (track) track.style.transform = `translateX(${-idx * 100}%)`;
+      countEl.textContent = pad2(idx + 1) + ' / ' + pad2(slides.length);
+      dotsEl.querySelectorAll('i').forEach((d, i) => d.classList.toggle('on', i === idx));
+      arrows().forEach(a => {
+        const isPrev = a.getAttribute('data-pv-prev') !== null;
+        a.disabled = isPrev ? idx === 0 : idx === slides.length - 1;
+      });
+      scrambleActive();
+    };
+
+    const openDeck = (slug: string) => {
+      const tpl = decks.get(slug);
+      if (!tpl) return;
+      stage.innerHTML = '';
+      stage.appendChild(tpl.content.cloneNode(true));
+      track = stage.querySelector('.pv-track');
+      slides = Array.from(stage.querySelectorAll<HTMLElement>('.slide'));
+      titleEl.textContent = (document.documentElement.lang || '').startsWith('en')
+        ? (tpl.dataset.titleEn || tpl.dataset.title || '')
+        : (tpl.dataset.title || '');
+      dotsEl.innerHTML = slides.map(() => '<i></i>').join('');
+      dotsEl.querySelectorAll('i').forEach((d, i) => d.addEventListener('click', () => goto(i)));
+      if (track && reduced) track.style.transition = 'none';
+      pv.hidden = false;
+      pv.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+      requestAnimationFrame(() => pv.classList.add('is-open'));
+      idx = 0;
+      goto(0);
+    };
+
+    const close = () => {
+      pv.classList.remove('is-open');
+      const done = () => {
+        pv.hidden = true;
+        pv.setAttribute('aria-hidden', 'true');
+        stage.innerHTML = '';
+        track = null; slides = [];
+        document.body.style.overflow = '';
+      };
+      if (reduced) done();
+      else setTimeout(done, 320);
+    };
+
+    // 拦截首页项目点击（capture 阶段，抢在 ClientRouter 的 SPA 跳转之前）
+    document.addEventListener('click', e => {
+      const link = (e.target as HTMLElement).closest<HTMLAnchorElement>('.feed-item, .row-link');
+      if (!link) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || (e as MouseEvent).button === 1) return; // 新标签/独立页兜底
+      const m = link.getAttribute('href')?.match(/\/works\/([^/]+)\/?$/);
+      const slug = m?.[1];
+      if (!slug || !decks.has(slug)) return; // 没 deck 的走默认跳转
+      e.preventDefault();
+      e.stopPropagation();
+      openDeck(slug);
+    }, true);
+
+    pv.querySelectorAll('[data-pv-close]').forEach(el => el.addEventListener('click', close));
+    pv.querySelectorAll('[data-pv-prev]').forEach(el => el.addEventListener('click', () => goto(idx - 1)));
+    pv.querySelectorAll('[data-pv-next]').forEach(el => el.addEventListener('click', () => goto(idx + 1)));
+
+    document.addEventListener('keydown', e => {
+      if (pv.hidden) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowLeft') goto(idx - 1);
+      else if (e.key === 'ArrowRight') goto(idx + 1);
+    });
+
+    // 移动端：横滑翻页 / 下滑关闭
+    let sx = 0, sy = 0;
+    stage.addEventListener('touchstart', e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+    stage.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - sx;
+      const dy = e.changedTouches[0].clientY - sy;
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) goto(idx - Math.sign(dx));
+      else if (dy > 90 && Math.abs(dx) < 60) close();
+    }, { passive: true });
+  }
+
+  setupSlideshow();
+  document.addEventListener('astro:after-swap', setupSlideshow);
+</script>
