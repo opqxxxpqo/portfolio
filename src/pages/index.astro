@@ -460,11 +460,14 @@ for (let f = 88; f <= 108; f += 0.5) {
     min-height: 0;
     width: 100%;
     background: #0c0c0b;
+    overflow: hidden; /* 微放大时裁掉溢出 */
   }
   .feed-poster img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transform-origin: center;
+    will-change: transform;
   }
   /* 顶部固定渐变阴影：CSS 叠加层，覆盖静态图 / 帧序列 / 视频，换素材自动保留 */
   .feed-poster::after {
@@ -616,6 +619,13 @@ for (let f = 88; f <= 108; f += 0.5) {
         scrubs.push(s);
       });
     }
+
+    // 静态封面：随滚动微放大（adoratorio 式，帧序列项不参与——它们是 canvas）
+    const statics = items
+      .map(item => ({ item, img: item.querySelector<HTMLImageElement>('.feed-poster img') }))
+      .filter(s => s.img && !item2hasFrames(s.item)) as { item: HTMLElement; img: HTMLImageElement }[];
+    function item2hasFrames(el: HTMLElement) { return !!el.dataset.framesBase; }
+
     const sizeScrub = (s: Scrub) => {
       const host = s.item.querySelector<HTMLElement>('.feed-poster');
       if (!host) return;
@@ -716,6 +726,20 @@ for (let f = 88; f <= 108; f += 0.5) {
         }
         drawScrub(s, p * (s.count - 1));
       });
+
+      // 静态封面微放大：同样按生命周期 p，scale 1→1.06（adoratorio 式，桌面）
+      if (!mobileMq.matches && !reduced) {
+        statics.forEach(({ item, img }) => {
+          const idx = Number(item.dataset.idx);
+          const riseP = clamp01((vh - item.getBoundingClientRect().top) / denom);
+          let p = riseP;
+          if (idx + 1 < items.length) {
+            const coverP = clamp01((vh - items[idx + 1].getBoundingClientRect().top) / denom);
+            p = (riseP + coverP) / 2;
+          }
+          img.style.transform = `scale(${(1 + p * 0.06).toFixed(4)})`;
+        });
+      }
     };
 
     let ticking = false;

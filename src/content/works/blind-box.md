@@ -3,7 +3,7 @@ title: "盲盒形象品牌设计"
 titleEn: "Blind-Box Character Branding"
 category: visual-design
 date: 2026-05-17
-cover: /works/blind-box/cover.jpg
+cover: /works/blind-box/total-3.jpg
 summary: "一组以日常物件为原型的盲盒角色形象。全流程 Blender 建模 + Photoshop 后期。"
 summaryEn: "A blind-box character series built on everyday-object archetypes. Modeled end-to-end in Blender, finished in Photoshop."
 role: "独立完成"
