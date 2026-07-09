@@ -131,8 +131,8 @@ function blindBoxSlides(work: any): Slide[] {
   ];
 }
 
-// 走独立页兜底（合集 / PDF / 待补）
-const SKIP = new Set(['ghost-radar', 'modeling', 'ux-study-portfolio']);
+// 走独立页兜底（合集 / PDF）
+const SKIP = new Set(['modeling', 'ux-study-portfolio']);
 
 export function buildSlides(work: any, enBody?: string): Slide[] | null {
   if (work.id === 'blind-box') return blindBoxSlides(work);
