@@ -12,16 +12,16 @@ frameSeq:
   base: /works/lofi-motion-cam/frames/
   count: 50
   ext: webp
-summary: "拟物磁带相机 App，把摄像头实时处理成 LoFi/VHS 质感并录制；质感全由 Blender 烘焙，代码只做动效与实时滤镜。"
-summaryEn: "A skeuomorphic tape-camcorder that runs your camera through real-time LoFi/VHS filters and records the result — every surface baked in Blender, code only drives motion and the live shader."
-role: "独立开发（AI 结对）"
-roleEn: "Solo dev (AI-paired)"
+summary: "把一个普通的复古滤镜相机，重做成「像真实机器一样」的厚重 CG 拟物产品，网页 / 安卓双端都能实时体验并录制。"
+summaryEn: "Rebuilt an ordinary retro-filter camera into a heavyweight CG skeuomorphic product that feels like a real machine — live and recordable on both web and Android."
+role: "独立开发（设计 / 3D 烘焙 / 交互 / 前端 / 工程，AI 结对）"
+roleEn: "Solo (design / 3D baking / interaction / frontend / engineering, AI-paired)"
 tools:
-  - Claude Code
   - Blender
-  - Expo (EAS Build)
-  - React Native + WebView
+  - Claude Code
   - WebGL / GLSL
+  - React Native + WebView
+  - Expo / EAS Build
 tags:
   - 拟物设计
   - 实时滤镜
@@ -52,23 +52,34 @@ gallery:
   - /works/lofi-motion-cam/g3.jpg
 ---
 
-## 项目定位
+## 情境
 
-一台拟物磁带相机——把手机或浏览器的摄像头，实时处理成 Mini-DV/VHS 那种 LoFi 质感，还能录下来存进相册。我想验证一件事：一个设计师带着 AI 结对，能不能把「渲染级的厚重质感」一路做成真能装进手机的产品，而不是停在一张好看的 mockup。
+项目最初只是一个简单的复古相机 App：Expo 套一个 WebView，把手机摄像头实时过一层 LoFi 滤镜。功能能跑，但界面是很普通的扁平 UI——和应用商店里一堆滤镜相机撞脸，没有记忆点、留不住人。
 
-## 关键决策
+## 任务
 
-1. **不做轻薄系统拟物，改做厚重 CG 重渲染。** Nothing-OS 那种拟物已经够多了，我想赌「渲染质感」本身能不能撑起一个产品。代价是给自己立了条铁律：所有材质、光影、阴影必须在 Blender 里烘进图，代码一律不许用 CSS 假造。
-2. **光影只烘不造，滑块砍掉了交叉淡化。** 为了让滑块拖动时光影连续，最初用相邻两帧交叉淡化，结果停下时两帧阴影叠在一起，露出「重影」。于是改成「位置连续 + 吸附最近那一帧烘焙图」——宁可 8 帧离散，也要任意位置的阴影都是真的。
-3. **实时滤镜用 WebGL shader 重写，砍掉 CPU 逐像素。** 要在手机上同时跑实时相机和鱼眼/色散/VHS 磁带撕裂，JS 每帧逐像素直接卡死；换成 GLSL 片元着色器 + 乒乓缓冲做拖影，才跑得动。
-4. **只在一个地方「程序化造」——滚轮。** 烘出来的滚轮纹条怎么都假，最后用 CSS 圆柱渐变 + 滚花 + 一层灰尘噪声搭出来。这说明「纯粹烘焙」不是目的：哪种方式更真、更可控，就用哪种。
+把它从「一个能用的 demo」升级成有强烈质感和记忆点的作品：UI 重做成厚重 CG 拟物，像一台真实存在的复古 DV 机器；同时不牺牲实时相机性能，并真正打包成能装进手机、能在线体验的产品，而不是停在设计稿。
 
-## 迭代过程
+## 定方向 · 厚重 CG 重渲染
 
-V1（轻薄拟物沙盒：manifest 驱动、多层视差、控件精灵）→ 验证了能拼装，但太薄、控件老对不齐轨道。
-V2（厚重 CG：一张烘焙整图当背景，会动的控件叠帧序列在上面）→ 质感立住了，而且同场景同相机出图，控件天然对齐。
-V3（真机产品化：紧致精灵 → 自包含 bundle → Expo 打成 APK，配 WebGL 实时滤镜 + 录制存相册，网页/安卓双端）→ 变成能装、能用、能分享的东西。
+否定轻薄的「系统拟物」（Nothing-OS 那种），改做厚重 CG 重渲染，并给自己立了条铁律：所有材质、光影、阴影全部在 Blender 里烘进图，代码只负责「动」，绝不用 CSS 假造光影——这是质感不塑料的根本。
 
-## 使用工具
+## 光影只烘不造
 
-Claude Code（全程结对写代码与打包）、Blender（所有材质与光影烘焙）、Expo + EAS Build（打 APK）、React Native + WebView（装壳）、WebGL / GLSL（实时滤镜引擎）。
+会动的控件最难。滑块拖动最初用相邻帧交叉淡化，停下时两帧阴影叠成「重影」。我改成位置连续 + 吸附最近的烘焙帧：宁可 8 帧离散，也保证任意位置的高光和接触阴影都是真烘的。
+
+## 实时性能与务实取舍
+
+把原来 CPU 逐像素的 JS 滤镜整体重写为 WebGL / GLSL 片元着色器，用乒乓缓冲做拖影，实现鱼眼、色散、暖调、VHS 磁带撕裂、扫描线等实时叠加，在手机 WebView 里跑得动。滚轮烘焙怎么都假，则果断改用程序化 CSS（圆柱渐变 + 滚花纹 + 灰尘噪声）——取舍标准是「更真更可控」，而不是死守纯烘焙。
+
+## 工程化打包
+
+写抠图脚本，把 4 组控件的全画幅帧序列（~45MB）压成 44 张紧致精灵（~6MB）+ 定位 manifest；再写打包脚本，把素材、着色器、逻辑内联成单个自包含 HTML，用 Expo / EAS 打成 APK。
+
+## 真机测试驱动修复
+
+装到手机实测，定位并修掉 5 个问题：录制热区只覆盖开关上半段、点击出现系统蓝色高光、停止录制后随机闪退（录制数据未释放导致的内存泄漏）、翻转镜头键漏放、拖动空白区整个界面错位——逐个查根因修复（释放采集流 + 置空录制器、锁定 touch-action 等）。
+
+## 成果与上线
+
+从一个撞脸的普通滤镜相机，变成有强烈记忆点的厚重 CG 拟物相机，网页 + 安卓双端都能真实体验、录制并存进相册。实时摄像头 + 多重 LoFi/VHS 滤镜在手机 WebView 流畅运行（从 JS 逐像素到 GPU 着色器）。控件素材从 ~45MB 压到 ~6MB，整包 8MB 自包含、离线可跑。沉淀出一条可复用的「出图 → 抠图 → 打包 → 上架」流水线（sprites → bundle → EAS），改一次素材几条命令即可重出新版。web 版部署到 GitHub Pages、APK 发成 GitHub Release，点开即玩 / 扫码即装。一个人（+ AI 结对）打通了设计 / 3D 烘焙 / 交互 / 前端 / 工程 / 发布全链路。

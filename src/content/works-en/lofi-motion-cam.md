@@ -1,26 +1,37 @@
 ---
 title: "LoFi Motion Cam"
-summary: "A skeuomorphic tape-camcorder that runs your camera through real-time LoFi/VHS filters and records the result — every surface baked in Blender, code only drives motion and the live shader."
-role: "Solo dev (AI-paired)"
+summary: "Rebuilt an ordinary retro-filter camera into a heavyweight CG skeuomorphic product that feels like a real machine — live and recordable on both web and Android."
+role: "Solo (design / 3D baking / interaction / frontend / engineering, AI-paired)"
 ---
 
-## Positioning
+## Situation
 
-A skeuomorphic tape camcorder — it takes your phone or browser camera, processes it live into that Mini-DV/VHS LoFi look, and records straight to the gallery. It was built to test one thing: can a designer, pairing with AI, take "render-grade heavyweight texture" all the way to a product that actually installs on a phone, instead of stopping at a pretty mockup?
+The project started as a simple retro camera app: Expo wrapping a WebView, running the phone camera through a live LoFi filter. It worked, but the UI was a plain flat interface — indistinguishable from the dozens of filter cameras in the app store, with nothing memorable to hold people.
 
-## Key Decisions
+## Task
 
-1. **Skipped thin system-style skeuomorphism for heavyweight CG rendering.** Nothing-OS-style skeuomorphism is everywhere already; the bet was whether rendered texture alone could carry a product. The price was a hard rule: every material, light, and shadow had to be baked into images in Blender — no faking anything with CSS.
-2. **Bake lighting, never fabricate it — the slider lost its cross-fade.** To keep shadows continuous while dragging, the first version cross-faded adjacent frames; at rest the two shadows stacked into a visible "ghost". The fix: continuous position, but snap to the nearest baked frame — better 8 discrete frames than a single fake shadow at any position.
-3. **Rewrote the live filters as WebGL shaders, killing per-pixel CPU work.** Running a live camera plus fisheye, chromatic aberration, and VHS tape-tearing at once choked JavaScript per-pixel loops on mobile; a GLSL fragment shader with ping-pong buffers for motion trails made it run.
-4. **Procedurally built exactly one thing — the jog wheel.** The baked wheel knurling never looked right, so it's a CSS cylindrical gradient plus knurl lines and a dust-noise layer. Which is the point: "pure baking" was never the goal — whichever technique looks more real and stays more controllable wins.
+Take it from "a working demo" to a piece with strong texture and a memory hook: rebuild the UI as heavyweight CG skeuomorphism, like a retro DV machine that actually exists — without sacrificing real-time camera performance, and genuinely packaged into a product you can install on a phone and try online, not just a design mockup.
 
-## Iteration
+## Direction · heavyweight CG rendering
 
-V1 (thin skeuomorphic sandbox: manifest-driven, parallax layers, control sprites) → proved the assembly worked, but felt flat and controls kept drifting off their tracks.
-V2 (heavyweight CG: one baked full-scene image as the background, animated controls layered on top as frame sequences) → the texture finally held, and rendering controls from the same scene and camera made them align by construction.
-V3 (productisation: tight sprites → self-contained bundle → Expo-built APK, with WebGL live filters plus record-to-gallery, shipping on web and Android) → something you can install, use, and share.
+I rejected thin "system skeuomorphism" (the Nothing-OS kind) for heavyweight CG re-rendering, and set myself a hard rule: every material, light, and shadow gets baked into images in Blender, code only drives motion, never faking light with CSS — that's what keeps the texture from feeling plastic.
 
-## Built with
+## Bake the light, never fake it
 
-Claude Code (paired on all code and packaging), Blender (every material and light bake), Expo + EAS Build (APK), React Native + WebView (the shell), WebGL / GLSL (the live filter engine).
+The moving controls were hardest. Dragging the slider first used cross-fading between adjacent frames, which stacked two shadows into a visible "ghost" at rest. I switched to continuous position + snap to the nearest baked frame: better 8 discrete frames than a fake highlight, so the specular and contact shadow are real at any position.
+
+## Real-time performance and pragmatic tradeoffs
+
+I rewrote the CPU per-pixel JS filters wholesale as WebGL / GLSL fragment shaders, with ping-pong buffers for trails — layering fisheye, chromatic aberration, warm tone, VHS tape-tear, and scanlines in real time, fast enough inside a phone WebView. The jog wheel never looked right baked, so I went procedural with CSS (cylinder gradient + knurl + dust noise). The criterion was "more real and more controllable," not dogmatic pure-baking.
+
+## Engineering and packaging
+
+I wrote a cut-out script to compress four groups of full-frame control sequences (~45MB) into 44 tight sprites (~6MB) + a positioning manifest, then a packaging script that inlines assets, shaders, and logic into a single self-contained HTML, built into an APK with Expo / EAS.
+
+## Device-test-driven fixes
+
+Installed on a real phone, I found and fixed five issues: the record hit-area only covered the top half of the switch, a system blue highlight on tap, random crashes after stopping a recording (a memory leak from unreleased capture data), a missing flip-camera key, and the whole UI shifting when dragging empty space — each traced to root cause (release the capture stream + null the recorder, lock touch-action, etc.).
+
+## Results and launch
+
+From a look-alike filter camera to a heavyweight CG skeuomorphic camera with a strong memory hook — real, recordable, and saved to the gallery on both web and Android. Live camera plus multiple LoFi/VHS filters run smoothly in a phone WebView (from JS per-pixel to GPU shaders). Control assets shrank from ~45MB to ~6MB; the whole bundle is 8MB, self-contained and offline-capable. It left behind a reusable "render → cut out → package → publish" pipeline (sprites → bundle → EAS) — a few commands re-ship a new build after an asset change. The web build is on GitHub Pages, the APK a GitHub Release — open to play, scan to install. One person (+ AI pairing) covered the whole chain: design / 3D baking / interaction / frontend / engineering / release.
