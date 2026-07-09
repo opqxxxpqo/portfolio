@@ -51,91 +51,65 @@ const proficient = [
 ---
 
 <BaseLayout title="关于 · 鲁琦 Qi Lu" description="拉夫堡大学服务设计创新硕士 · 视觉传达背景 · 软件栈 / 联系方式">
-  <section class="head">
-    <div class="container-narrow">
-      <p class="kicker">ABOUT</p>
-      <h1>
+  <canvas class="about-fx" id="about-fx" aria-hidden="true"></canvas>
+
+  <div class="about">
+    <!-- 头部 -->
+    <section class="head container-narrow">
+      <p class="mono-label eyebrow">
+        <span class="lang-zh">关于 — Qi Lu</span>
+        <span class="lang-en">ABOUT — QI LU</span>
+      </p>
+      <h1 class="head-title">
         <span class="lang-zh">你好，<br/>我是鲁琦。</span>
         <span class="lang-en">Hi,<br/>I'm Qi Lu.</span>
       </h1>
-      <p class="intro">
-        <span class="lang-zh">
-          本科<strong>视觉传达设计</strong>出身，现在在英国拉夫堡大学读
-          <strong>Service Design Innovation</strong> 硕士。
-          从静态视觉到服务系统设计，我习惯把人当成方法的起点，把工具当成放大器。
-        </span>
-        <span class="lang-en">
-          A <strong>Visual Communication Design</strong> graduate, now reading
-          <strong>MSc Service Design Innovation</strong> at Loughborough University.
-          Coming from static graphics into service-level systems, I treat people as the starting point of any method and tools as amplifiers.
-        </span>
+      <p class="lede">
+        <span class="lang-zh">本科<strong>视觉传达设计</strong>出身，现在在英国拉夫堡大学读 <strong>Service Design Innovation</strong> 硕士。从静态视觉到服务系统设计，我习惯把人当成方法的起点，把工具当成放大器。</span>
+        <span class="lang-en">A <strong>Visual Communication Design</strong> graduate, now reading <strong>MSc Service Design Innovation</strong> at Loughborough University. Coming from static graphics into service-level systems, I treat people as the starting point of any method and tools as amplifiers.</span>
       </p>
-      <p class="intro">
-        <span class="lang-zh">
-          日常里我把 <strong>Claude Code / Codex</strong> 这类 AI 编程工具当成自己的"第二只手"——
-          它不替我做判断，但能把节省下来的时间投回到调研、视觉打磨、和真正需要人的环节里。
-        </span>
-        <span class="lang-en">
-          Day to day I treat <strong>Claude Code / Codex</strong> as a second pair of hands —
-          they don't make the calls for me, but they free up the hours I'd rather spend on research, visual polish, and the parts of the work that genuinely need a person.
-        </span>
+      <p class="lede">
+        <span class="lang-zh">日常里我把 <strong>Claude Code / Codex</strong> 这类 AI 编程工具当成自己的「第二只手」——它不替我做判断，但能把节省下来的时间投回到调研、视觉打磨、和真正需要人的环节里。</span>
+        <span class="lang-en">Day to day I treat <strong>Claude Code / Codex</strong> as a second pair of hands — they don't make the calls for me, but they free up the hours I'd rather spend on research, visual polish, and the parts of the work that genuinely need a person.</span>
       </p>
       <div class="cta">
-        <a href="/resume.pdf" class="chunky-btn primary">
-          <span class="lang-zh">下载简历 PDF</span>
-          <span class="lang-en">Download CV (PDF)</span>
+        <a href="/resume.pdf" class="a-link">
+          <span class="lang-zh">下载简历 PDF ↓</span>
+          <span class="lang-en">DOWNLOAD CV (PDF) ↓</span>
         </a>
-        <a href="mailto:luqiapp2007@163.com" class="chunky-btn">
-          <span class="lang-zh">邮件联系</span>
-          <span class="lang-en">Email me</span>
+        <a href="mailto:luqiapp2007@163.com" class="a-link">
+          <span class="lang-zh">邮件联系 ↗</span>
+          <span class="lang-en">EMAIL ME ↗</span>
         </a>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="block highlight">
-    <div class="container-narrow">
+    <!-- 我怎么工作 -->
+    <section class="block container-narrow">
       <h2 class="block-title">
         <span class="lang-zh">我怎么工作</span>
         <span class="lang-en">How I work</span>
       </h2>
-      <p class="intro">
-        <span class="lang-zh">
-          大部分作品我半天到一天就做完，工具是 <strong>Claude Code、Figma、Blender、Midjourney</strong>。
-          但快不是因为我偷懒——而是 AI 把"执行"这件事的成本压到了几乎为零，
-          所以我能把省下来的全部时间花在判断上：访谈拿到的东西意味着什么、框架该怎么搭、哪些环节恰恰<strong>不该</strong>交给 AI。
-        </span>
-        <span class="lang-en">
-          Most of these projects took me half a day to a day, built with <strong>Claude Code, Figma, Blender, and Midjourney</strong>.
-          The speed isn't shortcutting — AI has pushed the cost of <em>execution</em> close to zero,
-          so I spend the time it gives back on judgment: what the interviews actually mean, how the framework should hold together, and which parts specifically should <strong>not</strong> be handed to AI.
-        </span>
+      <p class="body">
+        <span class="lang-zh">大部分作品我半天到一天就做完，工具是 <strong>Claude Code、Figma、Blender、Midjourney</strong>。但快不是因为我偷懒——而是 AI 把「执行」这件事的成本压到了几乎为零，所以我能把省下来的全部时间花在判断上：访谈拿到的东西意味着什么、框架该怎么搭、哪些环节恰恰<strong>不该</strong>交给 AI。</span>
+        <span class="lang-en">Most of these projects took me half a day to a day, built with <strong>Claude Code, Figma, Blender, and Midjourney</strong>. The speed isn't shortcutting — AI has pushed the cost of <em>execution</em> close to zero, so I spend the time it gives back on judgment: what the interviews actually mean, how the framework should hold together, and which parts specifically should <strong>not</strong> be handed to AI.</span>
       </p>
-      <p class="intro">
-        <span class="lang-zh">
-          我自己守住的部分从来不是写代码或调参，而是：定义问题、做取舍、决定什么东西值得做。
-          AI 负责把方案快速变成能跑的东西，我负责确认它做的是不是对的那件事。
-          <strong>执行越便宜，判断越值钱。</strong>这是我现在工作方式的全部前提。
-        </span>
-        <span class="lang-en">
-          The part I keep for myself was never writing code or tuning parameters. It's defining the problem, making the trade-offs, and deciding what's worth building at all.
-          AI turns a direction into something that runs; I decide whether it's the right thing to run.
-          <strong>The cheaper execution gets, the more judgment is worth.</strong> That's the whole premise of how I work now.
-        </span>
+      <p class="body">
+        <span class="lang-zh">我自己守住的部分从来不是写代码或调参，而是：定义问题、做取舍、决定什么东西值得做。AI 负责把方案快速变成能跑的东西，我负责确认它做的是不是对的那件事。<strong>执行越便宜，判断越值钱。</strong>这是我现在工作方式的全部前提。</span>
+        <span class="lang-en">The part I keep for myself was never writing code or tuning parameters. It's defining the problem, making the trade-offs, and deciding what's worth building at all. AI turns a direction into something that runs; I decide whether it's the right thing to run. <strong>The cheaper execution gets, the more judgment is worth.</strong> That's the whole premise of how I work now.</span>
       </p>
-    </div>
-  </section>
+    </section>
 
-  <section class="block">
-    <div class="container-narrow">
+    <!-- 教育背景 -->
+    <section class="block container-narrow">
       <h2 class="block-title">
         <span class="lang-zh">教育背景</span>
         <span class="lang-en">Education</span>
       </h2>
-      <ul class="edu-list">
+      <ul class="rows edu">
         {education.map(e => (
           <li>
-            <span class="edu-period">
+            <span class="mono-label period">
               <span class="lang-zh">{e.periodZh}</span>
               <span class="lang-en">{e.periodEn}</span>
             </span>
@@ -152,53 +126,45 @@ const proficient = [
           </li>
         ))}
       </ul>
-    </div>
-  </section>
+    </section>
 
-  <section class="block highlight">
-    <div class="container-narrow">
+    <!-- 软件栈 · 主攻 -->
+    <section class="block container-narrow">
       <h2 class="block-title">
         <span class="lang-zh">软件栈 · 主攻</span>
         <span class="lang-en">Toolkit · Core</span>
       </h2>
-      <p class="block-lede">
-        <span class="lang-zh">
-          下面五件是我<strong>最常用、最熟练</strong>的工具，几乎每个项目都会出现。
-          排序大致按使用频率，不分先后。
-        </span>
-        <span class="lang-en">
-          These five are the tools I reach for <strong>most often and most fluently</strong>, present in nearly every project.
-          Ordered roughly by frequency — no strict ranking.
-        </span>
+      <p class="lede-sm">
+        <span class="lang-zh">下面五件是我<strong>最常用、最熟练</strong>的工具，几乎每个项目都会出现。排序大致按使用频率，不分先后。</span>
+        <span class="lang-en">These five are the tools I reach for <strong>most often and most fluently</strong>, present in nearly every project. Ordered roughly by frequency — no strict ranking.</span>
       </p>
-      <ul class="ai-list">
+      <ul class="core-list">
         {primaryTools.map(t => (
           <li>
-            <div class="ai-name">{t.name}</div>
-            <div class="ai-usage">
+            <div class="core-name">{t.name}</div>
+            <div class="core-usage">
               <span class="lang-zh">{t.zh}</span>
               <span class="lang-en">{t.en}</span>
             </div>
           </li>
         ))}
       </ul>
-    </div>
-  </section>
+    </section>
 
-  <section class="block">
-    <div class="container-narrow">
+    <!-- 软件栈 · 熟练 -->
+    <section class="block container-narrow">
       <h2 class="block-title">
         <span class="lang-zh">软件栈 · 熟练使用</span>
         <span class="lang-en">Toolkit · Proficient</span>
       </h2>
-      <p class="block-lede">
+      <p class="lede-sm">
         <span class="lang-zh">这些是按需调用的工具——根据项目类型选择，都有过实际产出。</span>
         <span class="lang-en">Tools I bring in as needed — picked by project type, with actual deliverables behind each.</span>
       </p>
       <div class="skills">
         {proficient.map(g => (
           <div class="skill-group">
-            <h3 class="skill-group-title">
+            <h3 class="mono-label skill-group-title">
               <span class="lang-zh">{g.groupZh}</span>
               <span class="lang-en">{g.groupEn}</span>
             </h3>
@@ -208,202 +174,223 @@ const proficient = [
           </div>
         ))}
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="block">
-    <div class="container-narrow">
+    <!-- 联系方式 -->
+    <section class="block container-narrow">
       <h2 class="block-title">
         <span class="lang-zh">联系方式</span>
         <span class="lang-en">Contact</span>
       </h2>
-      <ul class="contact-list">
+      <ul class="rows contact">
         <li>
-          <span>
+          <span class="mono-label">
             <span class="lang-zh">邮箱</span>
             <span class="lang-en">Email</span>
           </span>
-          <a href="mailto:luqiapp2007@163.com">luqiapp2007@163.com</a>
+          <a href="mailto:luqiapp2007@163.com" class="c-link">luqiapp2007@163.com</a>
         </li>
         <li>
-          <span>GitHub</span>
-          <a href="https://github.com/opqxxxpqo" target="_blank" rel="noopener">github.com/opqxxxpqo</a>
+          <span class="mono-label">GitHub</span>
+          <a href="https://github.com/opqxxxpqo" target="_blank" rel="noopener" class="c-link">github.com/opqxxxpqo</a>
         </li>
       </ul>
-    </div>
-  </section>
+    </section>
+  </div>
 </BaseLayout>
 
 <style>
-  .head { padding: clamp(64px, 10vh, 120px) 0 64px; }
-  .kicker {
-    font-family: var(--font-mono);
-    font-size: 0.8125rem;
-    letter-spacing: 0.18em;
-    color: var(--fg-muted);
-    text-transform: uppercase;
-    margin-bottom: 24px;
+  /* ASCII 背景底噪：固定铺满，置底，内容在其上 */
+  .about-fx {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
   }
-  h1 {
+  .about { position: relative; z-index: 1; }
+
+  .head { padding: clamp(56px, 10vh, 110px) 0 56px; }
+  .eyebrow { margin: 0 0 26px; }
+  .head-title {
     font-family: var(--font-display);
-    font-size: clamp(2.5rem, 7vw, 4.5rem);
+    font-size: clamp(2.5rem, 7vw, 4.75rem);
     font-weight: 900;
     letter-spacing: -0.03em;
-    line-height: 0.95;
-    margin-bottom: 40px;
+    line-height: 0.98;
+    margin: 0 0 36px;
   }
-  .intro {
+  html[lang^='zh'] .head-title { letter-spacing: 0; }
+  .lede {
     font-size: 1.0625rem;
     color: var(--fg-soft);
-    line-height: 1.7;
-    margin-bottom: 16px;
+    line-height: 1.75;
+    margin: 0 0 16px;
+    max-width: 640px;
   }
-  .intro strong { color: var(--fg); }
-  .cta {
-    margin-top: 40px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
+  .lede strong { color: var(--fg); font-weight: 700; }
+  .cta { margin-top: 36px; display: flex; gap: 28px; flex-wrap: wrap; }
+  .a-link {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg);
+    border-bottom: 1px solid var(--fg);
+    padding-bottom: 3px;
+    transition: color var(--transition), border-color var(--transition);
   }
+  .a-link:hover { color: var(--accent); border-color: var(--accent); }
 
   .block {
-    padding: 80px 0;
-    border-top: var(--border-w-thick) solid var(--border);
-  }
-  .block.highlight {
-    background: var(--bg-strong);
+    padding: 48px 0;
+    border-top: 1px solid var(--hairline);
   }
   .block-title {
     font-family: var(--font-display);
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--fg);
-    margin-bottom: 32px;
+    font-size: clamp(1.375rem, 2.4vw, 1.875rem);
     font-weight: 900;
-    padding-bottom: 8px;
-    border-bottom: var(--border-w-thick) solid var(--border);
+    letter-spacing: -0.01em;
+    margin: 0 0 28px;
   }
-  .block-lede {
-    color: var(--fg-soft);
+  html[lang^='zh'] .block-title { letter-spacing: 0; }
+  .body {
     font-size: 1rem;
-    line-height: 1.7;
-    margin-bottom: 32px;
+    color: var(--fg-soft);
+    line-height: 1.75;
+    margin: 0 0 16px;
     max-width: 640px;
   }
-  .block-lede strong { color: var(--fg); }
-
-  .edu-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  .edu-list li {
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 24px;
-    padding: 20px 0;
-    border-bottom: var(--border-w) solid var(--border);
-  }
-  .edu-list li:last-child { border-bottom: none; }
-  .edu-period {
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
+  .body strong { color: var(--fg); font-weight: 700; }
+  .lede-sm {
     color: var(--fg-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    margin: 0 0 28px;
+    max-width: 620px;
   }
-  .edu-school {
-    font-family: var(--font-display);
-    font-size: 1.125rem;
-    color: var(--fg);
-    margin-bottom: 4px;
-  }
-  .edu-detail { color: var(--fg-soft); font-size: 0.9375rem; }
+  .lede-sm strong { color: var(--fg-soft); }
 
-  .ai-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  /* 细线行式列表（教育 / 联系） */
+  .rows { list-style: none; padding: 0; margin: 0; }
+  .rows li {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    gap: 24px;
+    padding: 18px 0;
+    border-top: 1px solid var(--hairline);
+    align-items: baseline;
+  }
+  .rows li:last-child { border-bottom: 1px solid var(--hairline); }
+  .edu-school { font-family: var(--font-display); font-size: 1.0625rem; font-weight: 900; margin-bottom: 3px; }
+  html[lang^='zh'] .edu-school { letter-spacing: 0; }
+  .edu-detail { color: var(--fg-soft); font-size: 0.9375rem; }
+  .contact .c-link {
+    font-size: 0.9375rem;
+    color: var(--fg);
+    border-bottom: 1px solid var(--accent);
+    padding-bottom: 1px;
+    transition: background var(--transition), color var(--transition);
+  }
+  .contact .c-link:hover { background: var(--accent); color: var(--accent-text); }
+
+  /* 主攻软件 —— 细线网格 */
+  .core-list {
+    list-style: none; padding: 0; margin: 0;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 0;
-    border-top: var(--border-w) solid var(--border);
-    border-left: var(--border-w) solid var(--border);
+    border-top: 1px solid var(--hairline);
+    border-left: 1px solid var(--hairline);
   }
-  .ai-list li {
-    background: var(--bg);
-    padding: 20px;
-    border-right: var(--border-w) solid var(--border);
-    border-bottom: var(--border-w) solid var(--border);
+  .core-list li {
+    padding: 18px 20px;
+    border-right: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
   }
-  .ai-name {
+  .core-name {
     font-family: var(--font-display);
     color: var(--accent);
     font-weight: 900;
-    margin-bottom: 8px;
     font-size: 1.0625rem;
+    margin-bottom: 6px;
   }
-  .ai-usage { color: var(--fg-soft); font-size: 0.9375rem; line-height: 1.55; }
+  .core-usage { color: var(--fg-soft); font-size: 0.9375rem; line-height: 1.55; }
 
-  .skills {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 40px;
-  }
+  /* 熟练软件 —— 分组 */
+  .skills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; }
   .skill-group-title {
-    font-family: var(--font-display);
-    font-size: 1rem;
-    color: var(--fg);
-    margin-bottom: 12px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    margin: 0 0 12px;
     padding-bottom: 8px;
-    border-bottom: var(--border-w) solid var(--border);
+    border-bottom: 1px solid var(--hairline);
   }
-  .skill-items {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  .skill-items li {
-    color: var(--fg-soft);
-    padding: 4px 0;
-    font-size: 0.9375rem;
-  }
-
-  .contact-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  .contact-list li {
-    display: grid;
-    grid-template-columns: 88px 1fr;
-    gap: 24px;
-    padding: 16px 0;
-    border-bottom: var(--border-w) solid var(--border);
-    font-size: 0.9375rem;
-  }
-  .contact-list span {
-    font-family: var(--font-mono);
-    color: var(--fg-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-size: 0.8125rem;
-  }
-  .contact-list a {
-    color: var(--fg);
-    border-bottom: var(--border-w) solid var(--accent);
-    display: inline-block;
-    padding-bottom: 1px;
-  }
-  .contact-list a:hover { background: var(--accent); color: var(--accent-text); }
+  .skill-items { list-style: none; padding: 0; margin: 0; }
+  .skill-items li { color: var(--fg-soft); padding: 4px 0; font-size: 0.9375rem; }
 
   @media (max-width: 640px) {
-    .ai-list, .skills { grid-template-columns: 1fr; }
-    .edu-list li, .contact-list li { grid-template-columns: 1fr; gap: 4px; }
+    .core-list, .skills { grid-template-columns: 1fr; }
+    .rows li { grid-template-columns: 1fr; gap: 4px; }
+    .cta { gap: 20px; }
   }
 </style>
+
+<script>
+  // 关于页 ASCII 背景：只做循环漂移的字符底噪，无鼠标交互
+  function setupAboutFx() {
+    const canvas = document.getElementById('about-fx') as HTMLCanvasElement | null;
+    if (!canvas || canvas.dataset.bound) return;
+    canvas.dataset.bound = '1';
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const CHARS = '.:+*#'.split('');
+    const CELL = 22;
+    let cols = 0, rows = 0, w = 0, h = 0, raf = 0, t = 0;
+    let fg = getComputedStyle(document.documentElement).getPropertyValue('--fg').trim() || '#121211';
+
+    const resize = () => {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      w = window.innerWidth; h = window.innerHeight;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cols = Math.ceil(w / CELL);
+      rows = Math.ceil(h / CELL);
+      ctx.font = '13px ui-monospace, "SF Mono", Consolas, monospace';
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'center';
+      fg = getComputedStyle(document.documentElement).getPropertyValue('--fg').trim() || '#121211';
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const frame = () => {
+      if (document.hidden) { raf = requestAnimationFrame(frame); return; }
+      t += 0.016;
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = fg;
+      for (let gy = 0; gy < rows; gy++) {
+        for (let gx = 0; gx < cols; gx++) {
+          const n =
+            Math.sin(gx * 0.26 + t * 0.6) * 0.5 +
+            Math.sin(gy * 0.32 - t * 0.45) * 0.5 +
+            Math.sin((gx + gy) * 0.16 + t * 0.8) * 0.5;
+          const v = (n + 1.5) / 3;
+          if (v < 0.64) continue;
+          const ci = Math.min(CHARS.length - 1, Math.floor((v - 0.64) / 0.36 * CHARS.length));
+          ctx.globalAlpha = 0.04 + (v - 0.64) * 0.28;
+          ctx.fillText(CHARS[ci], gx * CELL + CELL / 2, gy * CELL + CELL / 2);
+        }
+      }
+      ctx.globalAlpha = 1;
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+
+    document.addEventListener('astro:before-swap', () => cancelAnimationFrame(raf), { once: true });
+  }
+  setupAboutFx();
+  document.addEventListener('astro:page-load', setupAboutFx);
+</script>
