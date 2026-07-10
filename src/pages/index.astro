@@ -59,9 +59,9 @@ for (let f = 88; f <= 108; f += 0.5) {
       <span class="lang-zh">设计工程师 · 交付能落地的 AI 原型</span>
       <span class="lang-en">DESIGN ENGINEER — SHIPPING AI PROTOTYPES THAT WORK</span>
     </p>
-    <a class="landing-about mono-label" href="/about" data-scramble-hover>
-      <span class="lang-zh"><span data-scramble>关于 →</span></span>
-      <span class="lang-en"><span data-scramble>ABOUT →</span></span>
+    <a class="landing-about" href="/about" data-scramble-hover>
+      <span class="lang-zh"><span data-scramble>关于我 →</span></span>
+      <span class="lang-en"><span data-scramble>ABOUT ME →</span></span>
     </a>
     <div class="landing-center">
       <h1 class="landing-wordmark"><span>Qi Lu Portfolio</span></h1>
@@ -82,6 +82,10 @@ for (let f = 88; f <= 108; f += 0.5) {
         <div class="tn-tools">
           <LangToggle />
         </div>
+        <a class="tn-about" href="/about" data-astro-prefetch>
+          <span class="lang-zh">关于我 →</span>
+          <span class="lang-en">ABOUT ME →</span>
+        </a>
       </div>
 
       <div class="tn-scale" id="tn-scale">
@@ -199,6 +203,11 @@ for (let f = 88; f <= 108; f += 0.5) {
     top: 20px;
     right: 32px;
     z-index: 1;
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     color: #121211;
     transition: color var(--transition);
   }
@@ -311,6 +320,19 @@ for (let f = 88; f <= 108; f += 0.5) {
     height: 28px !important;
     border-radius: 6px !important;
   }
+  /* 关于我 —— 推到调频栏最右侧 */
+  .tn-about {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--tn-fg);
+    white-space: nowrap;
+    transition: color var(--transition);
+  }
+  .tn-about:hover { color: var(--accent); }
 
   /* ---------- 刻度带：精确刻度，无杂线 ---------- */
   .tn-scale {
