@@ -3,7 +3,25 @@
 // 用通用构建器从 markdown 正文自动解析 ZH（work.body）+ EN（works-en 的 body）成幻灯片。
 // 特例：盲盒（图片驱动）；跳过：合集 / PDF / 待补项目（回落 /works/<slug> 独立页）。
 
-export type SlideImg = { src: string } | { ph: string };
+import fs from 'node:fs';
+
+export type SlideImg = { src: string } | { video: string } | { ph: string };
+
+// 读 public/works/<slug>/slides/ 下按序号命名的配图/视频：N.ext → 第 N 张幻灯片
+// （0 = 封面，1 = 第一个小节，依次）。图 = jpg/png/webp，视频 = mp4/webm（静音循环）。
+function slideMedia(slug: string): Map<number, SlideImg> {
+  const map = new Map<number, SlideImg>();
+  try {
+    const dir = `public/works/${slug}/slides`;
+    for (const f of fs.readdirSync(dir)) {
+      const m = f.match(/^(\d+)\.(webp|jpg|jpeg|png|mp4|webm)$/i);
+      if (!m) continue;
+      const src = `/works/${slug}/slides/${f}`;
+      map.set(Number(m[1]), /mp4|webm/i.test(m[2]) ? { video: src } : { src });
+    }
+  } catch {}
+  return map;
+}
 
 export type Slide =
   | {
@@ -70,16 +88,19 @@ function genericSlides(work: any, enBody?: string): Slide[] {
   const d = work.data;
   const zh = parseSections(work.body || '');
   const en = enBody ? parseSections(enBody) : [];
+  const media = slideMedia(work.id); // 序号 → 配图/视频，按 slides/ 目录
   const slides: Slide[] = [];
 
+  // 封面（幻灯片 0）：有 slides/0.* 就用它（图或视频），否则用海报
   slides.push({
     layout: 'cover',
     title: d.title, titleEn: d.titleEn || d.title,
     tagline: d.summary, taglineEn: d.summaryEn || d.summary,
     meta: coverMeta(d),
-    img: { src: d.poster || d.cover }
+    img: media.get(0) ?? { src: d.poster || d.cover }
   });
 
+  let si = 1; // 幻灯片序号：小节从 1 起（0 是封面）
   let textIdx = 0;
   zh.forEach((s, i) => {
     if (isTools(s.heading)) return;
@@ -90,9 +111,10 @@ function genericSlides(work: any, enBody?: string): Slide[] {
       headingEn: e?.heading || s.heading,
       body: sectionBody(s.lines),
       bodyEn: e ? sectionBody(e.lines) : sectionBody(s.lines),
-      img: { ph: '配图 · ' + s.heading },
+      img: media.get(si) ?? { ph: '配图 · ' + s.heading },
       side: textIdx++ % 2 === 0 ? 'right' : 'left'
     });
+    si++;
   });
 
   const tIdx = zh.findIndex(s => isTools(s.heading));

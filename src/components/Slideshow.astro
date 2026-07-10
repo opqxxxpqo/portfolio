@@ -18,9 +18,11 @@ const { decks } = Astro.props;
           return (
             <article class="slide slide--cover">
               <div class="slide-visual">
-                {'src' in s.img
-                  ? <img src={s.img.src} alt="" loading="lazy" decoding="async" />
-                  : <div class="slide-ph"><span class="mono-label">{s.img.ph}</span></div>}
+                {'video' in s.img
+                  ? <video src={s.img.video} muted loop autoplay playsinline preload="metadata"></video>
+                  : 'src' in s.img
+                    ? <img src={s.img.src} alt="" loading="lazy" decoding="async" />
+                    : <div class="slide-ph"><span class="mono-label">{s.img.ph}</span></div>}
               </div>
               <div class="slide-copy">
                 <h2 class="slide-title" data-fx>
@@ -61,9 +63,11 @@ const { decks } = Astro.props;
                 </div>
               </div>
               <div class="slide-visual">
-                {'src' in s.img
-                  ? <img src={s.img.src} alt="" loading="lazy" decoding="async" />
-                  : <div class="slide-ph"><span class="mono-label">{s.img.ph}</span></div>}
+                {'video' in s.img
+                  ? <video src={s.img.video} muted loop autoplay playsinline preload="metadata"></video>
+                  : 'src' in s.img
+                    ? <img src={s.img.src} alt="" loading="lazy" decoding="async" />
+                    : <div class="slide-ph"><span class="mono-label">{s.img.ph}</span></div>}
               </div>
             </article>
           );
@@ -230,6 +234,10 @@ const { decks } = Astro.props;
     overflow: hidden;
   }
   .slide-visual img { width: 100%; height: 100%; object-fit: cover; }
+  /* 视频：静音循环、无控件，完整显示不裁切 */
+  .slide-visual video { width: 100%; height: 100%; object-fit: contain; display: block; }
+  /* 小节配图比例杂，用 contain 完整显示（封面海报仍 cover 满幅） */
+  .slide--text .slide-visual img { object-fit: contain; }
   .slide-ph {
     width: 100%; height: 100%;
     display: flex; align-items: center; justify-content: center;
@@ -414,6 +422,8 @@ const { decks } = Astro.props;
       stage.appendChild(tpl.content.cloneNode(true));
       track = stage.querySelector('.pv-track');
       slides = Array.from(stage.querySelectorAll<HTMLElement>('.slide'));
+      // 克隆进来的静音视频需要主动 play（autoplay 属性不一定在 clone 后触发）
+      stage.querySelectorAll('video').forEach(v => { v.muted = true; v.play().catch(() => {}); });
       titleEl.textContent = (document.documentElement.lang || '').startsWith('en')
         ? (tpl.dataset.titleEn || tpl.dataset.title || '')
         : (tpl.dataset.title || '');
