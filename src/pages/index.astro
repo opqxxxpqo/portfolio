@@ -10,10 +10,20 @@ const all = await getCollection('works');
 const worksEnAll = await getCollection('worksEn');
 const enBodyMap = new Map(worksEnAll.map(e => [e.id, e.body || '']));
 
-// 隐藏 hidden:true 的作品（合集子项），按时间倒序
+// 隐藏 hidden:true 的作品（合集子项）
+// 排序：置顶顺序 幽灵雷达 → 相机 → 盲盒 → 建模，其余按时间倒序
+const PIN = ['ghost-radar', 'lofi-motion-cam', 'blind-box', 'modeling'];
+const pinRank = (id: string) => {
+  const i = PIN.indexOf(id);
+  return i === -1 ? PIN.length : i;
+};
 const works = all
   .filter(w => !w.data.hidden)
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+  .sort((a, b) => {
+    const ra = pinRank(a.id), rb = pinRank(b.id);
+    if (ra !== rb) return ra - rb;
+    return b.data.date.getTime() - a.data.date.getTime();
+  });
 
 const yearFmt = (d: Date) => d.getFullYear().toString();
 const pad = (n: number) => n.toString().padStart(2, '0');
@@ -78,14 +88,8 @@ for (let f = 88; f <= 108; f += 0.5) {
   <!-- ========== 固定调频器：居中，着陆屏时隐藏 ========== -->
   <section class="tuner" id="tuner" tabindex="0" aria-label="Project tuner">
     <div class="tuner-inner">
-      <div class="tn-toprow">
-        <div class="tn-tools">
-          <LangToggle />
-        </div>
-        <a class="tn-about" href="/about" data-astro-prefetch>
-          <span class="lang-zh">关于我 →</span>
-          <span class="lang-en">ABOUT ME →</span>
-        </a>
+      <div class="tn-tools">
+        <LangToggle />
       </div>
 
       <div class="tn-scale" id="tn-scale">
@@ -113,6 +117,11 @@ for (let f = 88; f <= 108; f += 0.5) {
         ))}
         <div class="tn-needle" id="tn-needle" aria-hidden="true"></div>
       </div>
+
+      <a class="tn-about" href="/about" data-astro-prefetch>
+        <span class="lang-zh">关于我 →</span>
+        <span class="lang-en">ABOUT ME →</span>
+      </a>
     </div>
   </section>
 
@@ -299,19 +308,15 @@ for (let f = 88; f <= 108; f += 0.5) {
   }
 
   .tuner-inner {
-    max-width: 920px;
+    max-width: var(--max-width);
     margin: 0 auto;
-    padding: 12px 32px 12px;
+    padding: 10px 32px;
     display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .tn-toprow {
-    display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: 16px;
+    gap: 28px;
   }
-  /* 中文/EN 在调频左侧，圆角边框 */
+  /* 中文/EN 在最左，圆角边框 */
   .tn-tools { display: flex; gap: 6px; align-items: center; flex: none; }
   .tn-tools :global(button) {
     background: transparent !important;
@@ -320,9 +325,9 @@ for (let f = 88; f <= 108; f += 0.5) {
     height: 28px !important;
     border-radius: 6px !important;
   }
-  /* 关于我 —— 推到调频栏最右侧 */
+  /* 关于我 —— 刻度带右侧，与中文/EN 分居两端 */
   .tn-about {
-    margin-left: auto;
+    flex: none;
     font-family: var(--font-mono);
     font-size: 0.9375rem;
     font-weight: 700;
@@ -337,6 +342,8 @@ for (let f = 88; f <= 108; f += 0.5) {
   /* ---------- 刻度带：精确刻度，无杂线 ---------- */
   .tn-scale {
     position: relative;
+    flex: 1;
+    min-width: 0;
     height: 74px;
     cursor: ew-resize;
     touch-action: none;
@@ -521,8 +528,10 @@ for (let f = 88; f <= 108; f += 0.5) {
     .landing-about { right: 20px; }
     .landing-wordmark { font-size: clamp(2.25rem, 11vw, 3.5rem); padding: 0 20px; }
 
-    .tuner-inner { padding: 10px 20px 10px; }
-    .tn-scale { height: 64px; }
+    .tuner-inner { padding: 10px 16px; gap: 10px; }
+    .tn-scale { height: 60px; }
+    .tn-about { font-size: 0.6875rem; letter-spacing: 0.02em; }
+    .tn-tools :global(.lang-toggle) { padding: 0 8px !important; }
 
     /* 列表流：不 sticky、短幅海报一条条排 */
     .feed-item {
