@@ -4,13 +4,58 @@
 // 特例：盲盒（图片驱动）；跳过：合集 / PDF / 待补项目（回落 /works/<slug> 独立页）。
 
 import fs from 'node:fs';
+import sharp from 'sharp';
 
-export type SlideImg = { src: string } | { video: string } | { html: string } | { ph: string };
+export type SlideImg =
+  | { src: string; bg?: string }
+  | { video: string }
+  | { html: string }
+  | { ph: string };
+
+// 配图在幻灯片里是 contain（完整显示不裁切），图的比例和配图区对不上时四周会露出衬底。
+// 写死一个衬底色不行：幽灵的图是浅灰画布、相机的是深灰，同一个色总有一边露出黑边。
+// 所以取图自己四角的颜色当衬底 —— 露出来的部分和图的画布融成一块，看不出边。
+// 四角颜色不一致（内容顶到边，比如满幅照片）就别猜，回落深色。
+const FALLBACK_BG = '#0c0c0b';
+
+async function canvasColor(file: string): Promise<string | undefined> {
+  try {
+    const { width, height } = await sharp(file).metadata();
+    if (!width || !height) return undefined;
+    const N = 4;
+    const spots = [
+      { left: 0, top: 0 },
+      { left: width - N, top: 0 },
+      { left: 0, top: height - N },
+      { left: width - N, top: height - N },
+    ];
+    const corners: number[][] = [];
+    for (const s of spots) {
+      // 注意：stats() 是读原图的、会绕过 extract()，取局部得走 raw()
+      const { data, info } = await sharp(file)
+        .extract({ ...s, width: N, height: N })
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+      const c = [0, 1, 2].map(k => {
+        let sum = 0;
+        for (let i = 0; i < data.length; i += info.channels) sum += data[i + k];
+        return Math.round(sum / (data.length / info.channels));
+      });
+      corners.push(c);
+    }
+    const avg = [0, 1, 2].map(k => Math.round(corners.reduce((s, c) => s + c[k], 0) / corners.length));
+    const spread = Math.max(...corners.flatMap(c => c.map((v, k) => Math.abs(v - avg[k]))));
+    if (spread > 12) return undefined;
+    return '#' + avg.map(v => v.toString(16).padStart(2, '0')).join('');
+  } catch {
+    return undefined;
+  }
+}
 
 // 读 public/works/<slug>/slides/ 下按序号命名的配图/视频/HTML：N.ext → 第 N 张幻灯片
 // （0 = 封面，1 = 第一个小节，依次）。图 = jpg/png/webp，视频 = mp4/webm（静音循环），
 // html = 可交互嵌入（iframe，比如 canvas 动画 demo）。
-function slideMedia(slug: string): Map<number, SlideImg> {
+async function slideMedia(slug: string): Promise<Map<number, SlideImg>> {
   const map = new Map<number, SlideImg>();
   try {
     const dir = `public/works/${slug}/slides`;
@@ -21,7 +66,11 @@ function slideMedia(slug: string): Map<number, SlideImg> {
       const ext = m[2].toLowerCase();
       map.set(
         Number(m[1]),
-        ext === 'html' ? { html: src } : /mp4|webm/.test(ext) ? { video: src } : { src }
+        ext === 'html'
+          ? { html: src }
+          : /mp4|webm/.test(ext)
+            ? { video: src }
+            : { src, bg: await canvasColor(`${dir}/${f}`) }
       );
     }
   } catch {}
@@ -44,7 +93,7 @@ export type Slide =
       img: SlideImg;
       side?: 'left' | 'right';
     }
-  | { layout: 'image'; img: { src: string } | { video: string } | { html: string }; caption?: string; captionEn?: string }
+  | { layout: 'image'; img: { src: string; bg?: string } | { video: string } | { html: string }; caption?: string; captionEn?: string }
   | { layout: 'gallery'; imgs: { src: string }[] }
   | {
       layout: 'links';
@@ -90,11 +139,11 @@ function sectionBody(lines: string[]): string[] {
 const isTools = (h: string) => /使用工具|built with|tools/i.test(h);
 
 // ---------- 通用：从正文自动拆幻灯片 ----------
-function genericSlides(work: any, enBody?: string): Slide[] {
+async function genericSlides(work: any, enBody?: string): Promise<Slide[]> {
   const d = work.data;
   const zh = parseSections(work.body || '');
   const en = enBody ? parseSections(enBody) : [];
-  const media = slideMedia(work.id); // 序号 → 配图/视频，按 slides/ 目录
+  const media = await slideMedia(work.id); // 序号 → 配图/视频，按 slides/ 目录
   const slides: Slide[] = [];
   const links = (d.links || []).map((l: any) => ({ label: l.label, labelEn: l.labelEn || l.label, url: l.url }));
 
@@ -167,9 +216,9 @@ function blindBoxSlides(work: any): Slide[] {
 // 走独立页兜底（合集 / PDF）
 const SKIP = new Set(['modeling', 'ux-study-portfolio']);
 
-export function buildSlides(work: any, enBody?: string): Slide[] | null {
+export async function buildSlides(work: any, enBody?: string): Promise<Slide[] | null> {
   if (work.id === 'blind-box') return blindBoxSlides(work);
   if (SKIP.has(work.id)) return null;
-  if (work.body && /^##\s/m.test(work.body)) return genericSlides(work, enBody);
+  if (work.body && /^##\s/m.test(work.body)) return await genericSlides(work, enBody);
   return null;
 }

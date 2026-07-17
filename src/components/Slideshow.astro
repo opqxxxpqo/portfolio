@@ -17,7 +17,7 @@ const { decks } = Astro.props;
         if (s.layout === 'cover') {
           return (
             <article class="slide slide--cover">
-              <div class="slide-visual">
+              <div class="slide-visual" style={'src' in s.img && s.img.bg ? `--visual-bg:${s.img.bg}` : undefined}>
                 {'html' in s.img
                   ? <iframe src={s.img.html} loading="lazy" title="交互演示"></iframe>
                   : 'video' in s.img
@@ -74,7 +74,7 @@ const { decks } = Astro.props;
                   <div class="lang-en">{s.bodyEn.map(p => <p>{p}</p>)}</div>
                 </div>
               </div>
-              <div class="slide-visual">
+              <div class="slide-visual" style={'src' in s.img && s.img.bg ? `--visual-bg:${s.img.bg}` : undefined}>
                 {'html' in s.img
                   ? <iframe src={s.img.html} loading="lazy" title="交互演示"></iframe>
                   : 'video' in s.img
@@ -88,7 +88,7 @@ const { decks } = Astro.props;
         }
         if (s.layout === 'image') {
           return (
-            <article class="slide slide--image">
+            <article class="slide slide--image" style={'src' in s.img && s.img.bg ? `--visual-bg:${s.img.bg}` : undefined}>
               {'html' in s.img
                 ? <iframe src={s.img.html} loading="lazy" title="交互演示"></iframe>
                 : 'video' in s.img
@@ -247,7 +247,8 @@ const { decks } = Astro.props;
   .slide-visual {
     flex: 0 0 56%;
     min-width: 0;
-    background: #0c0c0b;
+    /* --visual-bg 由 slides.ts 取自图片四角的画布色，contain 露出的部分就和图融成一块 */
+    background: var(--visual-bg, #0c0c0b);
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
   }
@@ -262,7 +263,8 @@ const { decks } = Astro.props;
     display: block;
     background: #0c0c0b;
   }
-  /* 小节配图比例杂，用 contain 完整显示（封面海报仍 cover 满幅） */
+  /* 小节配图比例杂，用 contain 完整显示（封面海报仍 cover 满幅）。
+     露不露边由 --visual-bg 决定：取图自己的画布色，衬底和图融成一块。 */
   .slide--text .slide-visual img { object-fit: contain; }
   .slide-ph {
     width: 100%; height: 100%;
@@ -311,7 +313,7 @@ const { decks } = Astro.props;
   .slide-body p:last-child { margin-bottom: 0; }
 
   /* 全幅大图 */
-  .slide--image { background: #0c0c0b; align-items: center; justify-content: center; }
+  .slide--image { background: var(--visual-bg, #0c0c0b); align-items: center; justify-content: center; }
   .slide--image img,
   .slide--image video { max-width: 100%; max-height: 100%; object-fit: contain; }
   .slide--image iframe { width: 100%; height: 100%; border: 0; background: #0c0c0b; }
@@ -506,6 +508,30 @@ const { decks } = Astro.props;
       else if (e.key === 'ArrowLeft') goto(idx - 1);
       else if (e.key === 'ArrowRight') goto(idx + 1);
     });
+
+    // 滚轮翻页。触控板一次划动会连发几十个小 delta，所以翻完上锁，
+    // 等它彻底停下（120ms 没有新事件）才解锁，避免一划飞好几页。
+    let wheelLock = false;
+    let wheelIdle: number | undefined;
+    stage.addEventListener('wheel', e => {
+      // 文字栏能滚就先滚它，滚到头再翻页
+      const copy = (e.target as HTMLElement).closest<HTMLElement>('.slide-copy, .slide--gallery');
+      if (copy && copy.scrollHeight > copy.clientHeight + 1) {
+        const atTop = copy.scrollTop <= 0;
+        const atEnd = copy.scrollTop + copy.clientHeight >= copy.scrollHeight - 1;
+        if (!(e.deltaY < 0 ? atTop : atEnd)) return;
+      }
+      e.preventDefault();
+      clearTimeout(wheelIdle);
+      wheelIdle = window.setTimeout(() => { wheelLock = false; }, 120);
+      if (wheelLock) return;
+      const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (Math.abs(d) < 8) return;
+      const next = idx + Math.sign(d);
+      if (next < 0 || next > slides.length - 1) return; // 到头了就别锁，留着让它继续滚
+      wheelLock = true;
+      goto(next);
+    }, { passive: false });
 
     // 移动端：横滑翻页 / 下滑关闭
     let sx = 0, sy = 0;
