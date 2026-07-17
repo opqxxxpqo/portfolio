@@ -45,6 +45,16 @@ const { decks } = Astro.props;
                     </div>
                   ))}
                 </dl>
+                {s.links && (
+                  <div class="slide-links">
+                    {s.links.map(l => (
+                      <a href={l.url} target="_blank" rel="noopener" class="slide-link">
+                        <span class="lang-zh">{l.label} ↗</span>
+                        <span class="lang-en">{l.labelEn} ↗</span>
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             </article>
           );
@@ -75,7 +85,9 @@ const { decks } = Astro.props;
         if (s.layout === 'image') {
           return (
             <article class="slide slide--image">
-              <img src={s.img.src} alt="" loading="lazy" decoding="async" />
+              {'video' in s.img
+                ? <video src={s.img.video} muted loop autoplay playsinline preload="metadata"></video>
+                : <img src={s.img.src} alt="" loading="lazy" decoding="async" />}
             </article>
           );
         }
@@ -286,7 +298,8 @@ const { decks } = Astro.props;
 
   /* 全幅大图 */
   .slide--image { background: #0c0c0b; align-items: center; justify-content: center; }
-  .slide--image img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .slide--image img,
+  .slide--image video { max-width: 100%; max-height: 100%; object-fit: contain; }
 
   /* 角色网格 */
   .slide--gallery { padding: clamp(20px, 3vw, 40px); overflow-y: auto; }

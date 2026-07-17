@@ -30,6 +30,7 @@ export type Slide =
       tagline: string; taglineEn: string;
       meta: { label: string; labelEn: string; value: string; valueEn: string }[];
       img: SlideImg;
+      links?: { label: string; labelEn: string; url: string }[]; // 链接并进封面，省掉单独一页
     }
   | {
       layout: 'text';
@@ -38,7 +39,7 @@ export type Slide =
       img: SlideImg;
       side?: 'left' | 'right';
     }
-  | { layout: 'image'; img: { src: string }; caption?: string; captionEn?: string }
+  | { layout: 'image'; img: { src: string } | { video: string }; caption?: string; captionEn?: string }
   | { layout: 'gallery'; imgs: { src: string }[] }
   | {
       layout: 'links';
@@ -90,14 +91,16 @@ function genericSlides(work: any, enBody?: string): Slide[] {
   const en = enBody ? parseSections(enBody) : [];
   const media = slideMedia(work.id); // 序号 → 配图/视频，按 slides/ 目录
   const slides: Slide[] = [];
+  const links = (d.links || []).map((l: any) => ({ label: l.label, labelEn: l.labelEn || l.label, url: l.url }));
 
-  // 封面（幻灯片 0）：有 slides/0.* 就用它（图或视频），否则用海报
+  // 封面（幻灯片 0）：有 slides/0.* 就用它（图或视频），否则用海报；链接并进封面
   slides.push({
     layout: 'cover',
     title: d.title, titleEn: d.titleEn || d.title,
     tagline: d.summary, taglineEn: d.summaryEn || d.summary,
     meta: coverMeta(d),
-    img: media.get(0) ?? { src: d.poster || d.cover }
+    img: media.get(0) ?? { src: d.poster || d.cover },
+    links: links.length ? links : undefined
   });
 
   let si = 1; // 幻灯片序号：小节从 1 起（0 是封面）
@@ -117,13 +120,16 @@ function genericSlides(work: any, enBody?: string): Slide[] {
     si++;
   });
 
-  const tIdx = zh.findIndex(s => isTools(s.heading));
-  const toolZh = tIdx >= 0 ? sectionBody(zh[tIdx].lines).slice(0, 1) : [];
-  const toolEn = tIdx >= 0 && en[tIdx] ? sectionBody(en[tIdx].lines).slice(0, 1) : toolZh;
-  const links = (d.links || []).map((l: any) => ({ label: l.label, labelEn: l.labelEn || l.label, url: l.url }));
-  if (links.length || toolZh.length) {
-    slides.push({ layout: 'links', heading: '工具与链接', headingEn: 'Tools & links', body: toolZh, bodyEn: toolEn, links });
-  }
+  // 超出小节数的媒体（序号 ≥ si）→ 追加为纯媒体页（无文字），按序号排，视频通常放最后
+  [...media.keys()]
+    .filter(k => k >= si)
+    .sort((a, b) => a - b)
+    .forEach(k => {
+      const m = media.get(k)!;
+      if ('ph' in m) return;
+      slides.push({ layout: 'image', img: m });
+    });
+
   return slides;
 }
 
