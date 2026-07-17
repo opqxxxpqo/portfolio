@@ -5,19 +5,24 @@
 
 import fs from 'node:fs';
 
-export type SlideImg = { src: string } | { video: string } | { ph: string };
+export type SlideImg = { src: string } | { video: string } | { html: string } | { ph: string };
 
-// 读 public/works/<slug>/slides/ 下按序号命名的配图/视频：N.ext → 第 N 张幻灯片
-// （0 = 封面，1 = 第一个小节，依次）。图 = jpg/png/webp，视频 = mp4/webm（静音循环）。
+// 读 public/works/<slug>/slides/ 下按序号命名的配图/视频/HTML：N.ext → 第 N 张幻灯片
+// （0 = 封面，1 = 第一个小节，依次）。图 = jpg/png/webp，视频 = mp4/webm（静音循环），
+// html = 可交互嵌入（iframe，比如 canvas 动画 demo）。
 function slideMedia(slug: string): Map<number, SlideImg> {
   const map = new Map<number, SlideImg>();
   try {
     const dir = `public/works/${slug}/slides`;
     for (const f of fs.readdirSync(dir)) {
-      const m = f.match(/^(\d+)\.(webp|jpg|jpeg|png|mp4|webm)$/i);
+      const m = f.match(/^(\d+)\.(webp|jpg|jpeg|png|mp4|webm|html)$/i);
       if (!m) continue;
       const src = `/works/${slug}/slides/${f}`;
-      map.set(Number(m[1]), /mp4|webm/i.test(m[2]) ? { video: src } : { src });
+      const ext = m[2].toLowerCase();
+      map.set(
+        Number(m[1]),
+        ext === 'html' ? { html: src } : /mp4|webm/.test(ext) ? { video: src } : { src }
+      );
     }
   } catch {}
   return map;
@@ -39,7 +44,7 @@ export type Slide =
       img: SlideImg;
       side?: 'left' | 'right';
     }
-  | { layout: 'image'; img: { src: string } | { video: string }; caption?: string; captionEn?: string }
+  | { layout: 'image'; img: { src: string } | { video: string } | { html: string }; caption?: string; captionEn?: string }
   | { layout: 'gallery'; imgs: { src: string }[] }
   | {
       layout: 'links';

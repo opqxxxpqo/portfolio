@@ -18,11 +18,13 @@ const { decks } = Astro.props;
           return (
             <article class="slide slide--cover">
               <div class="slide-visual">
-                {'video' in s.img
-                  ? <video src={s.img.video} muted loop autoplay playsinline preload="metadata"></video>
-                  : 'src' in s.img
-                    ? <img src={s.img.src} alt="" loading="lazy" decoding="async" />
-                    : <div class="slide-ph"><span class="mono-label">{s.img.ph}</span></div>}
+                {'html' in s.img
+                  ? <iframe src={s.img.html} loading="lazy" title="交互演示"></iframe>
+                  : 'video' in s.img
+                    ? <video src={s.img.video} muted loop autoplay playsinline preload="metadata"></video>
+                    : 'src' in s.img
+                      ? <img src={s.img.src} alt="" loading="lazy" decoding="async" />
+                      : <div class="slide-ph"><span class="mono-label">{s.img.ph}</span></div>}
               </div>
               <div class="slide-copy">
                 <h2 class="slide-title" data-fx>
@@ -73,11 +75,13 @@ const { decks } = Astro.props;
                 </div>
               </div>
               <div class="slide-visual">
-                {'video' in s.img
-                  ? <video src={s.img.video} muted loop autoplay playsinline preload="metadata"></video>
-                  : 'src' in s.img
-                    ? <img src={s.img.src} alt="" loading="lazy" decoding="async" />
-                    : <div class="slide-ph"><span class="mono-label">{s.img.ph}</span></div>}
+                {'html' in s.img
+                  ? <iframe src={s.img.html} loading="lazy" title="交互演示"></iframe>
+                  : 'video' in s.img
+                    ? <video src={s.img.video} muted loop autoplay playsinline preload="metadata"></video>
+                    : 'src' in s.img
+                      ? <img src={s.img.src} alt="" loading="lazy" decoding="async" />
+                      : <div class="slide-ph"><span class="mono-label">{s.img.ph}</span></div>}
               </div>
             </article>
           );
@@ -85,9 +89,11 @@ const { decks } = Astro.props;
         if (s.layout === 'image') {
           return (
             <article class="slide slide--image">
-              {'video' in s.img
-                ? <video src={s.img.video} muted loop autoplay playsinline preload="metadata"></video>
-                : <img src={s.img.src} alt="" loading="lazy" decoding="async" />}
+              {'html' in s.img
+                ? <iframe src={s.img.html} loading="lazy" title="交互演示"></iframe>
+                : 'video' in s.img
+                  ? <video src={s.img.video} muted loop autoplay playsinline preload="metadata"></video>
+                  : <img src={s.img.src} alt="" loading="lazy" decoding="async" />}
             </article>
           );
         }
@@ -248,6 +254,14 @@ const { decks } = Astro.props;
   .slide-visual img { width: 100%; height: 100%; object-fit: cover; }
   /* 视频：静音循环、无控件，完整显示不裁切 */
   .slide-visual video { width: 100%; height: 100%; object-fit: contain; display: block; }
+  /* HTML 交互嵌入：铺满配图区（能不能点由 .has-embed 关掉热区来保证，见下） */
+  .slide-visual iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    background: #0c0c0b;
+  }
   /* 小节配图比例杂，用 contain 完整显示（封面海报仍 cover 满幅） */
   .slide--text .slide-visual img { object-fit: contain; }
   .slide-ph {
@@ -300,6 +314,7 @@ const { decks } = Astro.props;
   .slide--image { background: #0c0c0b; align-items: center; justify-content: center; }
   .slide--image img,
   .slide--image video { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .slide--image iframe { width: 100%; height: 100%; border: 0; background: #0c0c0b; }
 
   /* 角色网格 */
   .slide--gallery { padding: clamp(20px, 3vw, 40px); overflow-y: auto; }
@@ -345,6 +360,8 @@ const { decks } = Astro.props;
   .pv-edge--l { left: 0; }
   .pv-edge--r { right: 0; }
   .pv-edge[hidden] { display: none; }
+  /* .pv-track 有 transform（自成层叠上下文），iframe 的 z-index 永远拼不过热区 —— 直接让热区失效 */
+  .pv.has-embed .pv-edge { pointer-events: none; }
 
   /* 底部导航 */
   .pv-nav {
@@ -419,6 +436,8 @@ const { decks } = Astro.props;
     const goto = (n: number) => {
       idx = Math.max(0, Math.min(slides.length - 1, n));
       if (track) track.style.transform = `translateX(${-idx * 100}%)`;
+      // 交互演示页（内嵌 iframe）：让出左右点击热区，避免抢走 demo 自己的按钮/滑块；翻页仍走底部箭头和键盘
+      pv.classList.toggle('has-embed', !!slides[idx]?.querySelector('iframe'));
       countEl.textContent = pad2(idx + 1) + ' / ' + pad2(slides.length);
       dotsEl.querySelectorAll('i').forEach((d, i) => d.classList.toggle('on', i === idx));
       arrows().forEach(a => {
