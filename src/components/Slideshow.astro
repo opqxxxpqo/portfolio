@@ -17,10 +17,14 @@ const { decks } = Astro.props;
         if (s.layout === 'cover') {
           return (
             <article class="slide slide--cover">
-              <div class="slide-visual">
-                {'src' in s.img
-                  ? <img src={s.img.src} alt="" loading="lazy" decoding="async" />
-                  : <div class="slide-ph"><span class="mono-label">{s.img.ph}</span></div>}
+              <div class="slide-visual" style={'src' in s.img && s.img.bg ? `--visual-bg:${s.img.bg}` : undefined}>
+                {'html' in s.img
+                  ? <iframe src={s.img.html} loading="lazy" title="交互演示"></iframe>
+                  : 'video' in s.img
+                    ? <video src={s.img.video} muted loop autoplay playsinline preload="metadata"></video>
+                    : 'src' in s.img
+                      ? <img src={s.img.src} alt="" loading="lazy" decoding="async" />
+                      : <div class="slide-ph"><span class="mono-label">{s.img.ph}</span></div>}
               </div>
               <div class="slide-copy">
                 <h2 class="slide-title" data-fx>
@@ -43,6 +47,16 @@ const { decks } = Astro.props;
                     </div>
                   ))}
                 </dl>
+                {s.links && (
+                  <div class="slide-links">
+                    {s.links.map(l => (
+                      <a href={l.url} target="_blank" rel="noopener" class="slide-link">
+                        <span class="lang-zh">{l.label} ↗</span>
+                        <span class="lang-en">{l.labelEn} ↗</span>
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             </article>
           );
@@ -60,18 +74,26 @@ const { decks } = Astro.props;
                   <div class="lang-en">{s.bodyEn.map(p => <p>{p}</p>)}</div>
                 </div>
               </div>
-              <div class="slide-visual">
-                {'src' in s.img
-                  ? <img src={s.img.src} alt="" loading="lazy" decoding="async" />
-                  : <div class="slide-ph"><span class="mono-label">{s.img.ph}</span></div>}
+              <div class="slide-visual" style={'src' in s.img && s.img.bg ? `--visual-bg:${s.img.bg}` : undefined}>
+                {'html' in s.img
+                  ? <iframe src={s.img.html} loading="lazy" title="交互演示"></iframe>
+                  : 'video' in s.img
+                    ? <video src={s.img.video} muted loop autoplay playsinline preload="metadata"></video>
+                    : 'src' in s.img
+                      ? <img src={s.img.src} alt="" loading="lazy" decoding="async" />
+                      : <div class="slide-ph"><span class="mono-label">{s.img.ph}</span></div>}
               </div>
             </article>
           );
         }
         if (s.layout === 'image') {
           return (
-            <article class="slide slide--image">
-              <img src={s.img.src} alt="" loading="lazy" decoding="async" />
+            <article class="slide slide--image" style={'src' in s.img && s.img.bg ? `--visual-bg:${s.img.bg}` : undefined}>
+              {'html' in s.img
+                ? <iframe src={s.img.html} loading="lazy" title="交互演示"></iframe>
+                : 'video' in s.img
+                  ? <video src={s.img.video} muted loop autoplay playsinline preload="metadata"></video>
+                  : <img src={s.img.src} alt="" loading="lazy" decoding="async" />}
             </article>
           );
         }
@@ -225,11 +247,25 @@ const { decks } = Astro.props;
   .slide-visual {
     flex: 0 0 56%;
     min-width: 0;
-    background: #0c0c0b;
+    /* --visual-bg 由 slides.ts 取自图片四角的画布色，contain 露出的部分就和图融成一块 */
+    background: var(--visual-bg, #0c0c0b);
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
   }
   .slide-visual img { width: 100%; height: 100%; object-fit: cover; }
+  /* 视频：静音循环、无控件，完整显示不裁切 */
+  .slide-visual video { width: 100%; height: 100%; object-fit: contain; display: block; }
+  /* HTML 交互嵌入：铺满配图区（能不能点由 .has-embed 关掉热区来保证，见下） */
+  .slide-visual iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    background: #0c0c0b;
+  }
+  /* 小节配图比例杂，用 contain 完整显示（封面海报仍 cover 满幅）。
+     露不露边由 --visual-bg 决定：取图自己的画布色，衬底和图融成一块。 */
+  .slide--text .slide-visual img { object-fit: contain; }
   .slide-ph {
     width: 100%; height: 100%;
     display: flex; align-items: center; justify-content: center;
@@ -277,8 +313,10 @@ const { decks } = Astro.props;
   .slide-body p:last-child { margin-bottom: 0; }
 
   /* 全幅大图 */
-  .slide--image { background: #0c0c0b; align-items: center; justify-content: center; }
-  .slide--image img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .slide--image { background: var(--visual-bg, #0c0c0b); align-items: center; justify-content: center; }
+  .slide--image img,
+  .slide--image video { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .slide--image iframe { width: 100%; height: 100%; border: 0; background: #0c0c0b; }
 
   /* 角色网格 */
   .slide--gallery { padding: clamp(20px, 3vw, 40px); overflow-y: auto; }
@@ -324,6 +362,8 @@ const { decks } = Astro.props;
   .pv-edge--l { left: 0; }
   .pv-edge--r { right: 0; }
   .pv-edge[hidden] { display: none; }
+  /* .pv-track 有 transform（自成层叠上下文），iframe 的 z-index 永远拼不过热区 —— 直接让热区失效 */
+  .pv.has-embed .pv-edge { pointer-events: none; }
 
   /* 底部导航 */
   .pv-nav {
@@ -398,6 +438,8 @@ const { decks } = Astro.props;
     const goto = (n: number) => {
       idx = Math.max(0, Math.min(slides.length - 1, n));
       if (track) track.style.transform = `translateX(${-idx * 100}%)`;
+      // 交互演示页（内嵌 iframe）：让出左右点击热区，避免抢走 demo 自己的按钮/滑块；翻页仍走底部箭头和键盘
+      pv.classList.toggle('has-embed', !!slides[idx]?.querySelector('iframe'));
       countEl.textContent = pad2(idx + 1) + ' / ' + pad2(slides.length);
       dotsEl.querySelectorAll('i').forEach((d, i) => d.classList.toggle('on', i === idx));
       arrows().forEach(a => {
@@ -414,6 +456,8 @@ const { decks } = Astro.props;
       stage.appendChild(tpl.content.cloneNode(true));
       track = stage.querySelector('.pv-track');
       slides = Array.from(stage.querySelectorAll<HTMLElement>('.slide'));
+      // 克隆进来的静音视频需要主动 play（autoplay 属性不一定在 clone 后触发）
+      stage.querySelectorAll('video').forEach(v => { v.muted = true; v.play().catch(() => {}); });
       titleEl.textContent = (document.documentElement.lang || '').startsWith('en')
         ? (tpl.dataset.titleEn || tpl.dataset.title || '')
         : (tpl.dataset.title || '');
@@ -464,6 +508,30 @@ const { decks } = Astro.props;
       else if (e.key === 'ArrowLeft') goto(idx - 1);
       else if (e.key === 'ArrowRight') goto(idx + 1);
     });
+
+    // 滚轮翻页。触控板一次划动会连发几十个小 delta，所以翻完上锁，
+    // 等它彻底停下（120ms 没有新事件）才解锁，避免一划飞好几页。
+    let wheelLock = false;
+    let wheelIdle: number | undefined;
+    stage.addEventListener('wheel', e => {
+      // 文字栏能滚就先滚它，滚到头再翻页
+      const copy = (e.target as HTMLElement).closest<HTMLElement>('.slide-copy, .slide--gallery');
+      if (copy && copy.scrollHeight > copy.clientHeight + 1) {
+        const atTop = copy.scrollTop <= 0;
+        const atEnd = copy.scrollTop + copy.clientHeight >= copy.scrollHeight - 1;
+        if (!(e.deltaY < 0 ? atTop : atEnd)) return;
+      }
+      e.preventDefault();
+      clearTimeout(wheelIdle);
+      wheelIdle = window.setTimeout(() => { wheelLock = false; }, 120);
+      if (wheelLock) return;
+      const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (Math.abs(d) < 8) return;
+      const next = idx + Math.sign(d);
+      if (next < 0 || next > slides.length - 1) return; // 到头了就别锁，留着让它继续滚
+      wheelLock = true;
+      goto(next);
+    }, { passive: false });
 
     // 移动端：横滑翻页 / 下滑关闭
     let sx = 0, sy = 0;

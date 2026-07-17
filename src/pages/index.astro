@@ -29,9 +29,15 @@ const yearFmt = (d: Date) => d.getFullYear().toString();
 const pad = (n: number) => n.toString().padStart(2, '0');
 
 // 幻灯片 deck：有 slides 的项目点击弹浮窗，其余回落独立页
-const decks = works
-  .map(w => ({ slug: w.id, title: w.data.title, titleEn: (w.data as any).titleEn || w.data.title, slides: buildSlides(w, enBodyMap.get(w.id)) }))
-  .filter((d): d is { slug: string; title: string; titleEn: string; slides: NonNullable<ReturnType<typeof buildSlides>> } => d.slides !== null);
+type Deck = { slug: string; title: string; titleEn: string; slides: NonNullable<Awaited<ReturnType<typeof buildSlides>>> };
+const decks = (await Promise.all(
+  works.map(async w => ({
+    slug: w.id,
+    title: w.data.title,
+    titleEn: (w.data as any).titleEn || w.data.title,
+    slides: await buildSlides(w, enBodyMap.get(w.id))
+  }))
+)).filter((d): d is Deck => d.slides !== null);
 
 // 每个作品是一个频点。频点必须落在尺子的格点上（整 MHz），数字和刻度才对得上：
 // ≤10 个作品时用 89/91/93…（全部落在 1MHz 中刻度，间距均匀）；更多时吸附到 0.5MHz 格

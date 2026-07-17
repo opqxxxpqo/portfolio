@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GhostRun · 追逐雷达</title>
+<style>
+  :root {
+    --color-background-secondary: transparent;
+    --color-text-secondary: rgba(255,255,255,.55);
+    --border-radius-lg: 10px;
+    --border-radius-md: 6px;
+  }
+  html, body {
+    margin: 0; padding: 0;
+    background: #0c0c0b; color: #fff;
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    -webkit-font-smoothing: antialiased;
+  }
+  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 12px; box-sizing: border-box; }
+  button {
+    background: #000; color: #49F3A5; cursor: pointer;
+    border: 0.5px solid rgba(73,243,165,.5); border-radius: 6px;
+    padding: 4px 10px; font: inherit; font-size: 13px; line-height: 1;
+  }
+  button:hover { background: #49F3A5; color: #000; }
+  input[type=range] { accent-color: #49F3A5; }
+</style>
+</head>
+<body>
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">车机HUD动画：本车位于方形画面中心，速度随过弯非匀速变化，幽灵车圆环逼近并超车，配色为薄荷绿黑白。</h2>
+<div style="background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 16px;">
+  <div style="position: relative; max-width: 520px; margin: 0 auto; background: #000; border-radius: 8px; overflow: hidden;">
+    <canvas id="hmi" style="display:block; width:100%;"></canvas>
+  </div>
+  <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; max-width:520px; margin: 14px auto 0;">
+    <span id="badge" style="font-size:12px; padding:4px 12px; border-radius: var(--border-radius-md); background:#000; color:#49F3A5; border:0.5px solid rgba(73,243,165,0.5); white-space:nowrap; font-variant-numeric:tabular-nums;">接近中</span>
+    <div style="display:flex; align-items:baseline; gap:6px;">
+      <span id="dist" style="font-size:24px; font-weight:500; font-variant-numeric:tabular-nums;">--</span>
+      <span style="font-size:13px; color: var(--color-text-secondary);">m</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:180px;">
+      <label for="spd" style="font-size:13px; color: var(--color-text-secondary); white-space:nowrap;">相对速度</label>
+      <input type="range" id="spd" min="1" max="10" step="1" value="4" style="flex:1;">
+    </div>
+    <button id="pp" aria-label="暂停" style="display:flex; align-items:center; gap:6px;">⏸</button>
+  </div>
+</div>
+<script>
+const GREEN = '#49F3A5';
+const cv = document.getElementById('hmi');
+const ctx = cv.getContext('2d');
+const badge = document.getElementById('badge');
+const distEl = document.getElementById('dist');
+const spd = document.getElementById('spd');
+const pp = document.getElementById('pp');
+let playing = true, tG = 0, trackT = 0, last = performance.now(), frames = 0;
+
+pp.addEventListener('click', () => {
+  playing = !playing;
+  pp.innerHTML = playing ? '⏸' : '▶';
+  pp.setAttribute('aria-label', playing ? '暂停' : '播放');
+});
+
+function resize(){
+  const w = cv.parentElement.clientWidth;
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = w * dpr; cv.height = w * dpr;
+  cv.style.height = w + 'px';
+}
+window.addEventListener('resize', resize);
+resize();
+
+const DX = -Math.SQRT1_2, DY = Math.SQRT1_2;
+
+function smooth(a,b,x){ x = Math.min(1, Math.max(0, (x-a)/(b-a))); return x*x*(3-2*x); }
+function egoV(u){ return 120 - 62*(smooth(0.40,0.55,u) - smooth(0.72,0.90,u)); }
+function driveState(u){
+  if (u < 0.40) return '直线巡航';
+  if (u < 0.55) return '制动减速';
+  if (u < 0.72) return '弯心';
+  if (u < 0.90) return '出弯加速';
+  return '直线巡航';
+}
+
+function marker(x, y, c){
+  ctx.strokeStyle = c; ctx.lineWidth = 1.4;
+  ctx.strokeRect(x-5, y-5, 10, 10);
+  ctx.beginPath();
+  ctx.moveTo(x-5,y-5); ctx.lineTo(x+5,y+5);
+  ctx.moveTo(x+5,y-5); ctx.lineTo(x-5,y+5);
+  ctx.stroke();
+}
+
+function label(txt, x, y, c){
+  ctx.font = '11px ui-monospace, SFMono-Regular, monospace';
+  ctx.textAlign = 'left';
+  const w = ctx.measureText(txt).width;
+  ctx.fillStyle = c;
+  ctx.fillText(txt, x, y);
+  ctx.strokeStyle = c; ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x-4, y-9); ctx.lineTo(x-7, y-9); ctx.lineTo(x-7, y+3); ctx.lineTo(x-4, y+3);
+  ctx.moveTo(x+w+4, y-9); ctx.lineTo(x+w+7, y-9); ctx.lineTo(x+w+7, y+3); ctx.lineTo(x+w+4, y+3);
+  ctx.stroke();
+}
+
+function tc(f){
+  const s = Math.floor(f/60), ff = f%60;
+  const mm = String(Math.floor(s/60)%60).padStart(2,'0');
+  const ss = String(s%60).padStart(2,'0');
+  return '00:'+mm+':'+ss+':'+String(ff).padStart(2,'0');
+}
+
+function draw(now){
+  const dt = Math.min(0.05, (now-last)/1000); last = now;
+  const T = 9;
+  const u = (trackT / T) % 1;
+  const v = egoV(u);
+  const cycle = 16 / (+spd.value);
+  if (playing){
+    trackT += dt;
+    tG = (tG + dt/cycle * (v/120)) % 1;
+    frames++;
+  }
+  const dpr = window.devicePixelRatio || 1;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const S = cv.width/dpr;
+  ctx.clearRect(0,0,S,S);
+  ctx.fillStyle = '#000'; ctx.fillRect(0,0,S,S);
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
+  for(let gx=1; gx<5; gx++) for(let gy=1; gy<5; gy++){
+    const x = gx*0.2*S, y = gy*0.2*S;
+    ctx.beginPath();
+    ctx.moveTo(x-5,y); ctx.lineTo(x+5,y);
+    ctx.moveTo(x,y-5); ctx.lineTo(x,y+5);
+    ctx.stroke();
+  }
+
+  const m = 0.06*S;
+  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  ctx.strokeRect(m, m, S-2*m, S-2*m);
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  [[m,m],[S/2,m],[S-m,m],[m,S/2],[S-m,S/2],[m,S-m],[S/2,S-m],[S-m,S-m]].forEach(p => ctx.fillRect(p[0]-2.5, p[1]-2.5, 5, 5));
+
+  const rEgo = 0.19*S;
+  const ex = S/2, ey = S/2;
+  const ax = ex - DX*2*rEgo, ay = ey - DY*2*rEgo;
+  const rMin = 0.022*S, rMax = 0.56*S;
+  const cornerEnv = smooth(0.45,0.60,u) - smooth(0.75,0.92,u);
+  const rot = -0.16 * cornerEnv;
+
+  ctx.save();
+  ctx.translate(ex, ey); ctx.rotate(rot); ctx.translate(-ex, -ey);
+
+  const farR = rMax;
+  ctx.strokeStyle = 'rgba(73,243,165,0.30)';
+  ctx.setLineDash([3,5]);
+  ctx.beginPath();
+  ctx.moveTo(ax, ay);
+  ctx.lineTo(ax + DX*2*farR, ay + DY*2*farR);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  function ring(t){
+    const r = rMin * Math.pow(rMax/rMin, t);
+    return { r, cx: ax + DX*r, cy: ay + DY*r };
+  }
+
+  [0.2, 0.4, 0.6, 0.8].forEach(off => {
+    const t = (tG + off) % 1;
+    const g = ring(t);
+    const a = Math.min(t*5, 1) * (t > 0.82 ? Math.max(0, (1-t)/0.18) : 1) * 0.7;
+    ctx.strokeStyle = 'rgba(255,255,255,' + a.toFixed(3) + ')';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(g.cx, g.cy, g.r, 0, 6.2832); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,' + (a*0.8).toFixed(3) + ')';
+    [[g.cx, g.cy-g.r],[g.cx, g.cy+g.r],[g.cx-g.r, g.cy],[g.cx+g.r, g.cy]].forEach(p => ctx.fillRect(p[0]-2, p[1]-2, 4, 4));
+  });
+
+  const t = tG;
+  const g = ring(t);
+  const px = ax + DX*2*g.r, py = ay + DY*2*g.r;
+  const gap = 2*(rEgo - g.r);
+  const meters = Math.max(0, Math.round(gap * 0.55));
+  let st;
+  if (gap > 0.08*S) st = '接近中';
+  else if (gap > 0) st = '即将超车';
+  else if (t < 0.86) st = '超车中';
+  else st = '已超越';
+
+  const ga = Math.min(t*5, 1) * (t > 0.88 ? Math.max(0, (1-t)/0.12) : 1);
+  ctx.globalAlpha = ga;
+  ctx.strokeStyle = GREEN;
+  ctx.lineWidth = 2.2;
+  if (st === '超车中') ctx.setLineDash([8,6]);
+  ctx.beginPath(); ctx.arc(g.cx, g.cy, g.r, 0, 6.2832); ctx.stroke();
+  ctx.setLineDash([]);
+
+  if (gap > 0){
+    ctx.strokeStyle = GREEN; ctx.lineWidth = 1;
+    ctx.setLineDash([2,4]);
+    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(ex, ey); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = GREEN;
+    ctx.font = '11px ui-monospace, monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(meters + 'm', (px+ex)/2 + 10, (py+ey)/2);
+  }
+
+  marker(px, py, GREEN);
+  label('GHOST', px + 12, py - 12, GREEN);
+  ctx.globalAlpha = 1;
+
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(ex, ey, 8, 0, 6.2832); ctx.stroke();
+  ctx.beginPath(); ctx.arc(ex, ey, 2.5, 0, 6.2832);
+  ctx.fillStyle = '#fff'; ctx.fill();
+  label('EGO', ex + 14, ey + 20, 'rgba(255,255,255,0.85)');
+
+  ctx.restore();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.font = '11px ui-monospace, monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('FPS 60.00', 14, 20);
+  ctx.textAlign = 'center';
+  ctx.fillText('REAR_RADAR / GHOST TRK', S/2, 20);
+  ctx.textAlign = 'right';
+  ctx.fillText(tc(frames), S - 14, 20);
+  ctx.textAlign = 'left';
+
+  ctx.fillStyle = GREEN;
+  ctx.font = '500 26px ui-monospace, monospace';
+  ctx.fillText(String(Math.round(v)), 14, S - 16);
+  const vw = ctx.measureText(String(Math.round(v))).width;
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.font = '11px ui-monospace, monospace';
+  ctx.fillText('km/h', 18 + vw, S - 16);
+
+  const ds = driveState(u);
+  ctx.textAlign = 'center';
+  if (ds === '制动减速'){
+    ctx.fillStyle = GREEN;
+    ctx.fillRect(S/2 - 44, S - 30, 88, 18);
+    ctx.fillStyle = '#000';
+    ctx.fillText('制动减速', S/2, S - 17);
+  } else {
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.fillText(ds, S/2, S - 17);
+  }
+  ctx.textAlign = 'right';
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.fillText(tc(frames), S - 14, S - 17);
+  ctx.textAlign = 'left';
+
+  badge.textContent = st;
+  distEl.textContent = gap > 0 ? meters : (st === '超车中' ? '0' : '--');
+
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script></body>
+</html>
