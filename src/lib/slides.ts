@@ -93,7 +93,7 @@ export type Slide =
       img: SlideImg;
       side?: 'left' | 'right';
     }
-  | { layout: 'image'; img: { src: string; bg?: string } | { video: string } | { html: string }; caption?: string; captionEn?: string }
+  | { layout: 'image'; img: { src: string; bg?: string } | { video: string } | { html: string }; caption?: string; captionEn?: string; fill?: boolean }
   | { layout: 'gallery'; imgs: { src: string }[] }
   | {
       layout: 'links';
@@ -192,6 +192,7 @@ function blindBoxSlides(work: any): Slide[] {
   const d = work.data;
   const B = '/works/blind-box/';
   return [
+    // 封面沿用原来的（cover.jpg + 标题/信息栏）
     {
       layout: 'cover',
       title: d.title, titleEn: d.titleEn || d.title,
@@ -199,17 +200,13 @@ function blindBoxSlides(work: any): Slide[] {
       meta: coverMeta(d),
       img: { src: B + 'cover.jpg' }
     },
-    { layout: 'image', img: { src: B + 'layout-1.jpg' } },
-    { layout: 'image', img: { src: B + 'layout-3.jpg' } },
-    {
-      layout: 'gallery',
-      imgs: [
-        { src: B + 'banana.jpg' }, { src: B + 'box.jpg' }, { src: B + 'cart.jpg' },
-        { src: B + 'cone.jpg' }, { src: B + 'bag.jpg' }, { src: B + 'untitled-2.jpg' },
-        { src: B + 'untitled-8.jpg' }, { src: B + 'layout-5.jpg' }
-      ]
-    },
-    { layout: 'image', img: { src: B + 'total-3.jpg' } }
+    // 四张新内容图（1.84:1，正好铺满全尺寸图页）
+    { layout: 'image', img: { src: B + 'c1.webp' } },
+    { layout: 'image', img: { src: B + 'c2.webp' } },
+    { layout: 'image', img: { src: B + 'c3.webp' } },
+    { layout: 'image', img: { src: B + 'c4.webp' } },
+    // 收尾群像沿用原图，但铺满放大、不留黑边（fill = cover 裁切）
+    { layout: 'image', img: { src: B + 'total-3.jpg' }, fill: true }
   ];
 }
 

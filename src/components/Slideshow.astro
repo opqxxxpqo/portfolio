@@ -88,7 +88,7 @@ const { decks } = Astro.props;
         }
         if (s.layout === 'image') {
           return (
-            <article class="slide slide--image" style={'src' in s.img && s.img.bg ? `--visual-bg:${s.img.bg}` : undefined}>
+            <article class={`slide slide--image ${s.fill ? 'is-fill' : ''}`} style={'src' in s.img && s.img.bg ? `--visual-bg:${s.img.bg}` : undefined}>
               {'html' in s.img
                 ? <iframe src={s.img.html} loading="lazy" title="交互演示"></iframe>
                 : 'video' in s.img
@@ -316,6 +316,9 @@ const { decks } = Astro.props;
   .slide--image { background: var(--visual-bg, #0c0c0b); align-items: center; justify-content: center; }
   .slide--image img,
   .slide--image video { max-width: 100%; max-height: 100%; object-fit: contain; }
+  /* is-fill：铺满整页、cover 裁切，无黑边（比例接近时只裁掉几个像素） */
+  .slide--image.is-fill img,
+  .slide--image.is-fill video { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; }
   .slide--image iframe { width: 100%; height: 100%; border: 0; background: #0c0c0b; }
 
   /* 角色网格 */
