@@ -61,9 +61,9 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
           <span class="lang-en">No Tailwind; light/dark just toggles variables</span>
         </li>
         <li>
-          <strong>Netlify</strong>
-          <span class="lang-zh">国内访问稳定，GitHub Actions 也配好了双通道</span>
-          <span class="lang-en">Stable from China, with a GitHub Actions backup pipeline</span>
+          <strong>Vercel</strong>
+          <span class="lang-zh">推 GitHub 自动构建部署，全球 CDN 分发</span>
+          <span class="lang-en">Auto-builds and deploys on every GitHub push, served over a global CDN</span>
         </li>
         <li>
           <strong><span class="lang-zh">无重型 JS</span><span class="lang-en">No heavy JS</span></strong>
@@ -160,29 +160,6 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
     </div>
   </section>
 
-  <section class="block highlight">
-    <div class="container-narrow">
-      <h2 class="block-title">
-        <span class="lang-zh">对话截图（占位）</span>
-        <span class="lang-en">Conversation screenshots (placeholder)</span>
-      </h2>
-      <p class="block-lede">
-        <span class="lang-zh">
-          这里准备放 1—2 张和 Claude Code 协作的截图，让流程更具象。
-          正式上线前请把下面的 SVG 换成真实截图（推荐 PNG，宽度 ≥ 1600px）。
-        </span>
-        <span class="lang-en">
-          Reserved for one or two real screenshots of working with Claude Code, to make the workflow concrete.
-          Swap the SVG placeholders below for actual screenshots before launch (PNG, ≥ 1600px wide).
-        </span>
-      </p>
-      <div class="screenshots">
-        <img src="/process/screenshot-1.svg" alt="Claude Code session 1" loading="lazy" />
-        <img src="/process/screenshot-2.svg" alt="Claude Code session 2" loading="lazy" />
-      </div>
-    </div>
-  </section>
-
   <section class="block">
     <div class="container-narrow">
       <h2 class="block-title">
@@ -201,11 +178,11 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
       </p>
       <p class="intro">
         <span class="lang-zh">
-          如果你看到这里，欢迎 <a href="mailto:you@example.com" class="inline-link">写信给我</a>，
+          如果你看到这里，欢迎 <a href="mailto:luqiapp2007@163.com" class="inline-link">写信给我</a>，
           我也很想知道你如何看待 AI 协作的边界。
         </span>
         <span class="lang-en">
-          If you've read this far, feel free to <a href="mailto:you@example.com" class="inline-link">drop me a line</a> —
+          If you've read this far, feel free to <a href="mailto:luqiapp2007@163.com" class="inline-link">drop me a line</a> —
           I'd love to hear where you draw the line on AI collaboration.
         </span>
       </p>
@@ -333,19 +310,7 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
     color: var(--fg);
   }
 
-  .screenshots {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-  .screenshots img {
-    width: 100%;
-    border: var(--border-w-thick) solid var(--border);
-    background: var(--bg);
-  }
-
   @media (max-width: 640px) {
-    .screenshots { grid-template-columns: 1fr; }
     .flow li, .tech-list li { grid-template-columns: 1fr; gap: 8px; }
   }
 </style>

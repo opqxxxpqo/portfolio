@@ -7,7 +7,7 @@
 - 严格 zod schema 校验作品 frontmatter
 - 内置画廊 / B 站视频 / PDF / 3D 模型 / 外部 iframe / 链接 六种内容块
 - 支持普通版式和 longform 长滚动叙事版式
-- 静态部署，国内访问优先：Netlify + GitHub Actions 双通道
+- 静态部署在 Vercel（推 Git 自动构建部署，全球 CDN）
 
 ---
 
@@ -57,31 +57,16 @@ git push -u origin main
 
 ---
 
-## 部署到 Netlify
+## 部署到 Vercel
 
-提供两条路径，**选一条即可**。
+1. 注册 [vercel.com](https://vercel.com)，用 GitHub 登录
+2. **Add New… → Project** → 选这个仓库 → Import
+3. Vercel 自动识别 Astro，无需手动填 build 命令（`npm run build` / 输出 `dist`）
+4. 点 **Deploy**，拿到 `xxx.vercel.app` 域名
 
-### 路径 A：Netlify 直接连 Git（推荐，最省事）
+之后每次推到 `main` 都会自动重新构建部署。**改自定义域名**：项目 Settings → Domains → Add，Vercel 自动签 HTTPS 证书。
 
-1. 注册 [netlify.com](https://www.netlify.com)
-2. 进入控制台 → **Add new site** → **Import an existing project**
-3. 选 GitHub，授权后选你的仓库
-4. Netlify 会自动识别根目录的 `netlify.toml`，无需手动填 build 命令
-5. 点 **Deploy**，等 1—2 分钟即可拿到 `xxx.netlify.app` 域名
-
-**改自定义域名**：站点 Settings → Domain management → Add custom domain。Netlify 自动签 HTTPS 证书。
-
-### 路径 B：GitHub Actions 推送部署
-
-适合需要在 CI 里做额外校验（如 lint、test）的场景。
-
-1. 在 Netlify 控制台 → 新建一个空站点（Sites → Add new site → Deploy manually，先随便拖个空文件夹）
-2. 进站点 Settings → General → **Site ID**，复制
-3. 个人头像 → User settings → Applications → **Personal access tokens** → 新建一个 token，复制
-4. 在 GitHub 仓库 Settings → Secrets and variables → Actions → New repository secret，添加两个：
-   - `NETLIFY_SITE_ID`：第 2 步的 ID
-   - `NETLIFY_AUTH_TOKEN`：第 3 步的 token
-5. 推到 `main` 分支即自动触发 [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml)
+> 部署域名定下来后，记得把 [`astro.config.mjs`](./astro.config.mjs) 里的 `site` 改成正式网址（影响 sitemap 和 og:url）。
 
 ---
 
@@ -97,9 +82,8 @@ git push -u origin main
 | `public/og-image.svg` | 社交分享缩略图（1200×630，建议 PNG） |
 | `public/resume.pdf` | 真实简历 PDF |
 | `public/wechat-qr.svg` | 你的微信二维码图片 |
-| `public/process/screenshot-*.svg` | 和 Claude Code 协作的真实截图（PNG，宽 ≥ 1600px） |
 | `src/components/Header.astro` 中的 `YourName` | 改成你的名字 |
-| `src/components/Footer.astro` 中的 `you@example.com` / GitHub | 改成你的联系方式 |
+| `src/components/Footer.astro` 的邮箱 / GitHub | 你的联系方式 |
 | `src/pages/about.astro` | 整页内容（教育背景、技能等） |
 | `src/pages/index.astro` 中的 hero 文案 | 改成你的姓名和一句话定位 |
 | `src/content/works/*.md` | 四个示例作品，全部替换/删除 |
@@ -110,7 +94,7 @@ git push -u origin main
 ## 性能与国内访问优化（已默认开启）
 
 - 字体走 `cdn.jsdelivr.net`（国内可用），中文用系统字体回退避免 FOIT
-- 静态资源在 `netlify.toml` 中配了 immutable 缓存
+- 哈希命名的静态资源由 Vercel 默认加 immutable 长缓存
 - 图片全部 `loading="lazy"`、`decoding="async"`
 - B 站 iframe 加了 `referrerpolicy="no-referrer"`，规避防盗链
 - `<ClientRouter />` 启用 view transitions，配合 `prefetch` 预取下一页

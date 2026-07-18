@@ -1,10 +1,10 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
-// 部署到 Netlify 前请把 site 改成你的正式域名（例如 https://yourname.netlify.app 或自定义域名）
-// 这一项影响 sitemap.xml 和 og:url 的生成
+// site = 线上正式域名（部署在 Vercel），影响 sitemap.xml 和 og:url 的生成。
+// TODO: 换成真实 Vercel 网址（形如 https://<project>.vercel.app 或自定义域名）。
 export default defineConfig({
-  site: 'https://qi-lu-portfolio.onrender.com',
+  site: 'https://qi-lu-portfolio.vercel.app',
   integrations: [sitemap()],
   image: {
     // 允许使用 public/ 下的图片，同时启用 Astro <Image> 处理 src/ 下的资源
