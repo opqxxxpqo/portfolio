@@ -101,11 +101,19 @@ export type Slide =
       body?: string[]; bodyEn?: string[];
       links: { label: string; labelEn: string; url: string }[];
     }
-  // 合集子作品：直接在弹窗内嵌最终成片/模型（B站播放器 / 视频 / 可旋转 3D）
+  // 合集子作品（视频类）：静态图当封面 + 底部跳转看视频的链接（外链，不是详情套详情）
+  | {
+      layout: 'item';
+      title: string; titleEn: string;
+      img: { src: string; bg?: string } | { ph: string };
+      link?: { url: string; label: string; labelEn: string };
+      idx: string; total: string;
+    }
+  // 合集子作品（3D 模型，无视频可跳）：弹窗内直接放可旋转模型
   | {
       layout: 'embed';
       title: string; titleEn: string;
-      media: { bilibili: string } | { video: string; poster?: string } | { model: string; poster?: string };
+      media: { model: string; poster?: string };
       idx: string; total: string;
     };
 
@@ -220,15 +228,20 @@ async function blindBoxSlides(work: any): Promise<Slide[]> {
   ];
 }
 
-// ---------- 合集：封面 + 每个子作品一页，直接在弹窗内嵌最终成片/模型 ----------
-// 子作品自己的媒体（B站/视频/模型）在各自的 md 里，用 worksById 按 items 的链接查回来。
-// 查不到媒体的子项（比如盲盒——它本身已是独立作品）跳过，不做详情套详情。
-function itemMedia(sub: any): { bilibili: string } | { video: string; poster?: string } | { model: string; poster?: string } | null {
+// ---------- 合集：封面 + 每个子作品一页 ----------
+// 视频类子作品：静态图当封面 + 底部「看视频」外链（B站视频页 / mp4 文件）；
+// 3D 模型（无视频可跳）：弹窗内直接放可旋转模型。
+// 子作品的媒体（B站/视频/模型）在各自 md 里，用 worksById 按 items 链接查回来。
+// 查不到媒体的子项（如盲盒——本身已是独立作品）跳过，不做详情套详情。
+type SubKind =
+  | { kind: 'video'; url: string }
+  | { kind: 'model'; model: string; poster?: string };
+function subKind(sub: any): SubKind | null {
   if (!sub) return null;
-  if (sub.bilibili?.length) return { bilibili: sub.bilibili[0] };
+  if (sub.bilibili?.length) return { kind: 'video', url: `https://www.bilibili.com/video/${sub.bilibili[0]}` };
   const vid = sub.videos?.[0];
-  if (vid) return { video: typeof vid === 'string' ? vid : vid.src, poster: sub.poster || sub.cover };
-  if (sub.models?.length) return { model: sub.models[0], poster: sub.cover };
+  if (vid) return { kind: 'video', url: typeof vid === 'string' ? vid : vid.src };
+  if (sub.models?.length) return { kind: 'model', model: sub.models[0], poster: sub.cover };
   return null;
 }
 
@@ -244,20 +257,33 @@ async function collectionSlides(work: any, worksById?: Map<string, any>): Promis
       img: { src: d.poster || d.cover }
     }
   ];
-  // 先把每个子项的媒体解出来，过滤掉没有可内嵌媒体的（如盲盒）
   const subId = (src: string) => src.replace(/^\/works\//, '').replace(/\/$/, '');
   const resolved = items
-    .map((it: any) => ({ it, media: itemMedia(worksById?.get(subId(it.src))) }))
-    .filter((x: any) => x.media);
+    .map((it: any) => ({ it, sk: subKind(worksById?.get(subId(it.src))) }))
+    .filter((x: any) => x.sk);
   const total = String(resolved.length).padStart(2, '0');
-  resolved.forEach(({ it, media }: any, i: number) => {
-    slides.push({
-      layout: 'embed',
-      title: it.title, titleEn: it.titleEn || it.title,
-      media,
-      idx: String(i + 1).padStart(2, '0'), total
-    });
-  });
+  for (let i = 0; i < resolved.length; i++) {
+    const { it, sk } = resolved[i];
+    const idx = String(i + 1).padStart(2, '0');
+    if (sk.kind === 'model') {
+      slides.push({
+        layout: 'embed',
+        title: it.title, titleEn: it.titleEn || it.title,
+        media: { model: sk.model, poster: sk.poster },
+        idx, total
+      });
+    } else {
+      // 静态图封面：优先用 items 里的 poster，没有就占位（等用户发图）
+      const poster = it.poster;
+      slides.push({
+        layout: 'item',
+        title: it.title, titleEn: it.titleEn || it.title,
+        img: poster ? { src: poster, bg: await canvasColor('public' + poster) } : { ph: '封面 · ' + it.title },
+        link: { url: sk.url, label: '看视频', labelEn: 'Watch video' },
+        idx, total
+      });
+    }
+  }
   return slides;
 }
 
