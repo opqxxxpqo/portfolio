@@ -100,6 +100,14 @@ export type Slide =
       heading: string; headingEn: string;
       body?: string[]; bodyEn?: string[];
       links: { label: string; labelEn: string; url: string }[];
+    }
+  // 合集子作品：整幅海报 + 叠加序号/标题/「查看作品 →」链接
+  | {
+      layout: 'item';
+      title: string; titleEn: string;
+      img: { src: string; bg?: string };
+      href: string;
+      idx: string; total: string;
     };
 
 const yr = (d: Date) => d.getFullYear().toString();
@@ -213,12 +221,43 @@ async function blindBoxSlides(work: any): Promise<Slide[]> {
   ];
 }
 
-// 走独立页兜底（合集 / PDF）
-const SKIP = new Set(['modeling', 'ux-study-portfolio']);
+// ---------- 合集：封面 + 每个子作品一页整幅海报（点「查看作品」进各自详情页）----------
+async function collectionSlides(work: any): Promise<Slide[]> {
+  const d = work.data;
+  const items = (d.items || []).filter((it: any) => it.type === 'link' && it.poster);
+  const slides: Slide[] = [
+    {
+      layout: 'cover',
+      title: d.title, titleEn: d.titleEn || d.title,
+      tagline: d.summary, taglineEn: d.summaryEn || d.summary,
+      meta: coverMeta(d),
+      img: { src: d.poster || d.cover }
+    }
+  ];
+  const total = String(items.length).padStart(2, '0');
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i];
+    slides.push({
+      layout: 'item',
+      title: it.title, titleEn: it.titleEn || it.title,
+      // 海报 cover 铺满，不留边，所以不用取画布色
+      img: { src: it.poster },
+      href: it.src,
+      idx: String(i + 1).padStart(2, '0'), total
+    });
+  }
+  return slides;
+}
+
+// 走独立页兜底（PDF 作品集：内嵌 PDF 阅读器，不适合幻灯片）
+const SKIP = new Set(['ux-study-portfolio']);
 
 export async function buildSlides(work: any, enBody?: string): Promise<Slide[] | null> {
   if (work.id === 'blind-box') return await blindBoxSlides(work);
   if (SKIP.has(work.id)) return null;
+  // 合集（有 items 链接列表，如建模）→ 封面 + 子作品海报页
+  if (Array.isArray(work.data.items) && work.data.items.some((it: any) => it.type === 'link' && it.poster))
+    return await collectionSlides(work);
   if (work.body && /^##\s/m.test(work.body)) return await genericSlides(work, enBody);
   return null;
 }

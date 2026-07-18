@@ -97,6 +97,24 @@ const { decks } = Astro.props;
             </article>
           );
         }
+        if (s.layout === 'item') {
+          return (
+            <article class="slide slide--item" style={s.img.bg ? `--visual-bg:${s.img.bg}` : undefined}>
+              <img class="item-poster" src={s.img.src} alt="" loading="lazy" decoding="async" />
+              <div class="item-caption">
+                <span class="item-idx mono-label">{s.idx} / {s.total}</span>
+                <h3 class="item-name" data-fx>
+                  <span class="lang-zh">{s.title}</span>
+                  <span class="lang-en">{s.titleEn}</span>
+                </h3>
+                <a class="item-link" href={s.href} data-astro-prefetch>
+                  <span class="lang-zh">查看作品 →</span>
+                  <span class="lang-en">View project →</span>
+                </a>
+              </div>
+            </article>
+          );
+        }
         if (s.layout === 'gallery') {
           return (
             <article class="slide slide--gallery">
@@ -321,6 +339,55 @@ const { decks } = Astro.props;
   .slide--image.is-fill video { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; }
   .slide--image iframe { width: 100%; height: 100%; border: 0; background: #0c0c0b; }
 
+  /* 合集子作品：整幅海报 + 左下叠加序号/标题/链接 */
+  .slide--item {
+    position: relative;
+    background: var(--visual-bg, #0c0c0b);
+    align-items: stretch;
+    justify-content: center;
+  }
+  .item-poster {
+    width: 100%; height: 100%;
+    object-fit: cover;            /* 整幅铺满、无黑边；宽幅海报裁掉少量边缘，完整原图在子页里看 */
+    display: block;
+  }
+  .item-caption {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: clamp(24px, 4vw, 44px);
+    /* 底部渐变蒙版，保证白字在任意海报上都可读 */
+    background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0) 100%);
+    color: #fff;
+  }
+  .item-idx { color: rgba(255,255,255,0.7); }
+  .item-name {
+    font-family: var(--font-display, inherit);
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .item-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    border: 1px solid rgba(255,255,255,0.55);
+    border-radius: 6px;
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+  }
+  .item-link:hover { background: #fff; color: #0c0c0b; border-color: #fff; }
+
   /* 角色网格 */
   .slide--gallery { padding: clamp(20px, 3vw, 40px); overflow-y: auto; }
   .gallery-grid {
@@ -441,8 +508,9 @@ const { decks } = Astro.props;
     const goto = (n: number) => {
       idx = Math.max(0, Math.min(slides.length - 1, n));
       if (track) track.style.transform = `translateX(${-idx * 100}%)`;
-      // 交互演示页（内嵌 iframe）：让出左右点击热区，避免抢走 demo 自己的按钮/滑块；翻页仍走底部箭头和键盘
-      pv.classList.toggle('has-embed', !!slides[idx]?.querySelector('iframe'));
+      // 有可点内容（iframe demo 或合集海报的「查看作品」链接）时让出左右点击热区，
+      // 避免热区盖住它们的按钮/链接；翻页仍走滚轮/底部箭头/键盘
+      pv.classList.toggle('has-embed', !!slides[idx]?.querySelector('iframe, .item-link'));
       countEl.textContent = pad2(idx + 1) + ' / ' + pad2(slides.length);
       dotsEl.querySelectorAll('i').forEach((d, i) => d.classList.toggle('on', i === idx));
       arrows().forEach(a => {
