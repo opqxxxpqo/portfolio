@@ -97,20 +97,22 @@ const { decks } = Astro.props;
             </article>
           );
         }
-        if (s.layout === 'item') {
+        if (s.layout === 'embed') {
           return (
-            <article class="slide slide--item" style={s.img.bg ? `--visual-bg:${s.img.bg}` : undefined}>
-              <img class="item-poster" src={s.img.src} alt="" loading="lazy" decoding="async" />
-              <div class="item-caption">
-                <span class="item-idx mono-label">{s.idx} / {s.total}</span>
-                <h3 class="item-name" data-fx>
+            <article class="slide slide--embed">
+              <div class="embed-head">
+                <span class="embed-idx mono-label">{s.idx} / {s.total}</span>
+                <span class="embed-name">
                   <span class="lang-zh">{s.title}</span>
                   <span class="lang-en">{s.titleEn}</span>
-                </h3>
-                <a class="item-link" href={s.href} data-astro-prefetch>
-                  <span class="lang-zh">查看作品 →</span>
-                  <span class="lang-en">View project →</span>
-                </a>
+                </span>
+              </div>
+              <div class="embed-stage">
+                {'bilibili' in s.media
+                  ? <iframe class="embed-media" src={`//player.bilibili.com/player.html?bvid=${s.media.bilibili}&high_quality=1&danmaku=0&autoplay=0`} loading="lazy" referrerpolicy="no-referrer" allowfullscreen></iframe>
+                  : 'video' in s.media
+                    ? <video class="embed-media" src={s.media.video} poster={s.media.poster} controls playsinline preload="metadata"></video>
+                    : <model-viewer class="embed-media" src={s.media.model} poster={s.media.poster} camera-controls auto-rotate auto-rotate-delay="1500" rotation-per-second="20deg" environment-image="neutral" shadow-intensity="1" exposure="1" loading="lazy"></model-viewer>}
               </div>
             </article>
           );
@@ -339,54 +341,37 @@ const { decks } = Astro.props;
   .slide--image.is-fill video { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; }
   .slide--image iframe { width: 100%; height: 100%; border: 0; background: #0c0c0b; }
 
-  /* 合集子作品：整幅海报 + 左下叠加序号/标题/链接 */
-  .slide--item {
-    position: relative;
-    background: var(--visual-bg, #0c0c0b);
-    align-items: stretch;
-    justify-content: center;
-  }
-  .item-poster {
-    width: 100%; height: 100%;
-    object-fit: cover;            /* 整幅铺满、无黑边；宽幅海报裁掉少量边缘，完整原图在子页里看 */
-    display: block;
-  }
-  .item-caption {
-    position: absolute;
-    left: 0; right: 0; bottom: 0;
-    z-index: 2;
+  /* 合集子作品：顶部标题条 + 直接内嵌成片/模型 */
+  .slide--embed { flex-direction: column; background: #000; }
+  .embed-head {
+    flex: none;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    padding: clamp(24px, 4vw, 44px);
-    /* 底部渐变蒙版，保证白字在任意海报上都可读 */
-    background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0) 100%);
-    color: #fff;
+    align-items: baseline;
+    gap: 14px;
+    padding: 13px 20px;
+    background: #fff;
+    color: #121211;
+    border-bottom: 1px solid var(--hairline);
   }
-  .item-idx { color: rgba(255,255,255,0.7); }
-  .item-name {
+  .embed-idx { color: var(--fg-muted); }
+  .embed-name {
     font-family: var(--font-display, inherit);
-    font-size: clamp(1.4rem, 3vw, 2.2rem);
-    font-weight: 800;
-    line-height: 1.05;
+    font-weight: 700;
+    font-size: 1.05rem;
     letter-spacing: -0.01em;
-    margin: 0;
   }
-  .item-link {
-    display: inline-flex;
+  .embed-stage {
+    flex: 1;
+    min-height: 0;
+    display: flex;
     align-items: center;
-    padding: 8px 16px;
-    border: 1px solid rgba(255,255,255,0.55);
-    border-radius: 6px;
-    color: #fff;
-    font-family: var(--font-mono);
-    font-size: 0.8125rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    transition: background var(--transition), color var(--transition), border-color var(--transition);
+    justify-content: center;
+    background: #000;
   }
-  .item-link:hover { background: #fff; color: #0c0c0b; border-color: #fff; }
+  .embed-media { width: 100%; height: 100%; border: 0; display: block; }
+  /* 视频 / 3D 完整显示，B站 iframe 铺满（播放器内部自适应） */
+  .slide--embed video.embed-media,
+  .slide--embed model-viewer.embed-media { object-fit: contain; background: #000; }
 
   /* 角色网格 */
   .slide--gallery { padding: clamp(20px, 3vw, 40px); overflow-y: auto; }
@@ -508,9 +493,9 @@ const { decks } = Astro.props;
     const goto = (n: number) => {
       idx = Math.max(0, Math.min(slides.length - 1, n));
       if (track) track.style.transform = `translateX(${-idx * 100}%)`;
-      // 有可点内容（iframe demo 或合集海报的「查看作品」链接）时让出左右点击热区，
-      // 避免热区盖住它们的按钮/链接；翻页仍走滚轮/底部箭头/键盘
-      pv.classList.toggle('has-embed', !!slides[idx]?.querySelector('iframe, .item-link'));
+      // 有可交互内容（iframe demo / B站播放器 / 带控件的视频 / 可旋转 3D）时让出左右点击热区，
+      // 避免热区盖住它们的控件/拖拽；翻页仍走滚轮/底部箭头/键盘
+      pv.classList.toggle('has-embed', !!slides[idx]?.querySelector('iframe, video[controls], model-viewer'));
       countEl.textContent = pad2(idx + 1) + ' / ' + pad2(slides.length);
       dotsEl.querySelectorAll('i').forEach((d, i) => d.classList.toggle('on', i === idx));
       arrows().forEach(a => {
@@ -527,8 +512,12 @@ const { decks } = Astro.props;
       stage.appendChild(tpl.content.cloneNode(true));
       track = stage.querySelector('.pv-track');
       slides = Array.from(stage.querySelectorAll<HTMLElement>('.slide'));
-      // 克隆进来的静音视频需要主动 play（autoplay 属性不一定在 clone 后触发）
-      stage.querySelectorAll('video').forEach(v => { v.muted = true; v.play().catch(() => {}); });
+      // 克隆进来的静音循环视频（配图/内容）需要主动 play；内嵌成片（.embed-media 带控件）不自动播、不静音
+      stage.querySelectorAll<HTMLVideoElement>('video:not(.embed-media)').forEach(v => { v.muted = true; v.play().catch(() => {}); });
+      // 合集里有可旋转 3D 模型时，按需注册 model-viewer（只在打开这类 deck 时加载，主页不受累）
+      if (stage.querySelector('model-viewer') && !customElements.get('model-viewer')) {
+        import('@google/model-viewer').catch(() => {});
+      }
       titleEl.textContent = (document.documentElement.lang || '').startsWith('en')
         ? (tpl.dataset.titleEn || tpl.dataset.title || '')
         : (tpl.dataset.title || '');
@@ -544,6 +533,8 @@ const { decks } = Astro.props;
     };
 
     const close = () => {
+      // 立刻暂停内嵌视频，别让声音在关闭动画里继续响（B站 iframe 靠随后清空 DOM 停掉）
+      stage.querySelectorAll('video').forEach(v => v.pause());
       pv.classList.remove('is-open');
       const done = () => {
         pv.hidden = true;

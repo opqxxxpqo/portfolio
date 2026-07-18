@@ -101,12 +101,11 @@ export type Slide =
       body?: string[]; bodyEn?: string[];
       links: { label: string; labelEn: string; url: string }[];
     }
-  // 合集子作品：整幅海报 + 叠加序号/标题/「查看作品 →」链接
+  // 合集子作品：直接在弹窗内嵌最终成片/模型（B站播放器 / 视频 / 可旋转 3D）
   | {
-      layout: 'item';
+      layout: 'embed';
       title: string; titleEn: string;
-      img: { src: string; bg?: string };
-      href: string;
+      media: { bilibili: string } | { video: string; poster?: string } | { model: string; poster?: string };
       idx: string; total: string;
     };
 
@@ -221,10 +220,21 @@ async function blindBoxSlides(work: any): Promise<Slide[]> {
   ];
 }
 
-// ---------- 合集：封面 + 每个子作品一页整幅海报（点「查看作品」进各自详情页）----------
-async function collectionSlides(work: any): Promise<Slide[]> {
+// ---------- 合集：封面 + 每个子作品一页，直接在弹窗内嵌最终成片/模型 ----------
+// 子作品自己的媒体（B站/视频/模型）在各自的 md 里，用 worksById 按 items 的链接查回来。
+// 查不到媒体的子项（比如盲盒——它本身已是独立作品）跳过，不做详情套详情。
+function itemMedia(sub: any): { bilibili: string } | { video: string; poster?: string } | { model: string; poster?: string } | null {
+  if (!sub) return null;
+  if (sub.bilibili?.length) return { bilibili: sub.bilibili[0] };
+  const vid = sub.videos?.[0];
+  if (vid) return { video: typeof vid === 'string' ? vid : vid.src, poster: sub.poster || sub.cover };
+  if (sub.models?.length) return { model: sub.models[0], poster: sub.cover };
+  return null;
+}
+
+async function collectionSlides(work: any, worksById?: Map<string, any>): Promise<Slide[]> {
   const d = work.data;
-  const items = (d.items || []).filter((it: any) => it.type === 'link' && it.poster);
+  const items = (d.items || []).filter((it: any) => it.type === 'link');
   const slides: Slide[] = [
     {
       layout: 'cover',
@@ -234,30 +244,32 @@ async function collectionSlides(work: any): Promise<Slide[]> {
       img: { src: d.poster || d.cover }
     }
   ];
-  const total = String(items.length).padStart(2, '0');
-  for (let i = 0; i < items.length; i++) {
-    const it = items[i];
+  // 先把每个子项的媒体解出来，过滤掉没有可内嵌媒体的（如盲盒）
+  const subId = (src: string) => src.replace(/^\/works\//, '').replace(/\/$/, '');
+  const resolved = items
+    .map((it: any) => ({ it, media: itemMedia(worksById?.get(subId(it.src))) }))
+    .filter((x: any) => x.media);
+  const total = String(resolved.length).padStart(2, '0');
+  resolved.forEach(({ it, media }: any, i: number) => {
     slides.push({
-      layout: 'item',
+      layout: 'embed',
       title: it.title, titleEn: it.titleEn || it.title,
-      // 海报 cover 铺满，不留边，所以不用取画布色
-      img: { src: it.poster },
-      href: it.src,
+      media,
       idx: String(i + 1).padStart(2, '0'), total
     });
-  }
+  });
   return slides;
 }
 
 // 走独立页兜底（PDF 作品集：内嵌 PDF 阅读器，不适合幻灯片）
 const SKIP = new Set(['ux-study-portfolio']);
 
-export async function buildSlides(work: any, enBody?: string): Promise<Slide[] | null> {
+export async function buildSlides(work: any, enBody?: string, worksById?: Map<string, any>): Promise<Slide[] | null> {
   if (work.id === 'blind-box') return await blindBoxSlides(work);
   if (SKIP.has(work.id)) return null;
-  // 合集（有 items 链接列表，如建模）→ 封面 + 子作品海报页
-  if (Array.isArray(work.data.items) && work.data.items.some((it: any) => it.type === 'link' && it.poster))
-    return await collectionSlides(work);
+  // 合集（有 items 链接列表，如建模）→ 封面 + 每个子作品内嵌成片/模型
+  if (Array.isArray(work.data.items) && work.data.items.some((it: any) => it.type === 'link'))
+    return await collectionSlides(work, worksById);
   if (work.body && /^##\s/m.test(work.body)) return await genericSlides(work, enBody);
   return null;
 }

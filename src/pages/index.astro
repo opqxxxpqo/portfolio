@@ -9,6 +9,8 @@ import { buildSlides } from '~/lib/slides';
 const all = await getCollection('works');
 const worksEnAll = await getCollection('worksEn');
 const enBodyMap = new Map(worksEnAll.map(e => [e.id, e.body || '']));
+// 合集（建模）要按 items 链接查子作品的媒体（B站/视频/模型），传一份全量 data 索引
+const worksById = new Map(all.map(w => [w.id, w.data]));
 
 // 隐藏 hidden:true 的作品（合集子项）
 // 排序：置顶顺序 幽灵雷达 → 相机 → 盲盒 → 建模，其余按时间倒序
@@ -35,7 +37,7 @@ const decks = (await Promise.all(
     slug: w.id,
     title: w.data.title,
     titleEn: (w.data as any).titleEn || w.data.title,
-    slides: await buildSlides(w, enBodyMap.get(w.id))
+    slides: await buildSlides(w, enBodyMap.get(w.id), worksById)
   }))
 )).filter((d): d is Deck => d.slides !== null);
 
