@@ -188,9 +188,12 @@ async function genericSlides(work: any, enBody?: string): Promise<Slide[]> {
 }
 
 // ---------- 盲盒：图片驱动（真实素材当配图）----------
-function blindBoxSlides(work: any): Slide[] {
+async function blindBoxSlides(work: any): Promise<Slide[]> {
   const d = work.data;
   const B = '/works/blind-box/';
+  // 图页两侧露出的衬底取图自己四角的画布色（这几张是 #1d1d1d，比默认 #0c0c0b 亮），
+  // 否则图边缘那圈灰会跟深色页底之间出现一道跳边
+  const img = async (file: string) => ({ src: B + file, bg: await canvasColor(`public/works/blind-box/${file}`) });
   return [
     // 封面沿用原来的（cover.jpg + 标题/信息栏）
     {
@@ -201,10 +204,10 @@ function blindBoxSlides(work: any): Slide[] {
       img: { src: B + 'cover.jpg' }
     },
     // 四张新内容图（1.84:1，正好铺满全尺寸图页）
-    { layout: 'image', img: { src: B + 'c1.webp' } },
-    { layout: 'image', img: { src: B + 'c2.webp' } },
-    { layout: 'image', img: { src: B + 'c3.webp' } },
-    { layout: 'image', img: { src: B + 'c4.webp' } },
+    { layout: 'image', img: await img('c1.webp') },
+    { layout: 'image', img: await img('c2.webp') },
+    { layout: 'image', img: await img('c3.webp') },
+    { layout: 'image', img: await img('c4.webp') },
     // 收尾群像沿用原图，但铺满放大、不留黑边（fill = cover 裁切）
     { layout: 'image', img: { src: B + 'total-3.jpg' }, fill: true }
   ];
@@ -214,7 +217,7 @@ function blindBoxSlides(work: any): Slide[] {
 const SKIP = new Set(['modeling', 'ux-study-portfolio']);
 
 export async function buildSlides(work: any, enBody?: string): Promise<Slide[] | null> {
-  if (work.id === 'blind-box') return blindBoxSlides(work);
+  if (work.id === 'blind-box') return await blindBoxSlides(work);
   if (SKIP.has(work.id)) return null;
   if (work.body && /^##\s/m.test(work.body)) return await genericSlides(work, enBody);
   return null;
