@@ -101,12 +101,12 @@ export type Slide =
       body?: string[]; bodyEn?: string[];
       links: { label: string; labelEn: string; url: string }[];
     }
-  // 合集子作品（视频类）：静态图当封面 + 底部跳转看视频的链接（外链，不是详情套详情）
+  // 合集子作品（视频类）：静态图当封面，点 ▶ 就地内嵌播放（B站播放器 iframe / mp4），不跳站外
   | {
       layout: 'item';
       title: string; titleEn: string;
       img: { src: string; bg?: string } | { ph: string };
-      link?: { url: string; label: string; labelEn: string };
+      media?: { bilibili: string } | { video: string };
       idx: string; total: string;
     }
   // 合集子作品（3D 模型，无视频可跳）：弹窗内直接放可旋转模型
@@ -234,13 +234,13 @@ async function blindBoxSlides(work: any): Promise<Slide[]> {
 // 子作品的媒体（B站/视频/模型）在各自 md 里，用 worksById 按 items 链接查回来。
 // 查不到媒体的子项（如盲盒——本身已是独立作品）跳过，不做详情套详情。
 type SubKind =
-  | { kind: 'video'; url: string }
+  | { kind: 'video'; media: { bilibili: string } | { video: string } }
   | { kind: 'model'; model: string; poster?: string };
 function subKind(sub: any): SubKind | null {
   if (!sub) return null;
-  if (sub.bilibili?.length) return { kind: 'video', url: `https://www.bilibili.com/video/${sub.bilibili[0]}` };
+  if (sub.bilibili?.length) return { kind: 'video', media: { bilibili: sub.bilibili[0] } };
   const vid = sub.videos?.[0];
-  if (vid) return { kind: 'video', url: typeof vid === 'string' ? vid : vid.src };
+  if (vid) return { kind: 'video', media: { video: typeof vid === 'string' ? vid : vid.src } };
   if (sub.models?.length) return { kind: 'model', model: sub.models[0], poster: sub.cover };
   return null;
 }
@@ -273,13 +273,13 @@ async function collectionSlides(work: any, worksById?: Map<string, any>): Promis
         idx, total
       });
     } else {
-      // 静态图封面：优先用 items 里的 poster，没有就占位（等用户发图）
+      // 静态图封面：优先用 items 里的 poster，没有就占位（等用户发图）；点 ▶ 就地内嵌播放
       const poster = it.poster;
       slides.push({
         layout: 'item',
         title: it.title, titleEn: it.titleEn || it.title,
         img: poster ? { src: poster, bg: await canvasColor('public' + poster) } : { ph: '封面 · ' + it.title },
-        link: { url: sk.url, label: '看视频', labelEn: 'Watch video' },
+        media: sk.media,
         idx, total
       });
     }

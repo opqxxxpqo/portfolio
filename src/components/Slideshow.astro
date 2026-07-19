@@ -98,24 +98,29 @@ const { decks } = Astro.props;
           );
         }
         if (s.layout === 'item') {
+          const media = s.media
+            ? ('bilibili' in s.media ? { 'data-bilibili': s.media.bilibili } : { 'data-video': s.media.video })
+            : {};
           return (
-            <article class="slide slide--item" style={'src' in s.img && s.img.bg ? `--visual-bg:${s.img.bg}` : undefined}>
-              {'src' in s.img
-                ? <img class="item-poster" src={s.img.src} alt="" loading="lazy" decoding="async" />
-                : <div class="item-ph"><span class="mono-label">{s.img.ph}</span></div>}
-              <div class="item-caption">
-                <span class="item-idx mono-label">{s.idx} / {s.total}</span>
-                <h3 class="item-name" data-fx>
-                  <span class="lang-zh">{s.title}</span>
-                  <span class="lang-en">{s.titleEn}</span>
-                </h3>
-                {s.link && (
-                  <a class="item-link" href={s.link.url} target="_blank" rel="noopener">
-                    <span class="lang-zh">{s.link.label} ↗</span>
-                    <span class="lang-en">{s.link.labelEn} ↗</span>
-                  </a>
+            <article class="slide slide--item" style={'src' in s.img && s.img.bg ? `--visual-bg:${s.img.bg}` : undefined} {...media}>
+              <div class="item-face">
+                {'src' in s.img
+                  ? <img class="item-poster" src={s.img.src} alt="" loading="lazy" decoding="async" />
+                  : <div class="item-ph"><span class="mono-label">{s.img.ph}</span></div>}
+                {s.media && (
+                  <button class="item-play" type="button" aria-label="播放视频">
+                    <span class="item-play-icon" aria-hidden="true">▶</span>
+                  </button>
                 )}
+                <div class="item-caption">
+                  <span class="item-idx mono-label">{s.idx} / {s.total}</span>
+                  <h3 class="item-name" data-fx>
+                    <span class="lang-zh">{s.title}</span>
+                    <span class="lang-en">{s.titleEn}</span>
+                  </h3>
+                </div>
               </div>
+              <div class="item-player" hidden></div>
             </article>
           );
         }
@@ -359,13 +364,14 @@ const { decks } = Astro.props;
   .slide--image.is-fill video { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; }
   .slide--image iframe { width: 100%; height: 100%; border: 0; background: #0c0c0b; }
 
-  /* 合集子作品（视频类）：整幅静态封面 + 左下叠加序号/标题/看视频外链 */
+  /* 合集子作品（视频类）：整幅静态封面 + 居中 ▶，点了就地内嵌播放 */
   .slide--item {
     position: relative;
     background: var(--visual-bg, #0c0c0b);
     align-items: stretch;
     justify-content: center;
   }
+  .item-face { position: absolute; inset: 0; }
   .item-poster { width: 100%; height: 100%; object-fit: cover; display: block; }
   .item-ph {
     width: 100%; height: 100%;
@@ -373,6 +379,23 @@ const { decks } = Astro.props;
     background: var(--bg-soft, #ececec);
   }
   .item-ph .mono-label { color: var(--fg-muted); }
+  /* 居中播放键 */
+  .item-play {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    width: 74px; height: 74px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.7);
+    border-radius: 50%;
+    background: rgba(0,0,0,0.4);
+    color: #fff;
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+  }
+  .item-play:hover { background: rgba(0,0,0,0.65); transform: translate(-50%, -50%) scale(1.06); }
+  .item-play-icon { font-size: 1.5rem; margin-left: 3px; line-height: 1; }
   .item-caption {
     position: absolute;
     left: 0; right: 0; bottom: 0;
@@ -380,7 +403,7 @@ const { decks } = Astro.props;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
+    gap: 8px;
     padding: clamp(24px, 4vw, 44px);
     background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0) 100%);
     color: #fff;
@@ -394,20 +417,11 @@ const { decks } = Astro.props;
     letter-spacing: -0.01em;
     margin: 0;
   }
-  .item-link {
-    display: inline-flex;
-    align-items: center;
-    padding: 8px 16px;
-    border: 1px solid rgba(255,255,255,0.55);
-    border-radius: 6px;
-    color: #fff;
-    font-family: var(--font-mono);
-    font-size: 0.8125rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    transition: background var(--transition), color var(--transition), border-color var(--transition);
-  }
-  .item-link:hover { background: #fff; color: #0c0c0b; border-color: #fff; }
+  /* 点 ▶ 后：封面淡出、内嵌播放器铺满 */
+  .slide--item.is-playing .item-face { display: none; }
+  .item-player { position: absolute; inset: 0; background: #000; }
+  .item-player iframe,
+  .item-player video { width: 100%; height: 100%; border: 0; display: block; background: #000; }
 
   /* 合集子作品（3D 模型）：顶部标题条 + 内嵌可旋转模型 */
   .slide--embed { flex-direction: column; background: #000; }
@@ -561,9 +575,16 @@ const { decks } = Astro.props;
     const goto = (n: number) => {
       idx = Math.max(0, Math.min(slides.length - 1, n));
       if (track) track.style.transform = `translateX(${-idx * 100}%)`;
-      // 有可交互内容（iframe demo / 可旋转 3D / 合集的看视频外链）时让出左右点击热区，
-      // 避免热区盖住它们的控件/拖拽/链接；翻页仍走滚轮/底部箭头/键盘
-      pv.classList.toggle('has-embed', !!slides[idx]?.querySelector('iframe, video[controls], model-viewer, .item-link'));
+      // 翻页时把已就地播放的合集视频复位（停掉声音、恢复封面）
+      stage.querySelectorAll('.slide--item.is-playing').forEach(art => {
+        art.querySelectorAll('video').forEach(v => v.pause());
+        const p = art.querySelector<HTMLElement>('.item-player');
+        if (p) { p.innerHTML = ''; p.hidden = true; }
+        art.classList.remove('is-playing');
+      });
+      // 有可交互内容（iframe demo / 可旋转 3D / 合集的 ▶ 播放键或已内嵌的播放器）时让出左右点击热区，
+      // 避免热区盖住它们的控件/拖拽/按钮；翻页仍走滚轮/底部箭头/键盘
+      pv.classList.toggle('has-embed', !!slides[idx]?.querySelector('iframe, video[controls], model-viewer, .item-play'));
       countEl.textContent = pad2(idx + 1) + ' / ' + pad2(slides.length);
       dotsEl.querySelectorAll('i').forEach((d, i) => d.classList.toggle('on', i === idx));
       arrows().forEach(a => {
@@ -599,6 +620,27 @@ const { decks } = Astro.props;
       idx = 0;
       goto(0);
     };
+
+    // 合集视频页：点 ▶ 就地内嵌播放（B站播放器 iframe / mp4），不跳站外。委托绑在常驻的 stage 上。
+    stage.addEventListener('click', e => {
+      const btn = (e.target as HTMLElement).closest('.item-play');
+      if (!btn) return;
+      const art = btn.closest<HTMLElement>('.slide--item');
+      const player = art?.querySelector<HTMLElement>('.item-player');
+      if (!art || !player || art.classList.contains('is-playing')) return;
+      const bvid = art.dataset.bilibili;
+      const vurl = art.dataset.video;
+      if (bvid) {
+        player.innerHTML = `<iframe src="//player.bilibili.com/player.html?bvid=${encodeURIComponent(bvid)}&high_quality=1&danmaku=0&autoplay=1" referrerpolicy="no-referrer" allowfullscreen loading="lazy"></iframe>`;
+      } else if (vurl) {
+        const v = document.createElement('video');
+        v.src = vurl; v.controls = true; v.autoplay = true; v.playsInline = true;
+        player.appendChild(v);
+        v.play().catch(() => {});
+      } else return;
+      player.hidden = false;
+      art.classList.add('is-playing');
+    });
 
     const close = () => {
       // 立刻暂停内嵌视频，别让声音在关闭动画里继续响（B站 iframe 靠随后清空 DOM 停掉）
