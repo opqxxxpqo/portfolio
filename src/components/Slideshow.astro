@@ -619,7 +619,8 @@ const { decks } = Astro.props;
         const model = art?.dataset.model;
         if (!art || !player || !model || art.classList.contains('is-playing')) return;
         if (!customElements.get('model-viewer')) import('@google/model-viewer').catch(() => {});
-        player.innerHTML = `<model-viewer src="${model}" poster="${art.dataset.poster || ''}" camera-controls auto-rotate auto-rotate-delay="1500" rotation-per-second="20deg" environment-image="neutral" shadow-intensity="1" exposure="1" loading="eager"></model-viewer>`;
+        // 行内 style：运行时注入的元素拿不到 Astro 的作用域属性，作用域 CSS 不生效，得靠 style 撑满
+        player.innerHTML = `<model-viewer src="${model}" poster="${art.dataset.poster || ''}" camera-controls auto-rotate auto-rotate-delay="1500" rotation-per-second="20deg" environment-image="neutral" shadow-intensity="1" exposure="1" loading="eager" style="width:100%;height:100%;display:block;background:#000"></model-viewer>`;
         player.hidden = false;
         art.querySelector<HTMLElement>('.item-back')?.removeAttribute('hidden');
         art.classList.add('is-playing');
