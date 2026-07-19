@@ -98,45 +98,43 @@ const { decks } = Astro.props;
           );
         }
         if (s.layout === 'item') {
-          const media = s.media
-            ? ('bilibili' in s.media ? { 'data-bilibili': s.media.bilibili } : { 'data-video': s.media.video })
-            : {};
           return (
-            <article class="slide slide--item" style={'src' in s.img && s.img.bg ? `--visual-bg:${s.img.bg}` : undefined} {...media}>
+            <article
+              class="slide slide--item"
+              style={'src' in s.img && s.img.bg ? `--visual-bg:${s.img.bg}` : undefined}
+              data-model={s.model}
+              data-poster={'src' in s.img ? s.img.src : undefined}
+            >
               <div class="item-face">
                 {'src' in s.img
                   ? <img class="item-poster" src={s.img.src} alt="" loading="lazy" decoding="async" />
                   : <div class="item-ph"><span class="mono-label">{s.img.ph}</span></div>}
-                {s.media && (
-                  <button class="item-play" type="button" aria-label="播放视频">
-                    <span class="item-play-icon" aria-hidden="true">▶</span>
+                {s.model && (
+                  <button class="item-enter3d" type="button">
+                    <span class="lang-zh">3D 浏览</span><span class="lang-en">View in 3D</span>
                   </button>
                 )}
                 <div class="item-caption">
-                  <span class="item-idx mono-label">{s.idx} / {s.total}</span>
-                  <h3 class="item-name" data-fx>
-                    <span class="lang-zh">{s.title}</span>
-                    <span class="lang-en">{s.titleEn}</span>
-                  </h3>
+                  <div class="item-cap-l">
+                    <span class="item-idx mono-label">{s.idx} / {s.total}</span>
+                    <h3 class="item-name" data-fx>
+                      <span class="lang-zh">{s.title}</span>
+                      <span class="lang-en">{s.titleEn}</span>
+                    </h3>
+                  </div>
+                  {s.link && (
+                    <a class="item-link" href={s.link} target="_blank" rel="noopener">
+                      <span class="lang-zh">看视频 ↗</span><span class="lang-en">Watch ↗</span>
+                    </a>
+                  )}
                 </div>
               </div>
-              <div class="item-player" hidden></div>
-            </article>
-          );
-        }
-        if (s.layout === 'embed') {
-          return (
-            <article class="slide slide--embed">
-              <div class="embed-head">
-                <span class="embed-idx mono-label">{s.idx} / {s.total}</span>
-                <span class="embed-name">
-                  <span class="lang-zh">{s.title}</span>
-                  <span class="lang-en">{s.titleEn}</span>
-                </span>
-              </div>
-              <div class="embed-stage">
-                <model-viewer class="embed-media" src={s.media.model} poster={s.media.poster} camera-controls auto-rotate auto-rotate-delay="1500" rotation-per-second="20deg" environment-image="neutral" shadow-intensity="1" exposure="1" loading="lazy"></model-viewer>
-              </div>
+              {s.model && <div class="item-player" hidden></div>}
+              {s.model && (
+                <button class="item-back" type="button" hidden>
+                  <span class="lang-zh">← 返回渲染图</span><span class="lang-en">← Back to render</span>
+                </button>
+              )}
             </article>
           );
         }
@@ -379,35 +377,20 @@ const { decks } = Astro.props;
     background: var(--bg-soft, #ececec);
   }
   .item-ph .mono-label { color: var(--fg-muted); }
-  /* 居中播放键 */
-  .item-play {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 3;
-    width: 74px; height: 74px;
-    display: flex; align-items: center; justify-content: center;
-    border: 1px solid rgba(255,255,255,0.7);
-    border-radius: 50%;
-    background: rgba(0,0,0,0.4);
-    color: #fff;
-    cursor: pointer;
-    transition: background var(--transition), transform var(--transition);
-  }
-  .item-play:hover { background: rgba(0,0,0,0.65); transform: translate(-50%, -50%) scale(1.06); }
-  .item-play-icon { font-size: 1.5rem; margin-left: 3px; line-height: 1; }
+  /* 底部信息条：左标题、右链接/按钮 */
   .item-caption {
     position: absolute;
     left: 0; right: 0; bottom: 0;
     z-index: 2;
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
     padding: clamp(24px, 4vw, 44px);
     background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0) 100%);
     color: #fff;
   }
+  .item-cap-l { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
   .item-idx { color: rgba(255,255,255,0.7); }
   .item-name {
     font-family: var(--font-display, inherit);
@@ -417,43 +400,39 @@ const { decks } = Astro.props;
     letter-spacing: -0.01em;
     margin: 0;
   }
-  /* 点 ▶ 后：封面淡出、内嵌播放器铺满 */
+  /* 右侧「看视频」外链 / 「3D 浏览」入口 / 「返回渲染图」，同一套药丸样式 */
+  .item-link, .item-enter3d, .item-back {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 18px;
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 999px;
+    background: rgba(0,0,0,0.35);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+  }
+  .item-link:hover, .item-enter3d:hover, .item-back:hover { background: #fff; color: #0c0c0b; border-color: #fff; }
+  /* 3D 浏览入口：居中盖在渲染图上 */
+  .item-enter3d {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+  }
+  .item-enter3d:hover { transform: translate(-50%, -50%); }
+  /* 进入 3D 后：渲染图隐藏、模型铺满、右上角出现返回键 */
   .slide--item.is-playing .item-face { display: none; }
   .item-player { position: absolute; inset: 0; background: #000; }
-  .item-player iframe,
-  .item-player video { width: 100%; height: 100%; border: 0; display: block; background: #000; }
-
-  /* 合集子作品（3D 模型）：顶部标题条 + 内嵌可旋转模型 */
-  .slide--embed { flex-direction: column; background: #000; }
-  .embed-head {
-    flex: none;
-    display: flex;
-    align-items: baseline;
-    gap: 14px;
-    padding: 13px 20px;
-    background: #fff;
-    color: #121211;
-    border-bottom: 1px solid var(--hairline);
-  }
-  .embed-idx { color: var(--fg-muted); }
-  .embed-name {
-    font-family: var(--font-display, inherit);
-    font-weight: 700;
-    font-size: 1.05rem;
-    letter-spacing: -0.01em;
-  }
-  .embed-stage {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #000;
-  }
-  .embed-media { width: 100%; height: 100%; border: 0; display: block; }
-  /* 视频 / 3D 完整显示，B站 iframe 铺满（播放器内部自适应） */
-  .slide--embed video.embed-media,
-  .slide--embed model-viewer.embed-media { object-fit: contain; background: #000; }
+  .item-player model-viewer { width: 100%; height: 100%; display: block; background: #000; }
+  .item-back { position: absolute; top: 16px; left: 16px; z-index: 4; }
+  /* display:inline-flex 会盖掉 [hidden] 的 display:none，得显式补回 */
+  .item-back[hidden] { display: none; }
 
   /* 角色网格 */
   .slide--gallery { padding: clamp(20px, 3vw, 40px); overflow-y: auto; }
@@ -572,19 +551,25 @@ const { decks } = Astro.props;
         .forEach(el => { if (el.offsetParent !== null) (window as any).__fx?.scramble?.(el, { stagger: 16, jitter: 80 }); });
     };
 
+    // 当前页有可交互内容（iframe demo / 可旋转 3D / 合集右侧外链）时让出左右点击热区，
+    // 避免热区盖住它们的控件/拖拽/链接；翻页仍走滚轮/底部箭头/键盘。
+    // 3D 入口按钮居中、不压边，所以不列入——好让 3D 封面页仍能点两侧翻页。
+    const syncEdges = () => {
+      pv.classList.toggle('has-embed', !!slides[idx]?.querySelector('iframe, video[controls], model-viewer, .item-link'));
+    };
+
     const goto = (n: number) => {
       idx = Math.max(0, Math.min(slides.length - 1, n));
       if (track) track.style.transform = `translateX(${-idx * 100}%)`;
-      // 翻页时把已就地播放的合集视频复位（停掉声音、恢复封面）
-      stage.querySelectorAll('.slide--item.is-playing').forEach(art => {
+      // 翻页时把已进入 3D / 播放的合集页复位（停声、清模型、恢复渲染图、收起返回键）
+      stage.querySelectorAll<HTMLElement>('.slide--item.is-playing').forEach(art => {
         art.querySelectorAll('video').forEach(v => v.pause());
         const p = art.querySelector<HTMLElement>('.item-player');
         if (p) { p.innerHTML = ''; p.hidden = true; }
+        art.querySelector<HTMLElement>('.item-back')?.setAttribute('hidden', '');
         art.classList.remove('is-playing');
       });
-      // 有可交互内容（iframe demo / 可旋转 3D / 合集的 ▶ 播放键或已内嵌的播放器）时让出左右点击热区，
-      // 避免热区盖住它们的控件/拖拽/按钮；翻页仍走滚轮/底部箭头/键盘
-      pv.classList.toggle('has-embed', !!slides[idx]?.querySelector('iframe, video[controls], model-viewer, .item-play'));
+      syncEdges();
       countEl.textContent = pad2(idx + 1) + ' / ' + pad2(slides.length);
       dotsEl.querySelectorAll('i').forEach((d, i) => d.classList.toggle('on', i === idx));
       arrows().forEach(a => {
@@ -601,12 +586,8 @@ const { decks } = Astro.props;
       stage.appendChild(tpl.content.cloneNode(true));
       track = stage.querySelector('.pv-track');
       slides = Array.from(stage.querySelectorAll<HTMLElement>('.slide'));
-      // 克隆进来的静音循环视频（配图/内容）需要主动 play；内嵌成片（.embed-media 带控件）不自动播、不静音
-      stage.querySelectorAll<HTMLVideoElement>('video:not(.embed-media)').forEach(v => { v.muted = true; v.play().catch(() => {}); });
-      // 合集里有可旋转 3D 模型时，按需注册 model-viewer（只在打开这类 deck 时加载，主页不受累）
-      if (stage.querySelector('model-viewer') && !customElements.get('model-viewer')) {
-        import('@google/model-viewer').catch(() => {});
-      }
+      // 克隆进来的静音循环视频（配图/内容）需要主动 play（3D 模型是点了才注入的，这里没有）
+      stage.querySelectorAll<HTMLVideoElement>('video').forEach(v => { v.muted = true; v.play().catch(() => {}); });
       titleEl.textContent = (document.documentElement.lang || '').startsWith('en')
         ? (tpl.dataset.titleEn || tpl.dataset.title || '')
         : (tpl.dataset.title || '');
@@ -621,25 +602,32 @@ const { decks } = Astro.props;
       goto(0);
     };
 
-    // 合集视频页：点 ▶ 就地内嵌播放（B站播放器 iframe / mp4），不跳站外。委托绑在常驻的 stage 上。
+    // 合集 3D 页：点「3D 浏览」就地加载可旋转模型，点「返回渲染图」退回封面。
+    // 委托绑在常驻的 stage 上。（视频页是普通外链 <a>，无需 JS。）
+    const exit3d = (art: HTMLElement) => {
+      const player = art.querySelector<HTMLElement>('.item-player');
+      if (player) { player.innerHTML = ''; player.hidden = true; }
+      art.querySelector<HTMLElement>('.item-back')?.setAttribute('hidden', '');
+      art.classList.remove('is-playing');
+    };
     stage.addEventListener('click', e => {
-      const btn = (e.target as HTMLElement).closest('.item-play');
-      if (!btn) return;
-      const art = btn.closest<HTMLElement>('.slide--item');
-      const player = art?.querySelector<HTMLElement>('.item-player');
-      if (!art || !player || art.classList.contains('is-playing')) return;
-      const bvid = art.dataset.bilibili;
-      const vurl = art.dataset.video;
-      if (bvid) {
-        player.innerHTML = `<iframe src="//player.bilibili.com/player.html?bvid=${encodeURIComponent(bvid)}&high_quality=1&danmaku=0&autoplay=1" referrerpolicy="no-referrer" allowfullscreen loading="lazy"></iframe>`;
-      } else if (vurl) {
-        const v = document.createElement('video');
-        v.src = vurl; v.controls = true; v.autoplay = true; v.playsInline = true;
-        player.appendChild(v);
-        v.play().catch(() => {});
-      } else return;
-      player.hidden = false;
-      art.classList.add('is-playing');
+      const enter = (e.target as HTMLElement).closest('.item-enter3d');
+      const back = (e.target as HTMLElement).closest('.item-back');
+      if (enter) {
+        const art = enter.closest<HTMLElement>('.slide--item');
+        const player = art?.querySelector<HTMLElement>('.item-player');
+        const model = art?.dataset.model;
+        if (!art || !player || !model || art.classList.contains('is-playing')) return;
+        if (!customElements.get('model-viewer')) import('@google/model-viewer').catch(() => {});
+        player.innerHTML = `<model-viewer src="${model}" poster="${art.dataset.poster || ''}" camera-controls auto-rotate auto-rotate-delay="1500" rotation-per-second="20deg" environment-image="neutral" shadow-intensity="1" exposure="1" loading="eager"></model-viewer>`;
+        player.hidden = false;
+        art.querySelector<HTMLElement>('.item-back')?.removeAttribute('hidden');
+        art.classList.add('is-playing');
+        syncEdges();
+      } else if (back) {
+        const art = back.closest<HTMLElement>('.slide--item');
+        if (art) { exit3d(art); syncEdges(); }
+      }
     });
 
     const close = () => {
@@ -686,6 +674,8 @@ const { decks } = Astro.props;
     let wheelLock = false;
     let wheelIdle: number | undefined;
     stage.addEventListener('wheel', e => {
+      // 3D 模型上滚轮是缩放，交给 model-viewer 自己处理，别抢来翻页
+      if ((e.target as HTMLElement).closest('model-viewer')) return;
       // 文字栏能滚就先滚它，滚到头再翻页
       const copy = (e.target as HTMLElement).closest<HTMLElement>('.slide-copy, .slide--gallery');
       if (copy && copy.scrollHeight > copy.clientHeight + 1) {

@@ -101,19 +101,15 @@ export type Slide =
       body?: string[]; bodyEn?: string[];
       links: { label: string; labelEn: string; url: string }[];
     }
-  // 合集子作品（视频类）：静态图当封面，点 ▶ 就地内嵌播放（B站播放器 iframe / mp4），不跳站外
+  // 合集子作品：静态渲染图当封面。
+  //   视频类 → 右侧「看视频 →」外链，跳到 B 站视频页 / mp4（新标签，干净）
+  //   3D 模型 → 门面：点「3D 浏览」就地加载可旋转模型，带「返回渲染图」退回
   | {
       layout: 'item';
       title: string; titleEn: string;
       img: { src: string; bg?: string } | { ph: string };
-      media?: { bilibili: string } | { video: string };
-      idx: string; total: string;
-    }
-  // 合集子作品（3D 模型，无视频可跳）：弹窗内直接放可旋转模型
-  | {
-      layout: 'embed';
-      title: string; titleEn: string;
-      media: { model: string; poster?: string };
+      link?: string;   // 视频外链
+      model?: string;  // 3D 模型 glb
       idx: string; total: string;
     };
 
@@ -234,14 +230,14 @@ async function blindBoxSlides(work: any): Promise<Slide[]> {
 // 子作品的媒体（B站/视频/模型）在各自 md 里，用 worksById 按 items 链接查回来。
 // 查不到媒体的子项（如盲盒——本身已是独立作品）跳过，不做详情套详情。
 type SubKind =
-  | { kind: 'video'; media: { bilibili: string } | { video: string } }
-  | { kind: 'model'; model: string; poster?: string };
+  | { kind: 'video'; url: string }
+  | { kind: 'model'; model: string };
 function subKind(sub: any): SubKind | null {
   if (!sub) return null;
-  if (sub.bilibili?.length) return { kind: 'video', media: { bilibili: sub.bilibili[0] } };
+  if (sub.bilibili?.length) return { kind: 'video', url: `https://www.bilibili.com/video/${sub.bilibili[0]}` };
   const vid = sub.videos?.[0];
-  if (vid) return { kind: 'video', media: { video: typeof vid === 'string' ? vid : vid.src } };
-  if (sub.models?.length) return { kind: 'model', model: sub.models[0], poster: sub.cover };
+  if (vid) return { kind: 'video', url: typeof vid === 'string' ? vid : vid.src };
+  if (sub.models?.length) return { kind: 'model', model: sub.models[0] };
   return null;
 }
 
@@ -265,24 +261,15 @@ async function collectionSlides(work: any, worksById?: Map<string, any>): Promis
   for (let i = 0; i < resolved.length; i++) {
     const { it, sk } = resolved[i];
     const idx = String(i + 1).padStart(2, '0');
-    if (sk.kind === 'model') {
-      slides.push({
-        layout: 'embed',
-        title: it.title, titleEn: it.titleEn || it.title,
-        media: { model: sk.model, poster: sk.poster },
-        idx, total
-      });
-    } else {
-      // 静态图封面：优先用 items 里的 poster，没有就占位（等用户发图）；点 ▶ 就地内嵌播放
-      const poster = it.poster;
-      slides.push({
-        layout: 'item',
-        title: it.title, titleEn: it.titleEn || it.title,
-        img: poster ? { src: poster, bg: await canvasColor('public' + poster) } : { ph: '封面 · ' + it.title },
-        media: sk.media,
-        idx, total
-      });
-    }
+    // 静态渲染图当封面：优先用 items 里的 poster，没有就占位（等用户发图）
+    const poster = it.poster;
+    slides.push({
+      layout: 'item',
+      title: it.title, titleEn: it.titleEn || it.title,
+      img: poster ? { src: poster, bg: await canvasColor('public' + poster) } : { ph: '封面 · ' + it.title },
+      ...(sk.kind === 'model' ? { model: sk.model } : { link: sk.url }),
+      idx, total
+    });
   }
   return slides;
 }
