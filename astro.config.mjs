@@ -2,9 +2,9 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 // site = 线上正式域名（部署在 Vercel），影响 sitemap.xml 和 og:url 的生成。
-// TODO: 换成真实 Vercel 网址（形如 https://<project>.vercel.app 或自定义域名）。
+// 有自定义域名后换成自定义域名即可。
 export default defineConfig({
-  site: 'https://qi-lu-portfolio.vercel.app',
+  site: 'https://portfolio-livid-beta-43.vercel.app',
   integrations: [sitemap()],
   image: {
     // 允许使用 public/ 下的图片，同时启用 Astro <Image> 处理 src/ 下的资源
