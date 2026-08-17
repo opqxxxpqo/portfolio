@@ -15,3 +15,9 @@ I split the workflow into LIVE and SEQUENCE. Live fires instantly; record mode p
 ## Results & delivery
 
 The performance chain keeps Scratch, Stutter and Brake and adds Radio, Intercom, Pitch and Pitch Drop; a five-key pitch keyboard applies momentary transposition, with a default NATURAL mode using time-stretch plus formant correction to kill the chipmunk artefact, and a cheaper TAPE mode as a fallback. The layout was rebuilt for phone landscape — a 4×4 pad matrix, a central performance area and a right-hand effects rack — shrinking the pads to give Scratch more surface, reinforced by pressed states, haptics and keyboard shortcuts for a hardware feel. Seventeen core logic tests cover event grouping, quantisation, drag reordering, left/right switching and pitch behaviour. It ships as a browser-playable build and an Android 1.0.4 landscape APK, with audio, icons and processors bundled to run offline.
+
+## Assets & disclaimer
+
+The corner symbols, distance markers and modifier glyphs in this interface follow the co-driver icon system from the *DiRT Rally* games — including its two alternate palettes for red and blue colour blindness. Reusing that vocabulary rather than redrawing it was deliberate: rally players already read these glyphs fluently, and inventing a new set would only add learning cost.
+
+This is a non-commercial prototype made for personal study and portfolio display; it has never been sold or commercially distributed. The game icons and voice samples shown here remain the property of their original developer and publisher, and this project claims no rights over them. If the rights holder considers the use inappropriate, please contact me and I will take the material and the demo down immediately.
