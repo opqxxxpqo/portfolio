@@ -14,7 +14,7 @@ const worksById = new Map(all.map(w => [w.id, w.data]));
 
 // 隐藏 hidden:true 的作品（合集子项）
 // 排序：置顶顺序 幽灵雷达 → 相机 → 盲盒 → 建模，其余按时间倒序
-const PIN = ['ghost-radar', 'lofi-motion-cam', 'blind-box', 'modeling'];
+const PIN = ['ghost-radar', 'lofi-motion-cam', 'blind-box', 'rally-mpc', 'modeling'];
 const pinRank = (id: string) => {
   const i = PIN.indexOf(id);
   return i === -1 ? PIN.length : i;

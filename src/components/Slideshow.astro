@@ -21,7 +21,9 @@ const { decks } = Astro.props;
                 {'html' in s.img
                   ? <iframe src={s.img.html} loading="lazy" title="交互演示"></iframe>
                   : 'video' in s.img
-                    ? <video src={s.img.video} muted loop autoplay playsinline preload="metadata"></video>
+                    ? (s.img.sound
+                        ? <video src={s.img.video} controls playsinline preload="metadata"></video>
+                        : <video src={s.img.video} muted loop autoplay playsinline preload="metadata"></video>)
                     : 'src' in s.img
                       ? <img src={s.img.src} alt="" loading="lazy" decoding="async" />
                       : <div class="slide-ph"><span class="mono-label">{s.img.ph}</span></div>}
@@ -78,7 +80,9 @@ const { decks } = Astro.props;
                 {'html' in s.img
                   ? <iframe src={s.img.html} loading="lazy" title="交互演示"></iframe>
                   : 'video' in s.img
-                    ? <video src={s.img.video} muted loop autoplay playsinline preload="metadata"></video>
+                    ? (s.img.sound
+                        ? <video src={s.img.video} controls playsinline preload="metadata"></video>
+                        : <video src={s.img.video} muted loop autoplay playsinline preload="metadata"></video>)
                     : 'src' in s.img
                       ? <img src={s.img.src} alt="" loading="lazy" decoding="async" />
                       : <div class="slide-ph"><span class="mono-label">{s.img.ph}</span></div>}
@@ -92,7 +96,9 @@ const { decks } = Astro.props;
               {'html' in s.img
                 ? <iframe src={s.img.html} loading="lazy" title="交互演示"></iframe>
                 : 'video' in s.img
-                  ? <video src={s.img.video} muted loop autoplay playsinline preload="metadata"></video>
+                  ? (s.img.sound
+                      ? <video src={s.img.video} controls playsinline preload="metadata"></video>
+                      : <video src={s.img.video} muted loop autoplay playsinline preload="metadata"></video>)
                   : <img src={s.img.src} alt="" loading="lazy" decoding="async" />}
             </article>
           );
@@ -561,6 +567,8 @@ const { decks } = Astro.props;
     const goto = (n: number) => {
       idx = Math.max(0, Math.min(slides.length - 1, n));
       if (track) track.style.transform = `translateX(${-idx * 100}%)`;
+      // 翻页离开时暂停带声音的演示视频，别让它在别的页面继续响
+      stage.querySelectorAll<HTMLVideoElement>('video[controls]').forEach(v => { if (!v.paused) v.pause(); });
       // 翻页时把已进入 3D / 播放的合集页复位（停声、清模型、恢复渲染图、收起返回键）
       stage.querySelectorAll<HTMLElement>('.slide--item.is-playing').forEach(art => {
         art.querySelectorAll('video').forEach(v => v.pause());
@@ -586,8 +594,9 @@ const { decks } = Astro.props;
       stage.appendChild(tpl.content.cloneNode(true));
       track = stage.querySelector('.pv-track');
       slides = Array.from(stage.querySelectorAll<HTMLElement>('.slide'));
-      // 克隆进来的静音循环视频（配图/内容）需要主动 play（3D 模型是点了才注入的，这里没有）
-      stage.querySelectorAll<HTMLVideoElement>('video').forEach(v => { v.muted = true; v.play().catch(() => {}); });
+      // 克隆进来的静音循环视频（配图/内容）需要主动 play；
+      // 带控件的是「声音就是内容」的演示视频（音频类作品），不静音也不自动播
+      stage.querySelectorAll<HTMLVideoElement>('video:not([controls])').forEach(v => { v.muted = true; v.play().catch(() => {}); });
       titleEl.textContent = (document.documentElement.lang || '').startsWith('en')
         ? (tpl.dataset.titleEn || tpl.dataset.title || '')
         : (tpl.dataset.title || '');

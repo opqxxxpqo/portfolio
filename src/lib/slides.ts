@@ -8,7 +8,7 @@ import sharp from 'sharp';
 
 export type SlideImg =
   | { src: string; bg?: string }
-  | { video: string }
+  | { video: string; sound?: boolean }
   | { html: string }
   | { ph: string };
 
@@ -55,21 +55,23 @@ async function canvasColor(file: string): Promise<string | undefined> {
 // 读 public/works/<slug>/slides/ 下按序号命名的配图/视频/HTML：N.ext → 第 N 张幻灯片
 // （0 = 封面，1 = 第一个小节，依次）。图 = jpg/png/webp，视频 = mp4/webm（静音循环），
 // html = 可交互嵌入（iframe，比如 canvas 动画 demo）。
+// 视频加 .sound（N.sound.mp4）= 声音是内容本身（音频类作品的演示），
+// 渲染成带控件、不静音、不自动播的播放器，别当无声动图循环。
 async function slideMedia(slug: string): Promise<Map<number, SlideImg>> {
   const map = new Map<number, SlideImg>();
   try {
     const dir = `public/works/${slug}/slides`;
     for (const f of fs.readdirSync(dir)) {
-      const m = f.match(/^(\d+)\.(webp|jpg|jpeg|png|mp4|webm|html)$/i);
+      const m = f.match(/^(\d+)(\.sound)?\.(webp|jpg|jpeg|png|mp4|webm|html)$/i);
       if (!m) continue;
       const src = `/works/${slug}/slides/${f}`;
-      const ext = m[2].toLowerCase();
+      const ext = m[3].toLowerCase();
       map.set(
         Number(m[1]),
         ext === 'html'
           ? { html: src }
           : /mp4|webm/.test(ext)
-            ? { video: src }
+            ? { video: src, sound: !!m[2] }
             : { src, bg: await canvasColor(`${dir}/${f}`) }
       );
     }
@@ -93,7 +95,7 @@ export type Slide =
       img: SlideImg;
       side?: 'left' | 'right';
     }
-  | { layout: 'image'; img: { src: string; bg?: string } | { video: string } | { html: string }; caption?: string; captionEn?: string; fill?: boolean }
+  | { layout: 'image'; img: { src: string; bg?: string } | { video: string; sound?: boolean } | { html: string }; caption?: string; captionEn?: string; fill?: boolean }
   | { layout: 'gallery'; imgs: { src: string }[] }
   | {
       layout: 'links';
